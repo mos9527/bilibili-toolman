@@ -77,7 +77,7 @@ with Submission() as submission:
     
 submit_result=sess.SubmitVideo(submission,endpoint,pic['data']['url'],config['biz_id'])
 if submit_result['code'] == 0:
-    logging.info('Upload sucess - BVid: %s' % submit_result['data']['bvid'])
+    logging.info('Upload success - BVid: %s' % submit_result['data']['bvid'])
 else:
     logging.warning('Failed to upload: %s' % submit_result)
 # endregion

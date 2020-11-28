@@ -3,7 +3,7 @@ from io import BytesIO
 import re
 from . import DownloadResult
 import logging,youtube_dl,requests
-__desc__ = '''Youtube Video provider'''
+__desc__ = '''Youtube 视频提供者'''
 logger = logging.getLogger('youtube')
 ydl = youtube_dl.YoutubeDL({
     'logger':logger,

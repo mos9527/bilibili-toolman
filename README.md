@@ -1,6 +1,10 @@
 # bilibili-toolman 哔哩哔哩工具人
 搬运各大网站的视频资源到 Bilibili
 
+# 依赖
+    
+    pip install -U requests Pillow
+
 # 使用
 
 	python bilibili-toolman.py --cookies "cookies=SESSDATA=cb0..; bili_jct=6750..." --youtube "https://www.youtube.com/watch?v=_3Mo7U0XSFo" --thread-id 17 --tags "majima,goro,majima goro"
