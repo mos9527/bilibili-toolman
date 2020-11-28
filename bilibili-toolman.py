@@ -54,8 +54,16 @@ logging.info('Selected provider: %s - %s' % (provider.__name__,provider.__desc__
 # region Downloading source
 logging.info('Ready to download resource')
 source : DownloadResult = provider.download_video(resource)
+def limit_chars(string):
+    import re
+    return re.sub("[\U00010000-\U0010ffff]",'',string) # remove emojis
+def limit_length(string,max):
+    if len(string) > max:string = string[:max-3] + '...'
+    return string
+source.title = limit_chars(limit_length(source.title,80))
+source.description = limit_chars(limit_length(source.description,2000))
 logging.info('Finished downloading %s' % source.title)
-logging.info('Summary: %s' % f'''
+logging.info('Summary (trimmed): %s' % f'''
 
     Title        : {source.title}
 
@@ -68,8 +76,6 @@ logging.info('Summary: %s' % f'''
 logging.warning('Uploading video')
 basename, size, endpoint, config, state = sess.UploadVideo(source.video_path,onStatusChange=report_progress)
 pic = sess.UploadCover(source.cover_path)
-if len(source.title) > 80:
-    source.title = source.title[:77] + '...'
 with Submission() as submission:
     submission.source = source.soruce
     submission.copyright = Submission.COPYRIGHT_REUPLOAD
