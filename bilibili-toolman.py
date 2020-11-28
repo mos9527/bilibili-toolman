@@ -11,6 +11,7 @@ cookie_path = os.path.join(str(Path.home()), '.bilibili-toolman')
 coloredlogs.DEFAULT_LOG_FORMAT = '[ %(asctime)s %(name)s %(levelname)6s ] %(message)s'
 coloredlogs.install(0);logging.getLogger('urllib3').setLevel(100);logging.getLogger('PIL.Image').setLevel(100)
 def save_cookies(cookie):
+    if not cookie:return
     with open(cookie_path,'w+') as target:target.write(cookie)
 def load_cookies():    
     return open(cookie_path).read()
@@ -35,7 +36,7 @@ for arg in args: # choose last given provider as our take
     if arg in provider_dict:
         provider=provider_dict[arg]
         resource=args[arg]
-if not provider or not resource or not args['cookies']:
+if not provider or not resource:
     sys.stderr.writelines(['Missing arguments,exiting\n'])
     p.print_help()
     sys.exit(2)
@@ -67,17 +68,19 @@ logging.info('Summary: %s' % f'''
 logging.warning('Uploading video')
 basename, size, endpoint, config, state = sess.UploadVideo(source.video_path,onStatusChange=report_progress)
 pic = sess.UploadCover(source.cover_path)
+if len(source.title) > 80:
+    source.title = source.title[:77] + '...'
 with Submission() as submission:
     submission.source = source.soruce
     submission.copyright = Submission.COPYRIGHT_REUPLOAD
     submission.desc = source.description
     submission.title = submission.title_1st_video = source.title
     submission.thread = args['thread_id']
-    submission.tags = args['tags']
+    submission.tags = args['tags'].split(',')
     
 submit_result=sess.SubmitVideo(submission,endpoint,pic['data']['url'],config['biz_id'])
 if submit_result['code'] == 0:
     logging.info('Upload success - BVid: %s' % submit_result['data']['bvid'])
 else:
-    logging.warning('Failed to upload: %s' % submit_result)
+    logging.error('Failed to upload: %s' % submit_result)
 # endregion

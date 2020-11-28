@@ -10,12 +10,10 @@
 	python bilibili-toolman.py --cookies "cookies=SESSDATA=cb0..; bili_jct=6750..." --youtube "https://www.youtube.com/watch?v=_3Mo7U0XSFo" --thread-id 17 --tags "majima,goro,majima goro"
 
 ## 参数说明
-|必选参数|说明|
-|-|-|
-|cookies|登录态 Cookie,可通过[该方法](https://github.com/Passkou/bilibili_api#%E8%8E%B7%E5%8F%96-sessdata-%E5%92%8C-csrf "该方法")获得。格式如 `SESSDATA=...;bili_jct=...` |
 
-|可选参数|说明|
+|参数|说明|
 |-|-|
+|cookies|登录态 Cookie,可通过[该方法](https://github.com/Passkou/bilibili_api#%E8%8E%B7%E5%8F%96-sessdata-%E5%92%8C-csrf "该方法")获得。格式如 `SESSDATA=...;bili_jct=...`；Cookie 会存储在 '~/.bilibili-toolman' |
 |youtube|YouTube 片源，可指定 YouTube 视频链接|
 |thread-id|分区 ID，详见文末分区表|
 |tags|视频标签，注意用逗号隔开|

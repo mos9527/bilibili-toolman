@@ -5,11 +5,12 @@ from . import DownloadResult
 import logging,youtube_dl,requests
 __desc__ = '''Youtube 视频提供者'''
 logger = logging.getLogger('youtube')
+youtube_dl.utils.std_headers['User-Agent'] = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
 ydl = youtube_dl.YoutubeDL({
     'logger':logger,
     'merge-output-format':'mp4',
     'outtmpl':'%(id)s.%(ext)s',
-    'format':'best',
+    'format':'best',    
 })
 
 def __to_yyyy_mm_dd(date):

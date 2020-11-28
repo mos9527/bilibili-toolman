@@ -237,7 +237,11 @@ class BiliSession(Session):
             endpoint = 'https:%s/ugcboss/%s' % (
                 config['endpoint'], config['upos_uri'][15:])
             self.logger.debug('Endpoint URL %s' % endpoint)
-            upload_id = self.UploadId(endpoint)['upload_id']
+            try:
+                upload_id = self.UploadId(endpoint)['upload_id']
+            except Exception as e:
+                self.logger.error('Unable to upload the video as the server has rejected our request')
+                raise e
             '''Upload endpoint & keys'''
             chunks = []
             chunksize = config['chunk_size']
