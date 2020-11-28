@@ -1,4 +1,4 @@
-# bilibili-toolman 哔哩哔哩工具人
+# bilibili-toolman 哔哩哔哩机器人
 搬运各大网站的视频资源到 Bilibili
 
 # 依赖
