@@ -19,6 +19,10 @@
 |tags|视频标签，注意用逗号隔开|
 
 详见 `--help` 输出
+
+# 截图
+![le screen shot of le console](https://raw.githubusercontent.com/greats3an/bilibili-toolman/master/readme.png)
+
 # 感谢
 [分区数据，API 参考 · Passkou · bilibili_api](https://github.com/Passkou/bilibili_api "Passkou · bilibili_api")
 
