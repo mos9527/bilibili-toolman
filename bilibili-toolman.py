@@ -76,11 +76,12 @@ with Submission() as submission:
     submission.desc = source.description
     submission.title = submission.title_1st_video = source.title
     submission.thread = args['thread_id']
-    submission.tags = args['tags'].split(',')
-    
+    submission.tags = args['tags'].split(',')    
 submit_result=sess.SubmitVideo(submission,endpoint,pic['data']['url'],config['biz_id'])
 if submit_result['code'] == 0:
     logging.info('Upload success - BVid: %s' % submit_result['data']['bvid'])
+    sys.exit(0)
 else:
     logging.error('Failed to upload: %s' % submit_result)
+    sys.exit(1)
 # endregion
