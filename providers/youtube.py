@@ -9,7 +9,7 @@ ydl = youtube_dl.YoutubeDL({
     'logger':logger,
     'merge-output-format':'mp4',
     'outtmpl':'%(id)s.%(ext)s',
-    'format':'worst',
+    'format':'best',
 })
 
 def __to_yyyy_mm_dd(date):
