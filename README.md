@@ -3,7 +3,7 @@
 
 # 依赖
     
-    pip install -U requests Pillow
+    pip install -U requests Pillow tqdm youtube-dl
 
 # 使用
 
