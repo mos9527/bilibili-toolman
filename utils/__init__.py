@@ -79,8 +79,8 @@ def limit_length(string,max):
     return string
 
 def prase_args(args: list):    
-    parser = _create_argparser()
     args.pop(0)  # remove filename
+    parser = _create_argparser()    
     if not args:
         parser.print_help()
         return
@@ -88,6 +88,7 @@ def prase_args(args: list):
     for k, v in parser.parse_args(args).__dict__.items():
         if k in global_args:
             global_args_dict[k] = v
+            if not '--%s' % k in args:continue
             args.pop(args.index('--%s' % k) + 1)
             args.pop(args.index('--%s' % k))
     '''pre-parse : fetch global args,then remove them'''
@@ -95,7 +96,11 @@ def prase_args(args: list):
     current_line = []
     current_provider = ''
 
-    def add(): local_args_group.append((provider_args[current_provider],{k if k in local_args else 'resource' : v  for k, v in parser.parse_args(current_line).__dict__.items() if k in local_args or k in provider_args}))
+    def add(): 
+        item = parser.parse_args(current_line).__dict__       
+        item['resource'] = item[current_provider]
+        local_args_group.append((provider_args[current_provider],item))
+    
     for arg in args:
         if arg[2:] in provider_args:
             # a new proivder

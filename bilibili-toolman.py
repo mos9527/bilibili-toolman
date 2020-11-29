@@ -20,6 +20,7 @@ os.chdir(temp_path)
 # region Downloading source
 logging.info('Total tasks: %s' % len(local_args))
 logging.info('Uploading as: %s' % sess.Self['data']['uname'])
+
 for task in local_args:
     provider,args = task
     resource = args['resource']    
