@@ -50,13 +50,11 @@ for task in local_args:
     '''Summary'''
     logging.info('Finished: %s' % source.title)
     logging.info('Summary (trimmed): %s' % f'''
-
     Title        : {source.title}
 
     Description  :         
-    
-        %s
-    ''' % '\n      '.join(source.description.split('\n')))
+
+        %s''' % '\n      '.join(source.description.split('\n')))
     # endregion
     # region Uploading
     logging.warning('Uploading video & cover')
