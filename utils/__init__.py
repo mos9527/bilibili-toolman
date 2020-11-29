@@ -11,8 +11,8 @@ local_args = {
     'opts':('解析设置',None),
     'thread_id': ('分区 ID',17),
     'tags': ('标签','转载'),
-    'desc_fmt':('描述格式','%s'),
-    'title_fmt':('标题格式','%s')
+    'desc_fmt':('描述格式','%(desc)s'),
+    'title_fmt':('标题格式','%(title)s')
 }
 
 def report_progress(current, max_val):

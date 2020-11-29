@@ -41,16 +41,20 @@ for task in local_args:
     except Exception as e:
         logging.error('Cannot download specified resource - %s,skipping...' % e)
         continue
-    source.title = limit_chars(limit_length(args['title_fmt'] % source.title,80))
-    source.description = limit_chars(limit_length(args['desc_fmt'] % source.description,2000))
+    format_blocks = {
+        'title':source.title,
+        'desc':source.description
+    }
+    source.title = limit_chars(limit_length(args['title_fmt'] % format_blocks,80))
+    source.description = limit_chars(limit_length(args['desc_fmt'] % format_blocks,2000))
     '''Summary'''
     logging.info('Finished: %s' % source.title)
     logging.info('Summary (trimmed): %s' % f'''
 
-        Title        : {source.title}
+    Title        : {source.title}
 
-        Description  : 
-        
+    Description  :         
+    
         %s
     ''' % '\n      '.join(source.description.split('\n')))
     # endregion
