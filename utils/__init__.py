@@ -78,9 +78,12 @@ def limit_length(string,max):
     if len(string) > max:string = string[:max-3] + '...'
     return string
 
-def prase_args(args: list):
-    args.pop(0)  # remove filename
+def prase_args(args: list):    
     parser = _create_argparser()
+    args.pop(0)  # remove filename
+    if not args:
+        parser.print_help()
+        return
     global_args_dict = dict()
     for k, v in parser.parse_args(args).__dict__.items():
         if k in global_args:

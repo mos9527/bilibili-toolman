@@ -6,7 +6,7 @@ from utils import report_progress,save_cookies,load_cookies,temp_path,prase_args
 import coloredlogs,logging,sys,os,time,urllib.parse
 coloredlogs.DEFAULT_LOG_FORMAT = '[ %(asctime)s %(name)8s %(levelname)6s ] %(message)s'
 coloredlogs.install(0);logging.getLogger('urllib3').setLevel(100);logging.getLogger('PIL.Image').setLevel(100)
-'''Logging levels & Save paths'''
+'''Logging levels & Save paths'''    
 global_args,local_args = prase_args(sys.argv)
 '''Setting up argparser'''
 save_cookies(global_args['cookies'])

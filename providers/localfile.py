@@ -1,6 +1,6 @@
 import os
 from . import DownloadResult
-
+__desc__ = '本地文件'
 options={
     'cover':''
 }
