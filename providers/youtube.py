@@ -40,6 +40,5 @@ def download_video(res) -> DownloadResult:
         result.description = f'''作者 : {info['uploader']} [{date} 上传]
 来源 : {result.soruce}
 
-{info['description']}
-        '''
+{info['description']}'''
     return result

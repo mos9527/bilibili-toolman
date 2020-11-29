@@ -341,11 +341,11 @@ class BiliSession(Session):
                 }
             ],
             "source": submission.source,
-            "tid": submission.thread,
+            "tid": int(submission.thread),
             "cover": cover_url,
             "title": submission.title,
             "tag": ','.join(submission.tags),
-            "desc_format_id": 0,
+            "desc_format_id": 31,
             "desc": submission.desc,
             "dynamic": "",
             "subtitle": {
@@ -354,6 +354,6 @@ class BiliSession(Session):
             },
             "up_close_reply": submission.close_reply,
             "up_close_danmu": submission.close_danmu
-        }
+        }        
         self.logger.debug('Posting submission `%s`' % submission.title)
         return self.post("https://member.bilibili.com/x/vu/web/add", data=json.dumps(payload), params={'csrf': self.cookies.get('bili_jct')})
