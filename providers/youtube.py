@@ -1,5 +1,6 @@
 '''Youtube video provier - youtube-dl'''
 from io import BytesIO
+from math import inf
 import re
 from . import DownloadResult
 import logging,youtube_dl,requests
@@ -21,6 +22,9 @@ def __to_yyyy_mm_dd(date):
 def download_video(res) -> DownloadResult:    
     from PIL import Image
     # downloading the cover
+    info = ydl.extract_info(res,download=False)
+    if '_type' in info and info['_type'] != 'video':
+        raise NotImplementedError('Playlist is not supported for download')
     info = ydl.extract_info(res,download=True)
     cover_url = info['thumbnail']
     cover_path= info['display_id'] + '.png'

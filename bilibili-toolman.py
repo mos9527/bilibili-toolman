@@ -35,7 +35,11 @@ for task in local_args:
     for k,v in largs.items():logging.info('  - %s : %s' % (v[0],args[k]))
     logging.info('Fetching source video')
     '''Downloading source'''
-    source : DownloadResult = provider.download_video(resource)
+    try:
+        source : DownloadResult = provider.download_video(resource)
+    except Exception as e:
+        logging.error('Cannot download specified resource - %s,skipping...' % e)
+        continue
     source.title = limit_chars(limit_length(args['title_fmt'] % source.title,80))
     source.description = limit_chars(limit_length(args['desc_fmt'] % source.description,2000))
     '''Summary'''
