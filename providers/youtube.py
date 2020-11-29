@@ -3,16 +3,18 @@ from io import BytesIO
 import re
 from . import DownloadResult
 import logging,youtube_dl,requests
-__desc__ = '''Youtube 视频提供者'''
+__desc__ = '''Youtube 视频'''
 logger = logging.getLogger('youtube')
 youtube_dl.utils.std_headers['User-Agent'] = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
-ydl = youtube_dl.YoutubeDL({
+params = {
     'logger':logger,
     'merge-output-format':'mp4',
     'outtmpl':'%(id)s.%(ext)s',
     'format':'best',    
-})
-
+} # default params,can be overridden
+ydl = youtube_dl.YoutubeDL(params)
+def update_config(cfg):
+    ydl = youtube_dl.YoutubeDL({**params,**cfg})
 def __to_yyyy_mm_dd(date):
     return date[:4] + '/' + date[4:6] + '/' + date[6:]
 

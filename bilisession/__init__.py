@@ -213,7 +213,7 @@ class BiliSession(Session):
             'biz_id': biz_id
         })
 
-    def UploadVideo(self, path: str ,onStatusChange=lambda *k:None):
+    def UploadVideo(self, path: str ,report=lambda *k:None):
         '''Uploading a video via local path
 
         Args:
@@ -286,7 +286,7 @@ class BiliSession(Session):
             for file in file_manager:
                 path, read, length = file, file_manager[file]['read'], file_manager[file]['length']
                 uploaded += read
-            onStatusChange(uploaded,size)
+            report(uploaded,size)
             time.sleep(1)
         '''Wait for current upload to finish'''
         state = self.UploadStatus(endpoint, basename, config['upload_id'], config['biz_id'])

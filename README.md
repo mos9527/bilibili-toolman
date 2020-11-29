@@ -7,7 +7,7 @@
 
 # 使用
 
-	python bilibili-toolman.py --cookies "cookies=SESSDATA=cb0..; bili_jct=6750..." --youtube "https://www.youtube.com/watch?v=_3Mo7U0XSFo" --thread-id 17 --tags "majima,goro,majima goro"
+	python bilibili-toolman.py --cookies "cookies=SESSDATA=cb0..; bili_jct=6750..." --youtube "https://www.youtube.com/watch?v=_3Mo7U0XSFo" --thread_id 17 --tags "majima,goro,majima goro" --youtube ...    
 
 ## 参数说明
 
@@ -18,7 +18,7 @@
 |thread-id|分区 ID，详见文末分区表|
 |tags|视频标签，注意用逗号隔开|
 
-详见 `--help` 输出
+参数可由 `Provider` 引导参数串连 `Per-file option` 及其他 `Provider` ; 详见 `--help` 输出
 
 # 截图
 ![le screen shot of le console](https://raw.githubusercontent.com/greats3an/bilibili-toolman/master/readme.png)
