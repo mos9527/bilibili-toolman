@@ -1,5 +1,6 @@
 # For demoing how multiple videos can be uploaded without human interaction
 import os,time
+from sys import executable
 urls = [
     'https://www.youtube.com/watch?v=wVi8o3HLMFM&xxx=PLq5o307cvPzfK2B1iPE5y1eu_f_bVNgvj&ab_channel=Ceekos',
     'https://www.youtube.com/watch?v=CiTzgESFRXI&xxx=PLq5o307cvPzfK2B1iPE5y1eu_f_bVNgvj&index=2&ab_channel=Ceekos',
@@ -20,12 +21,10 @@ urls = [
     'https://www.youtube.com/watch?v=2gpkw15WAFY&xxx=PLq5o307cvPzfK2B1iPE5y1eu_f_bVNgvj&index=18&ab_channel=Ceekos',
     'https://www.youtube.com/watch?v=zQRyN0Vb-Yg&xxx=PLq5o307cvPzfK2B1iPE5y1eu_f_bVNgvj&index=19&ab_channel=Ceekos'
 ]
-command_template = 'python bilibili-toolman.py '
-command_template+= '--thread-id 19 --tags "JOJO,HFTF,未来遗产,JOJO的奇妙冒险,Ceekos,TAS" ' # note that cookies are stored
-command_template+= '--youtube "%s"'                                                      # once you have put it in the arguments
+executable       = 'python bilibili-toolman.py '
+command_template = '--youtube "%s"'                                                      # once you have put it in the arguments
+command_template+= '--thread-id 19 --tags "JOJO,HFTF,未来遗产,JOJO的奇妙冒险,Ceekos,TAS" ' # cookies are stored
 for url in urls:
-    command = command_template % url
-    while os.system(command) != 0:
-        print('Failed to upload,waiting to try again...')
-        time.sleep(5)
-print('Successfully uploaded all the videos')
+    executable += ' ' + command_template % url
+if(os.system(executable) != 0):print('Failed to upload!')
+else:print('Successfully uploaded all the videos')
