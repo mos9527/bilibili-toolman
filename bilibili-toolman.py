@@ -54,11 +54,11 @@ for task in local_args:
     ''' % '\n      '.join(source.description.split('\n')))
     # endregion
     # region Uploading
-    logging.warning('Uploading video')
+    logging.warning('Uploading video & cover')
     while True:
         try:
             basename, size, endpoint, config, state = sess.UploadVideo(source.video_path,report=report_progress)
-            pic = sess.UploadCover(source.cover_path)
+            pic = sess.UploadCover(source.cover_path) if source.cover_path else ''
             break
         except Exception:
             logging.warning('Failed to upload,retrying...')
@@ -66,7 +66,7 @@ for task in local_args:
     logging.info('Upload complete, preparing to submit')
     with Submission() as submission:
         submission.source = source.soruce
-        submission.copyright = Submission.COPYRIGHT_REUPLOAD
+        submission.copyright = Submission.COPYRIGHT_REUPLOAD if not source.original else Submission.COPYRIGHT_SELF_MADE
         submission.desc = source.description
         submission.title = submission.title_1st_video = source.title
         submission.thread = args['thread_id']

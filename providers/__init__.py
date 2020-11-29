@@ -6,8 +6,12 @@ class DownloadResult:
     title : str = ''
     description : str = ''    
     soruce : str = ''
+
+    original : bool = False
+
     def __enter__(self):
         '''Creates a new,empty submission'''
         return DownloadResult()
     def __exit__(self,*args):pass
 from . import youtube as provider_youtube
+from . import localfile as provider_localfile

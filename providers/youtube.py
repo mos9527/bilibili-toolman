@@ -14,11 +14,10 @@ params = {
     'format':'best',    
 } # default params,can be overridden
 ydl = youtube_dl.YoutubeDL(params)
+def __to_yyyy_mm_dd(date):
+    return date[:4] + '/' + date[4:6] + '/' + date[6:] 
 def update_config(cfg):
     ydl = youtube_dl.YoutubeDL({**params,**cfg})
-def __to_yyyy_mm_dd(date):
-    return date[:4] + '/' + date[4:6] + '/' + date[6:]
-
 def download_video(res) -> DownloadResult:    
     from PIL import Image
     # downloading the cover
