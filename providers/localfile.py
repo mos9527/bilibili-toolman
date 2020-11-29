@@ -1,6 +1,7 @@
 import os
 from . import DownloadResult
 __desc__ = '本地文件'
+__cfg_help__ = '''cover - 封面图片路径'''
 options={
     'cover':''
 }

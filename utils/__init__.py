@@ -1,8 +1,10 @@
 import tqdm
 import os
 import argparse
-from pathlib import Path
+import logging
 import providers
+from pathlib import Path
+
 pbar = None
 global_args = {
     'cookies': ('Bilibili 所用 Cookies ( 需要 SESSDATA 及 bili_jct ) e.g.cookies=SESSDATA=cb0..; bili_jct=6750... ',None)
@@ -11,9 +13,19 @@ local_args = {
     'opts':('解析设置',None),
     'thread_id': ('分区 ID',17),
     'tags': ('标签','转载'),
-    'desc_fmt':('描述格式','%(desc)s'),
-    'title_fmt':('标题格式','%(title)s')
+    'desc_fmt':('描述格式 e.g. %(desc)s','%(desc)s'),
+    'title_fmt':('标题格式 e.g. %(title)s','%(title)s')
 }
+
+def setup_logging():
+    import coloredlogs
+    coloredlogs.DEFAULT_LOG_FORMAT = '[ %(asctime)s %(name)8s %(levelname)6s ] %(message)s'
+    coloredlogs.install(0);logging.getLogger('urllib3').setLevel(100);logging.getLogger('PIL.Image').setLevel(100)
+
+def prepare_temp():    
+    if not os.path.isdir(temp_path):os.mkdir(temp_path)
+    os.chdir(temp_path)    
+    return True
 
 def report_progress(current, max_val):
     global pbar
@@ -55,7 +67,9 @@ provider_args = _enumerate_providers()
 
 
 def _create_argparser():
-    p = argparse.ArgumentParser(description='bilibili-toolman 哔哩哔哩工具人')
+    p = argparse.ArgumentParser(description='bilibili-toolman 哔哩哔哩工具人',formatter_class=argparse.RawTextHelpFormatter,epilog='''e.g.
+    python bilibili-toolman.py --cookies "cookies=SESSDATA=cb0..; bili_jct=6750..." --youtube "https://www.youtube.com/watch?v=_3Mo7U0XSFo" --thread_id 17 --tags "majima,goro,majima goro" --opts "format=best"    
+    ''')
     for arg, arg_ in global_args.items():
         arg_help,arg_default = arg_
         p.add_argument('--%s' % arg, type=str, help=arg_help,default=arg_default)
@@ -67,7 +81,7 @@ def _create_argparser():
     # local args (per source)
     for provider_name, provider in provider_args.items():
         p.add_argument('--%s' % provider_name, metavar='%s-URL' %
-                       provider_name.upper(), type=str, help='(Provider) %s'%provider.__desc__)
+                       provider_name.upper(), type=str, help='(Provider) %s\n   Options: %s'%(provider.__desc__,provider.__cfg_help__))
     return p
 
 def limit_chars(string):
@@ -98,9 +112,9 @@ def prase_args(args: list):
     current_provider = ''
 
     def add(): 
-        item = parser.parse_args(current_line).__dict__       
-        item['resource'] = item[current_provider]
-        local_args_group.append((provider_args[current_provider],item))
+        args = parser.parse_args(current_line).__dict__       
+        args['resource'] = args[current_provider]
+        local_args_group.append((provider_args[current_provider],args))
     
     for arg in args:
         if arg[2:] in provider_args:

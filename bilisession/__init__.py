@@ -105,6 +105,7 @@ class ThreadedWorkQueue(Queue):
 
     def __init__(self, worker_class, worker_count=4) -> None:
         super().__init__()
+        self.worker_count = worker_count
         self.workers = [worker_class(self, name='Worker-%s' % i)
                         for i in range(0, worker_count)]
 
@@ -150,7 +151,7 @@ class Submission:
 class BiliSession(Session):
     '''BiliSession - see BiliSession() for more info'''
 
-    def __init__(self, cookies: str) -> None:
+    def __init__(self, cookies: str = '') -> None:
         '''BiliSession
 
         Args:
@@ -167,11 +168,20 @@ class BiliSession(Session):
                 `cookies=SESSDATA=cb06a231%FFFFFFFFFF%2C29187*81; bili_jct=675017fffffffffffc76fda177052`
         '''
         super().__init__()
-        for item in cookies.replace(' ', '').split(';'):
-            self.cookies.set(*item.split('='))
+        self.load_cookies(cookies)
         self.headers['User-Agent'] = 'bilibili-toolman/%s' % BUILD_STR
         self.logger = logging.getLogger('BiliSession')
-
+    
+    def load_cookies(self,cookies:str):
+        '''Load cookies from query string'''
+        if not cookies: return
+        for item in cookies.replace(' ', '').split(';'):
+            if '=' in item:
+                self.cookies.set(*item.split('='))
+            else:
+                self.cookies.set(item,'')
+        return True
+    
     @property
     @JSONResponse
     def Self(self):
@@ -249,6 +259,7 @@ class BiliSession(Session):
             start, end, chunk = 0, chunksize, 0
             self.logger.debug('Upload chunks: %s' % chunkcount)
             self.logger.debug('Upload chunk size: %s' % chunksize)
+            self.logger.debug('Upload threads: %s' % queue.worker_count)
             def append():
                 chunks.append({
                     'partNumber': chunk + 1,
