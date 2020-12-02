@@ -14,36 +14,38 @@ params = {
     'merge-output-format':'mp4',
     'outtmpl':'%(id)s.%(ext)s',
     'format':'best',    
+    'writethumbnail':True
 } # default params,can be overridden
 ydl = youtube_dl.YoutubeDL(params)
 def __to_yyyy_mm_dd(date):
     return date[:4] + '/' + date[4:6] + '/' + date[6:] 
 def update_config(cfg):
     ydl = youtube_dl.YoutubeDL({**params,**cfg})
-def download_video(res) -> DownloadResult:    
-    from PIL import Image
-    # downloading the cover
-    info = ydl.extract_info(res,download=False)
-    if '_type' in info and info['_type'] != 'video':
-        raise NotImplementedError('Playlist is not supported for download')
-    info = ydl.extract_info(res,download=True)
-    cover_url = info['thumbnail']
-    cover_path= info['display_id'] + '.png'
-    date = __to_yyyy_mm_dd(info['upload_date'])
-    # Also converting webp to png
-    cover_webp = requests.get(cover_url).content
-    cover_webp = Image.open(BytesIO(cover_webp))
-    cover_webp.save(cover_path)
-    logger.debug('Downloaded cover image %s' % cover_path)
-    with DownloadResult() as result:
-        result.soruce = info['webpage_url']
+def download_video(res) -> DownloadResult:        
+    with DownloadResult() as results:
+        # downloading the cover            
+        def append_result(entry):
+            with DownloadResult() as result:
+                result.title = entry['title']
+                result.soruce = entry['webpage_url']
+                result.video_path = '%s.%s'%(entry['display_id'],entry['ext'])
+                '''For both total results and local sub-results'''
+                results.cover_path = result.cover_path = '%s.%s'%(entry['display_id'],'jpg')            
+                date = __to_yyyy_mm_dd(entry['upload_date'])
+                results.description = result.description = f'''作者 : {entry['uploader']} [{date} 上传]
 
-        result.video_path = '%s.%s'%(info['display_id'],info['ext'])
-        result.cover_path = cover_path
-        
-        result.title = info['title']
-        result.description = f'''作者 : {info['uploader']} [{date} 上传]
 来源 : {result.soruce}
 
-{info['description']}'''
-    return result
+{entry['description']}'''
+            results.results.append(result)
+
+        info = ydl.extract_info(res,download=True)
+        results.soruce = info['webpage_url']
+        results.title = info['title']
+        '''Appending our results'''
+        if 'entries' in info:
+            for entry in info['entries']:
+                append_result(entry)
+        else:
+            append_result(info)
+    return results

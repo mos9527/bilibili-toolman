@@ -7,14 +7,15 @@ from pathlib import Path
 
 pbar = None
 global_args = {
-    'cookies': ('Bilibili 所用 Cookies ( 需要 SESSDATA 及 bili_jct ) e.g.cookies=SESSDATA=cb0..; bili_jct=6750... ',None)
+    'cookies': ('Bilibili 所用 Cookies ( 需要 SESSDATA 及 bili_jct ) e.g.cookies=SESSDATA=cb0..; bili_jct=6750... ',None),    
 }
 local_args = {
     'opts':('解析设置',None),
     'thread_id': ('分区 ID',17),
     'tags': ('标签','转载'),
     'desc_fmt':('描述格式 e.g. %(desc)s','%(desc)s'),
-    'title_fmt':('标题格式 e.g. %(title)s','%(title)s')
+    'title_fmt':('标题格式 e.g. %(title)s','%(title)s'),
+    'is_seperate_parts':('多个视频独立投稿（不分P）',None),
 }
 
 def setup_logging():
@@ -29,13 +30,13 @@ def prepare_temp():
 
 def report_progress(current, max_val):
     global pbar
-    if not pbar and (current < max_val):
+    if not pbar:
         pbar = tqdm.tqdm(desc='Uploading', total=max_val,
                          unit='B', unit_scale=True)
     pbar.update(current - pbar.n)
-    if (current >= max_val):
-        pbar.reset()
-        pbar.close()
+    if (max_val != pbar.total):
+        pbar.clear()
+        pbar.total = max_val
 
 
 temp_path = 'temp'

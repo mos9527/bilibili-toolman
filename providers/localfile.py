@@ -11,10 +11,12 @@ def update_config(opt):
     options = {**options,**opt}
 
 def download_video(res) -> DownloadResult:
+    results = DownloadResult()
     if not os.path.isfile(res) or (options['cover'] and not os.path.isfile(options['cover'])):
         raise FileNotFoundError
     with DownloadResult() as result:        
         result.video_path = res
         result.cover_path = options['cover']            
         result.original = True                
-    return result
+    results.results.append(result)
+    return results

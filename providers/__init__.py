@@ -9,6 +9,9 @@ class DownloadResult:
 
     original : bool = False
 
+    results = []
+    '''A list of DownloadResult'''
+
     def __enter__(self):
         '''Creates a new,empty submission'''
         return DownloadResult()

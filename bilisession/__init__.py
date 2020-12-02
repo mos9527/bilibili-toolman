@@ -129,10 +129,8 @@ class Submission:
     close_reply: bool = False
     close_danmu: bool = False
     '''Access control parameters'''
-    desc: str = ''
+    description: str = ''
     '''Description for the video'''
-    title_1st_video: str = ''
-    '''Title for the first video'''
     title: str = ''
     '''Title for the submission'''
     copyright: int = 0
@@ -143,6 +141,35 @@ class Submission:
     '''Tags of video'''
     thread: int = 19
     '''Thread ID'''
+    submissions = []
+    '''Sub-submissions'''
+    _video_filename = ''
+    @property
+    def video_endpoint(self):
+        '''Endpoint name'''
+        return self._video_filename
+    @video_endpoint.setter
+    def video_endpoint(self,value):
+        # note : this will strip the HTTP prefix        
+        self._video_filename = value.split('/')[-1].split('.')[0]    
+    _cover_url = ''        
+    @property
+    def cover_url(self):
+        '''Cover image URL'''
+        return self._cover_url
+    @cover_url.setter
+    def cover_url(self,value):
+        # note : this will strip the HTTP prefix        
+        self._cover_url = '//' + value.split('//')[-1]    
+    biz_id = 0
+    '''a.k.a cid'''        
+    def __dict__(self):
+        return {
+            "filename": self.video_endpoint,
+            "title": self.title,
+            "desc": self.description,
+            "cid": self.biz_id,
+        }
     def __enter__(self):
         '''Creates a new,empty submission'''
         return Submission()
@@ -326,45 +353,54 @@ class BiliSession(Session):
             'csrf': self.cookies.get('bili_jct')
         })
 
-    @JSONResponse
-    def SubmitVideo(self, submission: Submission, video_endpoint: str, cover_url: str, biz_id: int):
+    def SubmitVideo(self, submission: Submission,seperate_parts=False):
         '''Submitting a video
 
         Args:
-            submission (Submission): Submission description
-            video_endpoint (str): `endpoint` fetched via `UploadVideo`
-            cover_url (str): Cover image URL fetched via `UploadCover`
-            biz_id (int): Preupload ID fetched via `UploadVideo`
+            submission (Submission): Submission object
 
         Returns:
             dict
         '''
-        video_filename = video_endpoint.split('/')[-1].split('.')[0]
-        cover_url = '//' + cover_url.split('//')[-1]
-        payload = {
-            "copyright": submission.copyright,
-            "videos": [
-                {
-                    "filename": video_filename,
-                    "title": submission.title_1st_video,
-                    "desc": "",
-                    "cid": biz_id,
-                }
-            ],
-            "source": submission.source,
-            "tid": int(submission.thread),
-            "cover": cover_url,
-            "title": submission.title,
-            "tag": ','.join(submission.tags),
-            "desc_format_id": 31,
-            "desc": submission.desc,
-            "dynamic": "",
-            "subtitle": {
-                "open": 0,
-                "lan": ""
-            },
-            "up_close_reply": submission.close_reply,
-            "up_close_danmu": submission.close_danmu
-        }        
-        self.logger.debug('Posting submission `%s`' % submission.title)
-        return self.post("https://member.bilibili.com/x/vu/web/add", data=json.dumps(payload), params={'csrf': self.cookies.get('bili_jct')})
+        @JSONResponse
+        def upload_one(submission,single=False):
+            payload = {
+                "copyright": submission.copyright,
+                "videos": [ sub.__dict__() for sub in submission.submissions ] if not single else [ submission.__dict__() ],
+                "source": submission.source,
+                "tid": int(submission.thread),
+                "cover": submission.cover_url,
+                "title": submission.title,
+                "tag": ','.join(submission.tags),
+                "desc_format_id": 31,
+                "desc": submission.description,
+                "up_close_reply": submission.close_reply,
+                "up_close_danmu": submission.close_danmu
+            }        
+            return self.post("https://member.bilibili.com/x/vu/web/add", data=json.dumps(payload), params={'csrf': self.cookies.get('bili_jct')})
+        if not seperate_parts:
+            self.logger.debug('Posting multi-part submission `%s`' % submission.title)            
+            result = upload_one(submission)            
+            return {'code:':result['code'],'results':[result]}
+        else:
+            results = []
+            code_accumlation = 0
+            self.logger.warning('Posting multipule submissions')
+            for submission in submission.submissions:
+                self.logger.debug('Posting single submission `%s`' % submission.title)
+                while True:
+                    result = upload_one(submission,single=True)
+                    if result['code'] == 21070:
+                        self.logger.warning('Hit anti-DDos measures (%s),retrying' % result['code'])                
+                        time.sleep(30)
+                        continue 
+                    elif result['code'] != 0:
+                        self.logger.error('Error (%s): %s - skipping' % (result['code'],result['message']))
+                        self.logger.error('Video title: %s' % submission.title)
+                        self.logger.error('Video description:\n%s' % submission.description)
+                        break
+                    
+                code_accumlation += result['code']             
+                results.append(result)
+            return {'code':code_accumlation,'results':results}
+        
