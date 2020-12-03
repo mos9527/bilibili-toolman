@@ -136,13 +136,17 @@ class Submission:
     copyright: int = 0
     '''Copyright type'''
     source: str = ''
-    '''Reupload source'''
-    tags: list = []
-    '''Tags of video'''
+    '''Reupload source'''    
     thread: int = 19
     '''Thread ID'''
-    submissions = []
+    submissions: list = None
     '''Sub-submissions'''
+    tags: list = None
+    '''Tags of video'''
+    def __init__(self) -> None:
+        self.tags = []
+        self.submissions = []
+        # prevents mutable objects not being private per instance
     _video_filename = ''
     @property
     def video_endpoint(self):
@@ -250,12 +254,12 @@ class BiliSession(Session):
             'biz_id': biz_id
         })
 
-    def UploadVideo(self, path: str ,report=lambda *k:None):
+    def UploadVideo(self, path: str ,report=lambda current,max:None):
         '''Uploading a video via local path
 
         Args:
             path (str): Local path of video
-            onStatusChange : A function takes (current,max) to show progress of the upload
+            report : A function takes (current,max) to show progress of the upload
         
         Returns:
             File basename,File size,Upload Endpoint,Remote Config,Upload Status
@@ -371,7 +375,7 @@ class BiliSession(Session):
                 "tid": int(submission.thread),
                 "cover": submission.cover_url,
                 "title": submission.title,
-                "tag": ','.join(submission.tags),
+                "tag": ','.join(set(submission.tags)),
                 "desc_format_id": 31,
                 "desc": submission.description,
                 "up_close_reply": submission.close_reply,
@@ -391,15 +395,14 @@ class BiliSession(Session):
                 while True:
                     result = upload_one(submission,single=True)
                     if result['code'] == 21070:
-                        self.logger.warning('Hit anti-DDos measures (%s),retrying' % result['code'])                
+                        self.logger.warning('Hit anti-spamming measures (%s),retrying' % result['code'])
                         time.sleep(30)
                         continue 
                     elif result['code'] != 0:
                         self.logger.error('Error (%s): %s - skipping' % (result['code'],result['message']))
                         self.logger.error('Video title: %s' % submission.title)
                         self.logger.error('Video description:\n%s' % submission.description)
-                        break
-                    
+                        break                    
                 code_accumlation += result['code']             
                 results.append(result)
             return {'code':code_accumlation,'results':results}

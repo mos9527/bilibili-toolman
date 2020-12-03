@@ -9,9 +9,10 @@ class DownloadResult:
 
     original : bool = False
 
-    results = []
+    results = None
     '''A list of DownloadResult'''
-
+    def __init__(self) -> None:
+        self.results = []
     def __enter__(self):
         '''Creates a new,empty submission'''
         return DownloadResult()

@@ -8,7 +8,7 @@ import logging,sys,time,urllib.parse
 
 sess = BiliSession()
 
-def perform_task(provider,args):
+def perform_task(provider,args,report=report_progress):
     '''To perform a indivudial task
 
     If multiple videos are given by the provider,the submission will be in multi-parts (P)
@@ -21,6 +21,7 @@ def perform_task(provider,args):
             * resource - resoucre URI (must have)
             - opts     - options for uploader in query string e.g. format=best            
             - See `utils.local_args` for more arguments,along with thier details
+        report : A function takes (current,max) to show progress of the upload
     '''
     logger = sess.logger
     resource = args['resource']    
@@ -60,7 +61,7 @@ def perform_task(provider,args):
         logger.warning('Uploading video & cover')
         while True:
             try:
-                basename, size, endpoint, config, state = sess.UploadVideo(source.video_path,report=report_progress)
+                basename, size, endpoint, config, state = sess.UploadVideo(source.video_path,report=report)
                 pic = sess.UploadCover(source.cover_path)['data']['url'] if source.cover_path else ''
                 break
             except Exception:
@@ -81,7 +82,7 @@ def perform_task(provider,args):
             submission.title = source.title            
         '''Use the last given thread,tags,cover & description per multiple uploads'''                           
         submissions.thread = submission.thread or submissions.thread        
-        submissions.tags = submission.tags or submissions.tags
+        submissions.tags.extend(submission.tags)
         submissions.submissions.append(submission)        
     '''Filling submission info'''
     submissions.source = sources.soruce
@@ -93,7 +94,7 @@ def perform_task(provider,args):
     pic = sess.UploadCover(sources.cover_path)['data']['url'] if sources.cover_path else ''
     submissions.cover_url = pic
     '''Finally submitting the video'''
-    submit_result=sess.SubmitVideo(submissions,seperate_parts=args['is_seperate_parts'] != None)  
+    submit_result=sess.SubmitVideo(submissions,seperate_parts=args['is_seperate_parts'])  
     dirty = False
     for result in submit_result['results']:
         if result['code'] == 0:logger.info('Upload success - BVid: %s' % result['data']['bvid'])        
@@ -118,7 +119,7 @@ if __name__ == "__main__":
         logging.fatal('Unable to set working directory,quitting')
         sys.exit(2)
     for provider,args in local_args:
-        result,dirty = perform_task(provider,args)
+        result,dirty = perform_task(provider,args,report_progress if global_args['show_progress'] else lambda current,max:None )
         if not dirty:success.append((args,result))
         else: failure.append((args,None))
     if not failure:sys.exit(0)

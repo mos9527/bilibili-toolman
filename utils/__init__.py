@@ -1,4 +1,3 @@
-import tqdm
 import os
 import argparse
 import logging
@@ -8,16 +7,24 @@ from pathlib import Path
 pbar = None
 global_args = {
     'cookies': ('Bilibili 所用 Cookies ( 需要 SESSDATA 及 bili_jct ) e.g.cookies=SESSDATA=cb0..; bili_jct=6750... ',None),    
+    'show_progress':('显示上传进度',1)
 }
 local_args = {
     'opts':('解析设置',None),
     'thread_id': ('分区 ID',17),
     'tags': ('标签','转载'),
-    'desc_fmt':('描述格式 e.g. %(desc)s','%(desc)s'),
-    'title_fmt':('标题格式 e.g. %(title)s','%(title)s'),
-    'is_seperate_parts':('多个视频独立投稿（不分P）',None),
+    'desc_fmt':('描述格式 e.g. ％(desc)s','%(desc)s'),
+    'title_fmt':('标题格式 e.g. ％(title)s','%(title)s'),
+    'is_seperate_parts':('多个视频独立投稿（不分P）',1),
 }
+arg_epilog = '''
+本工具支持将给定视频源转载至哔哩哔哩
 
+参数可由 `Provider` 引导参数串连 `Per-file option` 及其他 `Provider` ，类似 FFmpeg 式 `-i` 串连
+
+e.g.
+    python bilibili-toolman.py --cookies "cookies=SESSDATA=cb0..; bili_jct=6750..." --youtube "https://www.youtube.com/watch?v=_3Mo7U0XSFo" --thread_id 17 --tags "majima,goro,majima goro" --opts "format=best" --youtube "https://www.youtube.com/playlist?list=PLcU_bi13CiQtVD5iB93I0IRaNvr5tGHzc" --tags "JOJO,HFTF,未来遗产,JOJO的奇妙冒险,Zarythe,TAS" --thread_id 19
+'''
 def setup_logging():
     import coloredlogs
     coloredlogs.DEFAULT_LOG_FORMAT = '[ %(asctime)s %(name)8s %(levelname)6s ] %(message)s'
@@ -27,16 +34,15 @@ def prepare_temp():
     if not os.path.isdir(temp_path):os.mkdir(temp_path)
     os.chdir(temp_path)    
     return True
-
+tqdm_bar = None
 def report_progress(current, max_val):
-    global pbar
-    if not pbar:
-        pbar = tqdm.tqdm(desc='Uploading', total=max_val,
-                         unit='B', unit_scale=True)
-    pbar.update(current - pbar.n)
-    if (max_val != pbar.total):
-        pbar.clear()
-        pbar.total = max_val
+    from tqdm import tqdm
+    global tqdm_bar
+    if tqdm_bar is None or max_val != tqdm_bar.total or current < tqdm_bar.n:
+        if tqdm_bar:tqdm_bar.close()
+        tqdm_bar = tqdm(desc='Uploading', total=max_val,unit='B', unit_scale=True)        
+    tqdm_bar.update(current - tqdm_bar.n)    
+    tqdm_bar.refresh()
 
 
 temp_path = 'temp'
@@ -68,9 +74,7 @@ provider_args = _enumerate_providers()
 
 
 def _create_argparser():
-    p = argparse.ArgumentParser(description='bilibili-toolman 哔哩哔哩工具人',formatter_class=argparse.RawTextHelpFormatter,epilog='''e.g.
-    python bilibili-toolman.py --cookies "cookies=SESSDATA=cb0..; bili_jct=6750..." --youtube "https://www.youtube.com/watch?v=_3Mo7U0XSFo" --thread_id 17 --tags "majima,goro,majima goro" --opts "format=best"    
-    ''')
+    p = argparse.ArgumentParser(description='bilibili-toolman 哔哩哔哩工具人',formatter_class=argparse.RawTextHelpFormatter,epilog=arg_epilog)
     for arg, arg_ in global_args.items():
         arg_help,arg_default = arg_
         p.add_argument('--%s' % arg, type=str, help=arg_help,default=arg_default)
