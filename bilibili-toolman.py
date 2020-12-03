@@ -7,7 +7,7 @@ from utils import setup_logging,prepare_temp,report_progress,save_cookies,load_c
 import logging,sys,time,urllib.parse
 
 sess = BiliSession()
-
+delay = 10
 def perform_task(provider,args,report=report_progress):
     '''To perform a indivudial task
 
@@ -65,8 +65,8 @@ def perform_task(provider,args,report=report_progress):
                 pic = sess.UploadCover(source.cover_path)['data']['url'] if source.cover_path else ''
                 break
             except Exception:
-                logger.warning('Failed to upload - retrying')
-                time.sleep(1)
+                logger.warning('Failed to upload - retrying in %ss'%delay)
+                time.sleep(delay)
         logger.info('Upload complete')
         # submit_result=sess.SubmitVideo(submission,endpoint,pic['data']['url'],config['biz_id'])
         with Submission() as submission:
@@ -115,6 +115,7 @@ if __name__ == "__main__":
     '''Parsing args'''
     save_cookies(global_args['cookies'])
     '''Saving / Loading cookies'''
+    delay = int(global_args['delay'])
     if not setup_session(load_cookies()):
         logging.fatal('Unable to set working directory,quitting')
         sys.exit(2)

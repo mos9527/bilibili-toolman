@@ -103,7 +103,7 @@ class BiliUploadWorker(threading.Thread):
 class ThreadedWorkQueue(Queue):
     '''Essential Thread pool / queue'''
 
-    def __init__(self, worker_class, worker_count=4) -> None:
+    def __init__(self, worker_class, worker_count=8) -> None:
         super().__init__()
         self.worker_count = worker_count
         self.workers = [worker_class(self, name='Worker-%s' % i)
@@ -237,8 +237,7 @@ class BiliSession(Session):
     @JSONResponse
     def UploadId(self, endpoint):
         '''Fetch upload ID'''
-        time.sleep(
-            0.1)  # adding delay as the `auth` token needs to be updated server-side
+        time.sleep(5)  # adding delay as the `auth` token needs to be updated server-side
         return self.post(endpoint + '?uploads', params={
             'output': 'json'
         })

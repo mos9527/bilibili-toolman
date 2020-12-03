@@ -7,7 +7,8 @@ from pathlib import Path
 pbar = None
 global_args = {
     'cookies': ('Bilibili 所用 Cookies ( 需要 SESSDATA 及 bili_jct ) e.g.cookies=SESSDATA=cb0..; bili_jct=6750... ',None),    
-    'show_progress':('显示上传进度',1)
+    'show_progress':('显示上传进度',1),
+    'delay':('上传延时',10)
 }
 local_args = {
     'opts':('解析设置',None),
@@ -15,7 +16,7 @@ local_args = {
     'tags': ('标签','转载'),
     'desc_fmt':('描述格式 e.g. ％(desc)s','%(desc)s'),
     'title_fmt':('标题格式 e.g. ％(title)s','%(title)s'),
-    'is_seperate_parts':('多个视频独立投稿（不分P）',1),
+    'is_seperate_parts':('多个视频独立投稿（不分P）',1),    
 }
 arg_epilog = '''
 本工具支持将给定视频源转载至哔哩哔哩
