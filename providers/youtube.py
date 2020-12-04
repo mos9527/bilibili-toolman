@@ -11,15 +11,15 @@ logger = logging.getLogger('youtube')
 youtube_dl.utils.std_headers['User-Agent'] = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
 params = {
     'logger':logger,
-    'merge-output-format':'mp4',
     'outtmpl':'%(id)s.%(ext)s',
-    'format':'best',    
+    'format':'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',    
     'writethumbnail':True
 } # default params,can be overridden
 ydl = youtube_dl.YoutubeDL(params)
 def __to_yyyy_mm_dd(date):
     return date[:4] + '/' + date[4:6] + '/' + date[6:] 
 def update_config(cfg):
+    global ydl
     ydl = youtube_dl.YoutubeDL({**params,**cfg})
 def download_video(res) -> DownloadResult:        
     with DownloadResult() as results:
