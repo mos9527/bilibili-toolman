@@ -88,11 +88,13 @@ def _create_argparser():
                        provider_name.upper(), type=str, help='(Provider) %s\n   Options: %s'%(provider.__desc__,provider.__cfg_help__))
     return p
 
-def limit_chars(string):
+def sanitize_string(string):
+    # limits characters to CJK & ascii chars
     import re
-    return re.sub("[\U00010000-\U0010ffff]",'',string) # remove emojis
+    return re.sub('[^\u0000-\u007F\uac00-\ud7a3\u3040-\u30ff\u4e00-\u9FFF]*','',string) # remove emojis
 
-def limit_length(string,max):
+def truncate_string(string,max):
+    # truncate & add ... to string over the length of `max`
     if len(string) > max:string = string[:max-3] + '...'
     return string
 

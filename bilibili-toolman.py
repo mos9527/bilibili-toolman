@@ -3,7 +3,7 @@
 from re import sub
 from bilisession import BiliSession,Submission
 from providers import DownloadResult
-from utils import setup_logging,prepare_temp,report_progress,save_cookies,load_cookies,prase_args,limit_chars,limit_length,local_args as largs
+from utils import setup_logging,prepare_temp,report_progress,save_cookies,load_cookies,prase_args,sanitize_string,truncate_string,local_args as largs
 import logging,sys,time,urllib.parse
 
 sess = BiliSession()
@@ -52,10 +52,10 @@ def perform_task(provider,args,report=report_progress):
         '''If one or multipule sources'''        
         format_blocks = {
             'title':source.title,
-            'desc':source.description
+            'desc':source.description,            
         }
-        source.title = limit_chars(limit_length(args['title_fmt'] % format_blocks,80))
-        source.description = limit_chars(limit_length(args['desc_fmt'] % format_blocks,2000))        
+        source.title = sanitize_string(truncate_string(args['title_fmt'] % format_blocks,80))
+        source.description = sanitize_string(truncate_string(args['desc_fmt'] % format_blocks,2000))        
         logger.info('Uploading: %s' % source.title)
         '''Summary trimming'''      
         basename, size, endpoint, config, state , pic = [None] * 6
