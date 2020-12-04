@@ -18,7 +18,7 @@ BUILD_NO = int(BUILD_VER[0] * 1e6 + BUILD_VER[1] * 1e4 + BUILD_VER[2] * 1e2)
 BUILD_STR = '.'.join(map(lambda v: str(v), BUILD_VER))
 '''Build variant & version'''
 
-RETRIES_UPLOAD_ID = 3
+RETRIES_UPLOAD_ID = 5
 
 DELAY_FETCH_UPLOAD_ID = .1
 DELAY_RETRY_UPLOAD_ID = 1

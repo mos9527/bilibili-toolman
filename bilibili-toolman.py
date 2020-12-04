@@ -58,7 +58,7 @@ def perform_task(provider,args,report=report_progress):
         source.description = limit_chars(limit_length(args['desc_fmt'] % format_blocks,2000))        
         logger.info('Uploading: %s' % source.title)
         '''Summary trimming'''      
-        basename, size, endpoint, config, state = [None] * 5
+        basename, size, endpoint, config, state , pic = [None] * 6
         while True:
             try:
                 basename, size, endpoint, config, state = sess.UploadVideo(source.video_path,report=report)

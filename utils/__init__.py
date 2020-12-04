@@ -39,9 +39,6 @@ def report_progress(current, max_val):
     from tqdm import tqdm
     global tqdm_bar
     if tqdm_bar is None or max_val != tqdm_bar.total or current < tqdm_bar.n:
-        if tqdm_bar:
-            tqdm_bar.reset()
-            tqdm_bar.close()
         tqdm_bar = tqdm(desc='Uploading', total=max_val,unit='B', unit_scale=True)        
     tqdm_bar.update(current - tqdm_bar.n)    
     tqdm_bar.refresh()
