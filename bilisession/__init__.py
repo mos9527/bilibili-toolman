@@ -1,6 +1,7 @@
 '''Bilibili video submission & other APIs'''
 import os
 from queue import Queue
+from re import split
 from threading import Lock
 from requests import Session
 from io import IOBase
@@ -16,6 +17,15 @@ BUILD_VER = (2, 8, 12)
 BUILD_NO = int(BUILD_VER[0] * 1e6 + BUILD_VER[1] * 1e4 + BUILD_VER[2] * 1e2)
 BUILD_STR = '.'.join(map(lambda v: str(v), BUILD_VER))
 '''Build variant & version'''
+
+RETRIES_UPLOAD_ID = 3
+
+DELAY_FETCH_UPLOAD_ID = .1
+DELAY_RETRY_UPLOAD_ID = 1
+DELAY_VIDEO_SUBMISSION = 30
+DELAY_REPORT_PROGRESS = .5
+
+WORKERS_UPLOAD = 3
 
 def JSONResponse(classfunc):
     '''Decodes `Response`s content to JSON'''
@@ -34,9 +44,8 @@ class FileManager(dict):
 
     def open(self, path):
         self.lock.acquire()  # preventing multipule instances from accessing all at once
-        if not path in self:
-            self[path] = {'stream': open(
-                path, 'rb'), 'read': 0, 'length': os.stat(path).st_size}
+        if not path in self or self[path]['stream'].closed:
+            self[path] = {'stream': open(path, 'rb'), 'read': 0, 'length': os.stat(path).st_size}
         self.lock.release()
 
     def close(self, path):
@@ -103,7 +112,7 @@ class BiliUploadWorker(threading.Thread):
 class ThreadedWorkQueue(Queue):
     '''Essential Thread pool / queue'''
 
-    def __init__(self, worker_class, worker_count=8) -> None:
+    def __init__(self, worker_class, worker_count=WORKERS_UPLOAD) -> None:
         super().__init__()
         self.worker_count = worker_count
         self.workers = [worker_class(self, name='Worker-%s' % i)
@@ -200,7 +209,7 @@ class BiliSession(Session):
         '''
         super().__init__()
         self.load_cookies(cookies)
-        self.headers['User-Agent'] = 'bilibili-toolman/%s' % BUILD_STR
+        self.headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36'
         self.logger = logging.getLogger('BiliSession')
     
     def load_cookies(self,cookies:str):
@@ -237,9 +246,12 @@ class BiliSession(Session):
     @JSONResponse
     def UploadId(self, endpoint):
         '''Fetch upload ID'''
-        time.sleep(5)  # adding delay as the `auth` token needs to be updated server-side
+        time.sleep(DELAY_FETCH_UPLOAD_ID)  # adding delay as the `auth` token needs to be updated server-side
         return self.post(endpoint + '?uploads', params={
             'output': 'json'
+        },headers={
+            'Origin': 'https://member.bilibili.com',
+            'Referer':'https://member.bilibili.com/'
         })
 
     @JSONResponse
@@ -270,18 +282,25 @@ class BiliSession(Session):
         self.logger.debug('Opened file %s (%s B) for reading' % (basename,size))
         '''Loading files'''
         def generate_upload_chunks(name, size):
-            '''Generating uplaod chunks'''
-            config = self.Preupload(name=name, size=size)
-            self.headers['X-Upos-Auth'] = config['auth']
-            '''X-Upos-Auth header'''
-            endpoint = 'https:%s/ugcboss/%s' % (
-                config['endpoint'], config['upos_uri'][15:])
-            self.logger.debug('Endpoint URL %s' % endpoint)
-            try:
-                upload_id = self.UploadId(endpoint)['upload_id']
-            except Exception as e:
-                self.logger.error('Unable to upload the video as the server has rejected our request')
-                raise e
+            def fetch_upload_id():
+                '''Generating uplaod chunks'''            
+                for i in range(1,RETRIES_UPLOAD_ID + 1):
+                    try:
+                        config = self.Preupload(name=name, size=size)
+                        self.headers['X-Upos-Auth'] = config['auth']
+                        '''X-Upos-Auth header'''
+                        endpoint = 'https:%s/ugcboss/%s' % (config['endpoint'], config['upos_uri'].split('/')[-1])
+                        self.logger.debug('Endpoint URL %s' % endpoint)
+                        self.logger.debug('Fetching token (%s)' % i)
+                        upload_id = self.UploadId(endpoint)['upload_id']
+                        return config,endpoint,upload_id
+                    except Exception as e:               
+                        self.logger.error('Unable to upload the video as the server has rejected our request,retrying')     
+                        time.sleep(DELAY_RETRY_UPLOAD_ID)            
+                return None,None,None
+            config,endpoint,upload_id = fetch_upload_id()
+            if not upload_id:
+                raise Exception("Unable to fetch upload id in %s tries" % RETRIES_UPLOAD_ID)
             '''Upload endpoint & keys'''
             chunks = []
             chunksize = config['chunk_size']
@@ -312,6 +331,7 @@ class BiliSession(Session):
             return endpoint, config, chunks
         endpoint, config, chunks = generate_upload_chunks(basename, size)
         '''Generates upload config'''
+        file_manager.open(path) # opens file for reading
         for chunk in chunks:
             queue.new_task((
                 self,
@@ -322,14 +342,11 @@ class BiliSession(Session):
             ))
         '''Assigns job'''
         self.logger.debug('Waiting for uploads to finish')
-        while (queue.unfinished_tasks > 0):
-            uploaded = 0
-            for file in file_manager:
-                path, read, length = file, file_manager[file]['read'], file_manager[file]['length']
-                uploaded += read
-            report(uploaded,size)
-            time.sleep(1)
-        '''Wait for current upload to finish'''
+        while (queue.unfinished_tasks > 0):                                        
+            report(file_manager[path]['read'],size)
+            time.sleep(DELAY_REPORT_PROGRESS)
+        '''Wait for current upload to finish'''        
+        file_manager.close(path)
         state = self.UploadStatus(endpoint, basename, config['upload_id'], config['biz_id'])
         if(state['OK']==1):
             self.logger.debug('Successfully finished uploading' )
@@ -395,7 +412,7 @@ class BiliSession(Session):
                     result = upload_one(submission,single=True)
                     if result['code'] == 21070:
                         self.logger.warning('Hit anti-spamming measures (%s),retrying' % result['code'])
-                        time.sleep(30)
+                        time.sleep(DELAY_VIDEO_SUBMISSION)
                         continue 
                     elif result['code'] != 0:
                         self.logger.error('Error (%s): %s - skipping' % (result['code'],result['message']))

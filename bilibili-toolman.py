@@ -7,7 +7,7 @@ from utils import setup_logging,prepare_temp,report_progress,save_cookies,load_c
 import logging,sys,time,urllib.parse
 
 sess = BiliSession()
-delay = 10
+
 def perform_task(provider,args,report=report_progress):
     '''To perform a indivudial task
 
@@ -49,24 +49,26 @@ def perform_task(provider,args,report=report_progress):
     submissions = Submission()
     logging.info('Processing total of %s sources' % len(sources.results))
     for source in sources.results:       
-        '''If one or multipule sources'''
+        '''If one or multipule sources'''        
         format_blocks = {
             'title':source.title,
             'desc':source.description
         }
         source.title = limit_chars(limit_length(args['title_fmt'] % format_blocks,80))
         source.description = limit_chars(limit_length(args['desc_fmt'] % format_blocks,2000))        
-        logger.info('Finished: %s' % source.title)
-        '''Summary trimming'''
-        logger.warning('Uploading video & cover')
+        logger.info('Uploading: %s' % source.title)
+        '''Summary trimming'''      
+        basename, size, endpoint, config, state = [None] * 5
         while True:
             try:
                 basename, size, endpoint, config, state = sess.UploadVideo(source.video_path,report=report)
                 pic = sess.UploadCover(source.cover_path)['data']['url'] if source.cover_path else ''
                 break
             except Exception:
-                logger.warning('Failed to upload - retrying in %ss'%delay)
-                time.sleep(delay)
+                logger.warning('Failed to upload - skipping')                
+                break
+        if not endpoint:
+            continue
         logger.info('Upload complete')
         # submit_result=sess.SubmitVideo(submission,endpoint,pic['data']['url'],config['biz_id'])
         with Submission() as submission:
@@ -114,8 +116,7 @@ if __name__ == "__main__":
     success,failure = [],[]
     '''Parsing args'''
     save_cookies(global_args['cookies'])
-    '''Saving / Loading cookies'''
-    delay = int(global_args['delay'])
+    '''Saving / Loading cookies'''    
     if not setup_session(load_cookies()):
         logging.fatal('Unable to set working directory,quitting')
         sys.exit(2)

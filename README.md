@@ -13,6 +13,10 @@
 
 详见 `--help` 输出
 
+# 注意
+
+- 网页端分 P 上传 API 自 2020/03 起一直经历维护，若尝试以多 P 形式上传
+
 # 截图
 ![le screen shot of le console](https://raw.githubusercontent.com/greats3an/bilibili-toolman/master/readme.png)
 

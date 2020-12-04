@@ -8,7 +8,6 @@ pbar = None
 global_args = {
     'cookies': ('Bilibili 所用 Cookies ( 需要 SESSDATA 及 bili_jct ) e.g.cookies=SESSDATA=cb0..; bili_jct=6750... ',None),    
     'show_progress':('显示上传进度',1),
-    'delay':('上传延时',10)
 }
 local_args = {
     'opts':('解析设置',None),
@@ -40,7 +39,9 @@ def report_progress(current, max_val):
     from tqdm import tqdm
     global tqdm_bar
     if tqdm_bar is None or max_val != tqdm_bar.total or current < tqdm_bar.n:
-        if tqdm_bar:tqdm_bar.close()
+        if tqdm_bar:
+            tqdm_bar.reset()
+            tqdm_bar.close()
         tqdm_bar = tqdm(desc='Uploading', total=max_val,unit='B', unit_scale=True)        
     tqdm_bar.update(current - tqdm_bar.n)    
     tqdm_bar.refresh()
