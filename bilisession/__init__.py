@@ -418,7 +418,9 @@ class BiliSession(Session):
                         self.logger.error('Error (%s): %s - skipping' % (result['code'],result['message']))
                         self.logger.error('Video title: %s' % submission.title)
                         self.logger.error('Video description:\n%s' % submission.description)
-                        break                    
+                        break       
+                    else:
+                        break             
                 code_accumlation += result['code']             
                 results.append(result)
             return {'code':code_accumlation,'results':results}
