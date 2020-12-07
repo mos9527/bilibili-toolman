@@ -46,7 +46,7 @@ def perform_task(provider,args,report=report_progress):
     except Exception as e:
         logger.error('Cannot download specified resource - %s - skipping' % e)
         return 
-    submissions = Submission()
+    submission = Submission()
     logging.info('Processing total of %s sources' % len(sources.results))
     for source in sources.results:       
         '''If one or multipule sources'''        
@@ -71,32 +71,32 @@ def perform_task(provider,args,report=report_progress):
             continue
         logger.info('Upload complete')
         # submit_result=sess.SubmitVideo(submission,endpoint,pic['data']['url'],config['biz_id'])
-        with Submission() as submission:
-            submission.cover_url = pic
-            submission.video_endpoint = endpoint
-            submission.biz_id = config['biz_id']
+        with Submission() as video:
+            video.cover_url = pic
+            video.video_endpoint = endpoint
+            video.biz_id = config['biz_id']
             '''Sources identifiers'''   
-            submission.copyright = Submission.COPYRIGHT_REUPLOAD if not source.original else Submission.COPYRIGHT_SELF_MADE
-            submission.source = sources.soruce         
-            submission.thread = args['thread_id']
-            submission.tags = args['tags'].split(',')
-            submission.description = source.description
-            submission.title = source.title            
+            video.copyright = Submission.COPYRIGHT_REUPLOAD if not source.original else Submission.COPYRIGHT_SELF_MADE
+            video.source = sources.soruce         
+            video.thread = args['thread_id']
+            video.tags = args['tags'].split(',')
+            video.description = source.description
+            video.title = source.title            
         '''Use the last given thread,tags,cover & description per multiple uploads'''                           
-        submissions.thread = submission.thread or submissions.thread        
-        submissions.tags.extend(submission.tags)
-        submissions.submissions.append(submission)        
+        submission.thread = video.thread or submission.thread        
+        submission.tags.extend(video.tags)
+        submission.videos.append(video)
     '''Filling submission info'''
-    submissions.source = sources.soruce
+    submission.source = sources.soruce
 
-    submissions.title = sources.title
-    submissions.description = sources.description
+    submission.title = sources.title
+    submission.description = sources.description
 
     '''Make cover image for all our submissions as well'''
     pic = sess.UploadCover(sources.cover_path)['data']['url'] if sources.cover_path else ''
-    submissions.cover_url = pic
+    submission.cover_url = pic
     '''Finally submitting the video'''
-    submit_result=sess.SubmitVideo(submissions,seperate_parts=args['is_seperate_parts'])  
+    submit_result=sess.SubmitVideo(submission,seperate_parts=args['is_seperate_parts'])  
     dirty = False
     for result in submit_result['results']:
         if result['code'] == 0:logger.info('Upload success - BVid: %s' % result['data']['bvid'])        

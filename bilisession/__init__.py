@@ -1,8 +1,10 @@
 '''Bilibili video submission & other APIs'''
 import os
 from queue import Queue
-from re import split
+from re import split, sub
+import re
 from threading import Lock
+from typing import List
 from requests import Session
 from io import IOBase
 import json
@@ -130,6 +132,49 @@ class ThreadedWorkQueue(Queue):
 queue = ThreadedWorkQueue(BiliUploadWorker)
 queue.run() # start congesting once module is loaded
 
+class SubmissionVideos(list):
+    '''Parent submission'''
+    def extend(self, __iterable) -> None:
+        for item in __iterable:
+            self.append(item)
+
+    def append(self, video) -> None:
+        '''Only Submission will be appended to our list'''
+        if isinstance(video,dict):
+            # try to interpert it as a list of dictionaries sent by server            
+            with Submission() as submission:                
+                submission.video_endpoint = video['filename']
+                submission.video_duration = video['duration']
+                submission.title = video['title']            
+                submission.bvid = video['bvid']
+                submission.biz_id = video['cid']
+                submission.aid = video['aid']
+                submission.stat = video
+            return super().append(submission)            
+        elif isinstance(video,Submission):
+            return super().append(video)
+        else:
+            raise Exception("Either a dict or a Submission object can be supplied.")
+            
+    @property
+    def archives(self):
+        '''Dumps current videos as archvies that's to be the payload'''
+        target = self if self else [self.parent] # fallback
+        return [{
+            "filename": video.video_endpoint,
+            "title": video.title,
+            "desc": video.description,
+            "cid": video.biz_id,
+        } for video in target]
+
+    def __init__(self,parent=None):
+        '''Initializes the list
+        
+            parent : Submission - Used as fallback value when theres no subvideos
+        '''
+        self.parent = parent
+        super().__init__()
+
 class Submission:
     '''Submission meta set'''
     COPYRIGHT_SELF_MADE = 1
@@ -148,14 +193,20 @@ class Submission:
     '''Reupload source'''    
     thread: int = 19
     '''Thread ID'''
-    submissions: list = None
-    '''Sub-submissions'''
     tags: list = None
     '''Tags of video'''
-    def __init__(self) -> None:
-        self.tags = []
-        self.submissions = []
-        # prevents mutable objects not being private per instance
+    videos: SubmissionVideos = None
+    '''List of videos in submission'''
+    _cover_url = ''        
+    @property
+    def cover_url(self):
+        '''Cover image URL'''
+        return self._cover_url
+    @cover_url.setter
+    def cover_url(self,value):
+        # note : this will strip the HTTP prefix        
+        self._cover_url = '//' + value.split('//')[-1] 
+    # region Per video attributes    
     _video_filename = ''
     @property
     def video_endpoint(self):
@@ -165,24 +216,30 @@ class Submission:
     def video_endpoint(self,value):
         # note : this will strip the HTTP prefix        
         self._video_filename = value.split('/')[-1].split('.')[0]    
-    _cover_url = ''        
-    @property
-    def cover_url(self):
-        '''Cover image URL'''
-        return self._cover_url
-    @cover_url.setter
-    def cover_url(self,value):
-        # note : this will strip the HTTP prefix        
-        self._cover_url = '//' + value.split('//')[-1]    
     biz_id = 0
     '''a.k.a cid'''        
-    def __dict__(self):
-        return {
-            "filename": self.video_endpoint,
-            "title": self.title,
-            "desc": self.description,
-            "cid": self.biz_id,
-        }
+    bvid = ''
+    '''video ID'''
+    aid = 0
+    '''another ID'''
+    thread_name = ''
+    '''upload thread name i.e. typename'''
+    parent_tname = ''
+    '''parent thread name'''
+    stat = None
+    '''viewer status'''
+    reject_reason = ''
+    '''rejection'''
+    state = 0
+    '''status of video'''
+    state_desc = ''
+    '''description of video'''
+    video_duration = 0
+    '''duration of video'''
+    # endregion
+    def __init__(self) -> None:
+        self.tags = []
+        self.videos = SubmissionVideos(self)
     def __enter__(self):
         '''Creates a new,empty submission'''
         return Submission()
@@ -265,6 +322,73 @@ class BiliSession(Session):
             'biz_id': biz_id
         })
 
+    @JSONResponse
+    def ListArchives(self,pubing=True,pubed=True,not_pubed=True,pn=1,ps=10):        
+        return self.get('https://member.bilibili.com/x/web/archives',params={
+            'status':('%s%s%s' % (',is_pubing'*pubing,',pubed'*pubed,',not_pubed'*not_pubed))[1:],
+            'pn':pn,
+            'ps':ps,
+            'interactive':1,
+            'coop':1
+        })
+    
+    @staticmethod
+    def create_submission_by_arc(arc):
+        with Submission() as submission:
+            submission.stat = arc['stat']
+            submission.aid = submission.stat['aid']
+            submission.parent_tname = arc['parent_tname']
+            submission.thread_name = arc['typename']
+            if 'Archive' in arc:arc['archive'] = arc['Archive']
+            submission.bvid = arc['archive']['bvid']
+            submission.title = arc['archive']['title']
+            submission.cover_url = arc['archive']['cover']
+            submission.tags = arc['archive']['tag'].split(',')
+            submission.description = arc['archive']['desc']
+            submission.source = arc['archive']['source']
+            submission.state_desc = arc['archive']['state_desc']
+            submission.state = arc['archive']['state']
+            submission.reject_reason = arc['archive']['reject_reason']  
+            if 'Videos' in arc:arc['videos'] = arc['Videos']
+            submission.videos.extend(arc['videos'])
+        return submission
+
+    @JSONResponse
+    def ViewArchive(self,bvid):
+        return self.get('https://member.bilibili.com/x/web/archive/view',params={'bvid':bvid})
+
+    @JSONResponse
+    def EditArchvie(self,submission : Submission):
+        return self.post('https://member.bilibili.com/x/vu/web/edit',payload={
+                "aid": submission.aid,
+                "copyright": submission.copyright,
+                "videos": submission.videos.archives,
+                "source": submission.source,
+                "tid": int(submission.thread),
+                "cover": submission.cover_url,
+                "title": submission.title,
+                "tag": ','.join(set(submission.tags)),
+                "desc_format_id": 31,
+                "desc": submission.description,
+                "up_close_reply": submission.close_reply,
+                "up_close_danmu": submission.close_danmu
+            })
+
+    def ListSubmissions(self,pubing=True,pubed=True,not_pubed=True,limit=1000) -> List[Submission]:
+        args = pubing,pubed,not_pubed
+        submissions = []
+        count = 0
+        def add_to_submissions(arcs):       
+            nonlocal count
+            for arc in arcs['arc_audits']:
+                count += submissions.append(self.create_submission_by_arc(arc)) or 1
+                if count >= limit:raise Exception("Hit fetch limit (%s)" % limit)                        
+        arc = self.ListArchives(*args,pn=1)['data']
+        add_to_submissions(arc)
+        for pn in range(2,math.ceil(arc['page']['count'] / arc['page']['ps']) + 1):
+            add_to_submissions(self.ListArchives(*args,pn=pn)['data'])
+        return submissions
+            
     def UploadVideo(self, path: str ,report=lambda current,max:None):
         '''Uploading a video via local path
 
@@ -383,10 +507,10 @@ class BiliSession(Session):
             dict
         '''
         @JSONResponse
-        def upload_one(submission,single=False):
+        def upload_one(submission : Submission):
             payload = {
                 "copyright": submission.copyright,
-                "videos": [ sub.__dict__() for sub in submission.submissions ] if not single else [ submission.__dict__() ],
+                "videos": submission.videos.archives,
                 "source": submission.source,
                 "tid": int(submission.thread),
                 "cover": submission.cover_url,
@@ -406,10 +530,10 @@ class BiliSession(Session):
             results = []
             code_accumlation = 0
             self.logger.warning('Posting multipule submissions')
-            for submission in submission.submissions:
+            for submission in submission.videos:
                 self.logger.debug('Posting single submission `%s`' % submission.title)
                 while True:
-                    result = upload_one(submission,single=True)
+                    result = upload_one(submission)
                     if result['code'] == 21070:
                         self.logger.warning('Hit anti-spamming measures (%s),retrying' % result['code'])
                         time.sleep(DELAY_VIDEO_SUBMISSION)
