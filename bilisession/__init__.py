@@ -383,7 +383,7 @@ class BiliSession(Session):
         if not submission.videos:
             self.logger.warning('No video was defined,using remote videos')            
             submission.videos.extend(self.ViewArchive(submission.bvid)['data']['videos'])
-        return self.post('https://member.bilibili.com/x/vu/web/edit',data=json.dumps({
+        return self.post('https://member.bilibili.com/x/vu/web/edit',json={
                 "aid": submission.aid,
                 "copyright": submission.copyright,
                 "videos": submission.videos.archive,
@@ -396,8 +396,7 @@ class BiliSession(Session):
                 "desc": submission.description,
                 "up_close_reply": submission.close_reply,
                 "up_close_danmu": submission.close_danmu,        
-            }
-        ),params={'csrf': self.cookies.get('bili_jct')})
+            },params={'csrf': self.cookies.get('bili_jct')})
 
     def ListSubmissions(self,pubing=True,pubed=True,not_pubed=True,limit=1000) -> List[Submission]:
         args = pubing,pubed,not_pubed
@@ -533,7 +532,7 @@ class BiliSession(Session):
         '''
         @JSONResponse
         def upload_one(submission : Submission):
-            return self.post("https://member.bilibili.com/x/vu/web/add", data=json.dumps(submission.archive), params={'csrf': self.cookies.get('bili_jct')})
+            return self.post("https://member.bilibili.com/x/vu/web/add", json=submission.archive, params={'csrf': self.cookies.get('bili_jct')})
         if not seperate_parts:
             self.logger.debug('Posting multi-part submission `%s`' % submission.title)            
             result = upload_one(submission)            

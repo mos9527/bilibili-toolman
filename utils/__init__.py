@@ -5,17 +5,18 @@ import providers
 from pathlib import Path
 
 pbar = None
-global_args = {
-    'cookies': ('Bilibili 所用 Cookies ( 需要 SESSDATA 及 bili_jct ) e.g.cookies=SESSDATA=cb0..; bili_jct=6750... ',None),    
+global_args = {    
+    'cookies': ('Bilibili 所用 Cookies ( 需要 SESSDATA 及 bili_jct ) e.g.cookies=SESSDATA=cb0..; bili_jct=6750... ',''),    
     'show_progress':('显示上传进度',1),
 }
 local_args = {
-    'opts':('解析设置',None),
+    'opts':('解析设置',''),
     'thread_id': ('分区 ID',17),
     'tags': ('标签','转载'),
     'desc_fmt':('描述格式 e.g. ％(desc)s','%(desc)s'),
     'title_fmt':('标题格式 e.g. ％(title)s','%(title)s'),
-    'is_seperate_parts':('多个视频独立投稿（不分P）',1),    
+    'seperate_parts':('多个视频独立投稿（不分P）',1),    
+    'no_upload':('只下载资源',0),
 }
 arg_epilog = '''
 本工具支持将给定视频源转载至哔哩哔哩
@@ -76,12 +77,12 @@ def _create_argparser():
     p = argparse.ArgumentParser(description='bilibili-toolman 哔哩哔哩工具人',formatter_class=argparse.RawTextHelpFormatter,epilog=arg_epilog)
     for arg, arg_ in global_args.items():
         arg_help,arg_default = arg_
-        p.add_argument('--%s' % arg, type=str, help=arg_help,default=arg_default)
+        p.add_argument('--%s' % arg, type=type(arg_default), help=arg_help,default=arg_default)
     # global args
     for arg, arg_ in local_args.items():        
         arg_help,arg_default = arg_
         arg_help='  (Per-file option) %s' % arg_help
-        p.add_argument('--%s' % arg, type=str, help=arg_help,default=arg_default)
+        p.add_argument('--%s' % arg, type=type(arg_default), help=arg_help,default=arg_default)
     # local args (per source)
     for provider_name, provider in provider_args.items():
         p.add_argument('--%s' % provider_name, metavar='%s-URL' %
