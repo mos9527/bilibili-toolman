@@ -157,7 +157,7 @@ class SubmissionVideos(list):
             raise Exception("Either a dict or a Submission object can be supplied.")
             
     @property
-    def archives(self):
+    def archive(self):
         '''Dumps current videos as archvies that's to be the payload'''
         target = self if self else [self.parent] # fallback
         return [{
@@ -182,8 +182,14 @@ class Submission:
     '''Copyright consts'''
     close_reply: bool = False
     close_danmu: bool = False
-    '''Access control parameters'''
-    description: str = ''
+    '''Access control parameters'''    
+    _description: str = ''
+    @property
+    def description(self):
+        return self._description
+    @description.setter
+    def description(self,v):
+        self._description = v or '' # fallback
     '''Description for the video'''
     title: str = ''
     '''Title for the submission'''
@@ -244,7 +250,22 @@ class Submission:
         '''Creates a new,empty submission'''
         return Submission()
     def __exit__(self,*args):pass
-
+    @property
+    def archive(self):
+        '''returns a dict containing all our info'''
+        return {
+            "copyright": self.copyright,
+            "videos": self.videos.archive,
+            "source": self.source,
+            "tid": int(self.thread),
+            "cover": self.cover_url,
+            "title": self.title,
+            "tag": ','.join(set(self.tags)),
+            "desc_format_id": 31,
+            "desc": self.description,
+            "up_close_reply": self.close_reply,
+            "up_close_danmu": self.close_danmu
+        }              
 class BiliSession(Session):
     '''BiliSession - see BiliSession() for more info'''
 
@@ -359,10 +380,13 @@ class BiliSession(Session):
 
     @JSONResponse
     def EditArchvie(self,submission : Submission):
-        return self.post('https://member.bilibili.com/x/vu/web/edit',payload={
+        if not submission.videos:
+            self.logger.warning('No video was defined,using remote videos')            
+            submission.videos.extend(self.ViewArchive(submission.bvid)['data']['videos'])
+        return self.post('https://member.bilibili.com/x/vu/web/edit',data=json.dumps({
                 "aid": submission.aid,
                 "copyright": submission.copyright,
-                "videos": submission.videos.archives,
+                "videos": submission.videos.archive,
                 "source": submission.source,
                 "tid": int(submission.thread),
                 "cover": submission.cover_url,
@@ -371,8 +395,9 @@ class BiliSession(Session):
                 "desc_format_id": 31,
                 "desc": submission.description,
                 "up_close_reply": submission.close_reply,
-                "up_close_danmu": submission.close_danmu
-            })
+                "up_close_danmu": submission.close_danmu,        
+            }
+        ),params={'csrf': self.cookies.get('bili_jct')})
 
     def ListSubmissions(self,pubing=True,pubed=True,not_pubed=True,limit=1000) -> List[Submission]:
         args = pubing,pubed,not_pubed
@@ -508,20 +533,7 @@ class BiliSession(Session):
         '''
         @JSONResponse
         def upload_one(submission : Submission):
-            payload = {
-                "copyright": submission.copyright,
-                "videos": submission.videos.archives,
-                "source": submission.source,
-                "tid": int(submission.thread),
-                "cover": submission.cover_url,
-                "title": submission.title,
-                "tag": ','.join(set(submission.tags)),
-                "desc_format_id": 31,
-                "desc": submission.description,
-                "up_close_reply": submission.close_reply,
-                "up_close_danmu": submission.close_danmu
-            }        
-            return self.post("https://member.bilibili.com/x/vu/web/add", data=json.dumps(payload), params={'csrf': self.cookies.get('bili_jct')})
+            return self.post("https://member.bilibili.com/x/vu/web/add", data=json.dumps(submission.archive), params={'csrf': self.cookies.get('bili_jct')})
         if not seperate_parts:
             self.logger.debug('Posting multi-part submission `%s`' % submission.title)            
             result = upload_one(submission)            

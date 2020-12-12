@@ -109,17 +109,12 @@ def setup_session(cookies:str):
     '''Setup session with cookies in query strings & setup temp root'''
     return prepare_temp() and sess.load_cookies(cookies)
 
-if __name__ == "__main__":
-    setup_logging()
-    global_args,local_args = prase_args(sys.argv)
+global_args,local_args = None,None
+
+def __tasks__():
     logging.info('Total tasks: %s' % len(local_args))
     success,failure = [],[]
-    '''Parsing args'''
-    save_cookies(global_args['cookies'])
-    '''Saving / Loading cookies'''    
-    if not setup_session(load_cookies()):
-        logging.fatal('Unable to set working directory,quitting')
-        sys.exit(2)
+
     for provider,args in local_args:
         result,dirty = perform_task(provider,args,report_progress if global_args['show_progress'] else lambda current,max:None )
         if not dirty:success.append((args,result))
@@ -127,3 +122,16 @@ if __name__ == "__main__":
     if not failure:sys.exit(0)
     logging.warning('Dirty flag set,upload might be unfinished')
     sys.exit(1)
+
+if __name__ == "__main__":
+    setup_logging()
+    global_args,local_args = prase_args(sys.argv)
+    '''Parsing args'''
+    save_cookies(global_args['cookies'])
+    '''Saving / Loading cookies'''    
+    if not setup_session(load_cookies()):
+        logging.fatal('Unable to set working directory,quitting')
+        sys.exit(2)    
+    else:
+        __tasks__()
+    sys.exit(0)
