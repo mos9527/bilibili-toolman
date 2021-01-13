@@ -8,7 +8,7 @@ import logging,sys,time,urllib.parse
 
 sess = BiliSession()
 logger = sess.logger
-sess.verify = False
+# sess.verify = False
 def download_sources(provider,arg) -> DownloadResult:    
     resource = arg['resource']    
     opts = arg['opts']
