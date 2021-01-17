@@ -44,17 +44,15 @@ def upload_sources(sources : DownloadResult,arg,report=report_progress):
         report : A function takes (current,max) to show progress of the upload
     '''    
     submission = Submission()    
-    self_info = sess.Self
-    if not 'uname' in self_info['data']:return logger.error(self_info['message'])        
-    logger.warning('Uploading as %s' % self_info['data']['uname'])        
     if not sources:return None,True
-    logging.info('Processing total of %s sources' % len(sources.results))
+    logging.info('Processing total of %s sources' % len(sources.results))    
+    def sanitize(title,desc,**kw):
+        blocks = {'title':title,'desc':desc,**kw}
+        return sanitize_string(truncate_string(arg['title_fmt'] % blocks,80)),sanitize_string(truncate_string(arg['desc_fmt'] % blocks,2000))                
     for source in sources.results:       
         '''If one or multipule sources'''        
-        blocks = {'title':source.title,'desc':source.description}
-        source.title = sanitize_string(truncate_string(arg['title_fmt'] % blocks,80))
-        source.description = sanitize_string(truncate_string(arg['desc_fmt'] % blocks,2000))                
-        logger.info('Uploading: %s' % source.title)
+        title,description = sanitize(source.title,source.description)
+        logger.info('Uploading: %s' % title)
         '''Summary trimming'''      
         basename, size, endpoint, config, state , pic = [None] * 6
         while True:
@@ -79,16 +77,17 @@ def upload_sources(sources : DownloadResult,arg,report=report_progress):
             video.thread = arg['thread_id']
             video.tags = arg['tags'].split(',')
             video.description = source.description
-            video.title = source.title            
+            video.title = title            
         '''Use the last given thread,tags,cover & description per multiple uploads'''                           
         submission.copyright = video.copyright or submission.copyright
         submission.thread = video.thread or submission.thread        
         submission.tags.extend(video.tags)
         submission.videos.append(video) # to the main submission
     '''Filling submission info'''    
+    title,description = sanitize(sources.title,sources.description)
     submission.source = sources.soruce
-    submission.title = sources.title
-    submission.description = sources.description
+    submission.title = title
+    submission.description = description
     '''Upload cover images for all our submissions as well'''
     pic = sess.UploadCover(sources.cover_path)['data']['url'] if sources.cover_path else ''
     submission.cover_url = pic
@@ -134,4 +133,9 @@ if __name__ == "__main__":
         logging.fatal('Unable to set working directory,quitting')
         sys.exit(2)    
     else:
+        self_info = sess.Self
+        if not 'uname' in self_info['data']:
+            logger.error('Invalid cookies: %s' % self_info['message'])        
+            sys.exit(2)            
+        logger.warning('Bilibili-toolman - operating as %s'  % self_info['data']['uname'])        
         __tasks__()
