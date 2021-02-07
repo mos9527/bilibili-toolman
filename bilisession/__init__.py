@@ -295,7 +295,7 @@ class BiliSession(Session):
         if not cookies: return
         for item in cookies.replace(' ', '').split(';'):
             if '=' in item:
-                self.cookies.set(*item.split('='))
+                self.cookies.set(*item.split('=')[:2])
             else:
                 self.cookies.set(item,'')
         return True
