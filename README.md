@@ -7,7 +7,7 @@
 
 # 使用
 
-	python bilibili-toolman.py --cookies "SESSDATA=cb0..; bili_jct=6750..." --youtube "https://www.youtube.com/watch?v=_3Mo7U0XSFo" --thread_id 17 --tags "majima,goro,majima goro" --opts "format=best"    
+	python bilibili-toolman.py --cookies "SESSDATA=cb0..; bili_jct=6750..." --youtube "https://www.youtube.com/watch?v=_3Mo7U0XSFo" --thread_id 17 --tags "majima,goro,majima goro" 
 
 ## 参数说明
 
