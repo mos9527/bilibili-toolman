@@ -21,7 +21,7 @@ local_args = {
 arg_epilog = '''
 本工具支持将给定视频源转载至哔哩哔哩
 
-参数可由 `Provider` 引导参数串连 `Per-file option` 及其他 `Provider` ，类似 FFmpeg 式 `-i` 串连
+参数可由 解析器 (如 --youtube) 引导参数串连 视频源选项 (如 "https://youtube.com..." --thread_id 1..）. 此格式可被重复 (如 --youtube ... --youtube ...)
 
 e.g.
     python bilibili-toolman.py --cookies "cookies=SESSDATA=cb0..; bili_jct=6750..." --youtube "https://www.youtube.com/watch?v=_3Mo7U0XSFo" --thread_id 17 --tags "majima,goro,majima goro" --opts "format=best" --youtube "https://www.youtube.com/playlist?list=PLcU_bi13CiQtVD5iB93I0IRaNvr5tGHzc" --tags "JOJO,HFTF,未来遗产,JOJO的奇妙冒险,Zarythe,TAS" --thread_id 19
@@ -81,12 +81,12 @@ def _create_argparser():
     # global args
     for arg, arg_ in local_args.items():        
         arg_help,arg_default = arg_
-        arg_help='  (Per-file option) %s' % arg_help
+        arg_help='  (视频源选项) %s' % arg_help
         p.add_argument('--%s' % arg, type=type(arg_default), help=arg_help,default=arg_default)
     # local args (per source)
     for provider_name, provider in provider_args.items():
         p.add_argument('--%s' % provider_name, metavar='%s-URL' %
-                       provider_name.upper(), type=str, help='(Provider) %s\n   Options: %s'%(provider.__desc__,provider.__cfg_help__))
+                       provider_name.upper(), type=str, help='(解析器选项) %s\n   Options: %s'%(provider.__desc__,provider.__cfg_help__))
     return p
 
 def sanitize_string(string):

@@ -1,5 +1,5 @@
 # bilibili-toolman 哔哩哔哩机器人
-搬运各大网站的视频资源到 Bilibili
+搬运各*(?)*大网站的视频资源到 Bilibili
 
 # 依赖
     
@@ -7,11 +7,44 @@
 
 # 使用
 
-	python bilibili-toolman.py --cookies "SESSDATA=cb0..; bili_jct=6750..." --youtube "https://www.youtube.com/watch?v=_3Mo7U0XSFo" --thread_id 17 --tags "majima,goro,majima goro" 
+	python bilibili-toolman.py --cookies "SESSDATA=cb0..; bili_jct=6750..." --youtube "https://www.youtube.com/watch?v=_3Mo7U0XSFo" --opts "no_check_certificate=True" --thread_id 17 --tags "..." 
 
 ## 参数说明
 
 详见 `--help` 输出
+
+    usage: -h [-h] [--cookies COOKIES] [--show_progress SHOW_PROGRESS] [--opts OPTS] [--thread_id THREAD_ID] [--tags TAGS] [--desc_fmt DESC_FMT] [--title_fmt TITLE_FMT] [--seperate_parts SEPERATE_PARTS] [--no_upload NO_UPLOAD] [--localfile LOCALFILE-URL]
+            [--youtube YOUTUBE-URL]
+
+    bilibili-toolman 哔哩哔哩工具人
+
+    optional arguments:
+    -h, --help            show this help message and exit
+    --cookies COOKIES     Bilibili 所用 Cookies ( 需要 SESSDATA 及 bili_jct ) e.g.cookies=SESSDATA=cb0..; bili_jct=6750...
+    --show_progress SHOW_PROGRESS
+                            显示上传进度
+    --opts OPTS             (视频源选项) 解析设置
+    --thread_id THREAD_ID
+                            (视频源选项) 分区 ID
+    --tags TAGS             (视频源选项) 标签
+    --desc_fmt DESC_FMT     (视频源选项) 描述格式 e.g. ％(desc)s
+    --title_fmt TITLE_FMT
+                            (视频源选项) 标题格式 e.g. ％(title)s
+    --seperate_parts SEPERATE_PARTS
+                            (视频源选项) 多个视频独立投稿（不分P）
+    --no_upload NO_UPLOAD
+                            (视频源选项) 只下载资源
+    --localfile LOCALFILE-URL
+                            (解析器选项) 本地文件
+                            Options: cover - 封面图片路径
+    --youtube YOUTUBE-URL
+                            (解析器选项) Youtube 视频
+                            Options: format - 同 youtube-dl -f
+                            ( 另可跟随其他 yotube-dl 参数 e.g. format=best;quiet=True )
+
+    本工具支持将给定视频源转载至哔哩哔哩
+
+    参数可由 解析器 (如 --youtube) 引导参数串连 视频源选项 (如 "https://youtube.com..." --thread_id 1..）. 此格式可被重复 (如 --youtube ... --youtube ...)
 
 # 注意
 
