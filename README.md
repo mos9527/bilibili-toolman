@@ -54,6 +54,7 @@
 ![le screen shot of le console](https://raw.githubusercontent.com/greats3an/bilibili-toolman/master/readme.png)
 
 # 感谢
+[FortuneDayssss/BilibiliUploader](https://github.com/FortuneDayssss/BilibiliUploader)
 [分区数据，API 参考 · Passkou · bilibili_api](https://github.com/Passkou/bilibili_api "Passkou · bilibili_api")
 
 [Youtube 解析 · ytdl-org · youtube-dl](https://github.com/ytdl-org/youtube-dl "ytdl-org · youtube-dl")

@@ -103,7 +103,7 @@ def upload_sources(sources : DownloadResult,arg,report=report_progress):
 
 def setup_session(cookies:str):
     '''Setup session with cookies in query strings & setup temp root'''
-    return prepare_temp() and sess.load_cookies(cookies)
+    return prepare_temp() and sess.LoginViaCookiesQueryString(cookies)
 
 global_args,local_args = None,None
 
