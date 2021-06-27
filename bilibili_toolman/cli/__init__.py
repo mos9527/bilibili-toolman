@@ -16,12 +16,12 @@ global_args = {
     'save' : {'help':'在输入上述认证方式之一的前提下，保存该信息于文件，并退出'}
 }
 local_args = {
-    'opts':{'help':'解析设置，详见 --opts 格式'},
+    'opts':{'help':'解析可选参数，详见 --opts 格式'},
     'thread_id': {'help':'分区 ID','default':17},
     'tags': {'help':'标签','default':'转载'},
-    'desc_fmt':{'help':'描述格式 e.g. 原描述：{desc}','default':'{desc}'},
-    'title_fmt':{'help':'标题格式 e.g. [Youtube] {title}','default':'{title}'},
-    'seperate_parts':{'help':'多个视频（e.g. Youtube 播放列表）独立投稿（不分P）（Web上传默认不分 P）','default':0},
+    'desc_fmt':{'help':'描述格式 e.g. "原描述：{desc}"','default':'{desc}'},
+    'title_fmt':{'help':'标题格式 e.g. "[Youtube] {title}"','default':'{title}'},
+    'seperate_parts':{'help':'多个视频（e.g. --youtube [播放列表],--localfile [文件夹]）独立投稿（不分P）（Web上传默认不分 P）','default':0},
     'no_upload':{'help':'只下载资源','default':0},
 }
 arg_epilog = '''
@@ -64,7 +64,7 @@ def _create_argparser():
     for arg_key, arg in local_args.items():                
         g.add_argument('--%s' % arg_key, **arg)
     # local args (per source)
-    g = p.add_argument_group('--opts 格式 ： [参数1]=[值1];[参数2]=[值2] (query-string)')
+    g = p.add_argument_group('解析可选参数 "opts" （格式 ： [参数1]=[值1];[参数2]=[值2] (query-string)）')
     for provider_name, provider in provider_args.items():
         g.add_argument(
             '--%s' % provider_name, 

@@ -253,40 +253,33 @@ class BiliSession(Session):
             if not upload_id:
                 raise Exception("Unable to fetch upload id in %s tries" % self.RETRIES_UPLOAD_ID)
             '''Upload endpoint & keys'''
-            chunks = []
             chunksize = config['chunk_size']
             chunkcount = math.ceil(size/chunksize)
-            start, end, chunk_n = 0, chunksize, 0
             file_manager.open(path) # opens file for reading
             logger.debug('Upload chunks: %s' % chunkcount)
             logger.debug('Upload chunk size: %s' % chunksize)
-            def new_chunk() -> WebUploadChunk:
-                chunk = WebUploadChunk(path,start,end)
-                chunk.url_endpoint = endpoint
-                chunk.session = self
-                chunk.params = {
-                    'partNumber': chunk_n + 1,
-                    'uploadId': upload_id,
-                    'chunk': chunk_n,
-                    'chunks': chunkcount,
-                    'start': start,
-                    'end': end,
-                    'total': size
-                }
-                chunk.headers = {
-                    'X-Upos-Auth': config['auth']
-                }
-                return chunk
-            while (end < size):
-                chunks.append(new_chunk())
-                start = end
-                end += chunksize
-                chunk_n += 1
-            if (end != size):
-                end = size
-                chunks.append(new_chunk())
+            def iter_chunks():
+                for chunk_n in range(0,chunkcount):   
+                    start = chunksize * chunk_n
+                    end = min(start + chunksize,size)
+                    chunk = WebUploadChunk(path,start,end)
+                    chunk.url_endpoint = endpoint
+                    chunk.session = self
+                    chunk.params = {
+                        'partNumber': chunk_n + 1,
+                        'uploadId': upload_id,
+                        'chunk': chunk_n,
+                        'chunks': chunkcount,
+                        'start': start,
+                        'end': end,
+                        'total': size
+                    }
+                    chunk.headers = {
+                        'X-Upos-Auth': config['auth']
+                    }
+                    yield chunk            
             config['upload_id'] = upload_id
-            return endpoint, config, chunks
+            return endpoint, config, iter_chunks()
         endpoint, config, chunks = generate_upload_chunks(basename, size)
         '''Generates upload config'''
         logger.debug('Waiting for uploads to finish')
@@ -335,7 +328,7 @@ class BiliSession(Session):
             dict
         '''
         if not seperate_parts:
-            logger.debug('Posting multi-part submission `%s`' % submission.title)            
+            logger.debug('Posting multi-part submission %s' % submission.title)            
             result = self._submit_submission(submission).json()
             return {'code:':result['code'],'results':[result]}
         else:

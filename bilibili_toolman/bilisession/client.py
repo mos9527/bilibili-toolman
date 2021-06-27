@@ -208,34 +208,26 @@ class BiliSession(BiliSession):
         # preprae the chunks then uploads them
         chunksize = self.UPLOAD_CHUNK_SIZE
         chunkcount = math.ceil(size/chunksize)
-        start, end, chunk_n = 0, chunksize, 0
         file_manager.open(path)
-        chunks = []
         logger.debug('Upload chunks: %s' % chunkcount)
         logger.debug('Upload chunk size: %s' % chunksize)
-        def new_chunk() -> ClientUploadChunk:
-            chunk = ClientUploadChunk(path,start,end)
-            chunk.session = self
-            chunk.url_endpoint = preupload_token['url']
-            chunk.files = {
-                'version': (None, self.BUILD_STR),
-                'filesize': (None, chunksize),
-                'chunk': (None, chunk_n),
-                'chunks': (None, chunkcount),                               
-            }
-            chunk.cookies = {
-                'PHPSESSID':preupload_token['filename']
-            }
-            return chunk
-        while (end < size):
-            chunks.append(new_chunk())
-            start = end
-            end += chunksize
-            chunk_n += 1
-        if (end != size):
-            end = size
-            chunks.append(new_chunk())
-        self._upload_chunks_to_endpoint_blocking(chunks)        
+        def iter_chunks():
+            for chunk_n in range(0,chunkcount):
+                start = chunksize * chunk_n
+                chunk = ClientUploadChunk(path,start,min(start + chunksize,size))
+                chunk.session = self
+                chunk.url_endpoint = preupload_token['url']
+                chunk.files = {
+                    'version': (None, self.BUILD_STR),
+                    'filesize': (None, chunksize),
+                    'chunk': (None, chunk_n),
+                    'chunks': (None, chunkcount),                               
+                }
+                chunk.cookies = {
+                    'PHPSESSID':preupload_token['filename']
+                }
+                yield chunk        
+        self._upload_chunks_to_endpoint_blocking(iter_chunks())
         logger.debug('Successfully finished uploading chunks')
         # recalulating md5
         md5_ = Crypto.iterable_md5(FileIterator(path,0,size))        

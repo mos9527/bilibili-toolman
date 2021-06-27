@@ -3,7 +3,7 @@ from sys import path
 from . import DownloadResult
 __desc__ = '本地文件'
 __cfg_help__ = '''
-    cover (str) - 封面图片路径    
+    cover (str) - 封面图片路径
 e.g. --localfile "le videos/" --opts cover="le cover.png" --tags ...'''
 options={
     'cover':''
@@ -22,11 +22,13 @@ def download_video(res) -> DownloadResult:
             result.video_path = res
             result.cover_path = options['cover']            
             result.original = True    
-            result.title = os.path.basename(res)            
+            result.title = os.path.basename(res)
             result.description = '[automated upload of file %s]' % res        
         results.results.append(result)
     if os.path.isfile(res):append(res)
     else:
         for f in os.listdir(res):
-            append(os.path.join(res,f))    
+            append(os.path.join(res,f))
+    results.title = os.path.basename(res)   
+    results.description = '[automated upload of file %s]' % res
     return results

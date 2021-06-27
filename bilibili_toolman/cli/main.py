@@ -66,6 +66,7 @@ def upload_sources(sources : DownloadResult,arg):
         logger.info('Upload complete')
         with Submission() as video:
             '''Creatating a video per submission'''
+            # A lot of these doesn't really matter as per-part videos only identifies themselves through UI via their titles
             video.cover_url = cover_url
             video.video_endpoint = endpoint
             video.biz_id = bid
@@ -74,8 +75,8 @@ def upload_sources(sources : DownloadResult,arg):
             video.source = sources.soruce         
             video.thread = arg.thread_id
             video.tags = arg.tags.split(',')
-            video.description = source.description
-            video.title = title            
+            video.description = source.description # This does NOT change per video
+            video.title = title # This shows up as title per-part, invisible if video is single-part only
         '''Use the last given thread,tags,cover & description per multiple uploads'''                           
         submission.copyright = video.copyright or submission.copyright
         submission.thread = video.thread or submission.thread        
@@ -84,8 +85,8 @@ def upload_sources(sources : DownloadResult,arg):
     '''Filling submission info'''    
     title,description = sanitize(sources.title,sources.description)
     submission.source = sources.soruce
-    submission.title = title
-    submission.description = description
+    submission.title = title # This shows up as the main title of the submission
+    submission.description = description # This is the only description that gets shown
     '''Upload cover images for all our submissions as well'''
     cover_url = sess.UploadCover(sources.cover_path)['data']['url'] if sources.cover_path else ''
     submission.cover_url = cover_url
