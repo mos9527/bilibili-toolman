@@ -1,4 +1,4 @@
-# bilibili-toolman 哔哩哔哩机器人
+# bilibili-toolman 哔哩哔哩搬运工具
 搬运各(?)大网站的视频资源到 Bilibili
 
 # 亮点
