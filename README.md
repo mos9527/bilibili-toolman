@@ -9,13 +9,13 @@
 - 多线程上传
 - ...
 
-# 依赖
-    
-    pip install -U requests pycryptodome coloredlogs youtube-dl
+# 安装
+
+    pip install bilibili_toolman
 
 ## 参数说明
 
-详见 `--help` 输出
+    python -m bilibili_toolman -h
 
     usage: -h [-h] [--username USERNAME] [--pwd PWD] [--cookies COOKIES] [--load LOAD] [--save SAVE] [--opts OPTS] [--thread_id THREAD_ID]
             [--tags TAGS] [--desc_fmt DESC_FMT] [--title_fmt TITLE_FMT] [--seperate_parts SEPERATE_PARTS] [--no_upload NO_UPLOAD]
