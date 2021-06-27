@@ -1,64 +1,47 @@
 import os
 import argparse
 import logging
-import providers
 from pathlib import Path
+from .. import providers
 
+class AttribuitedDict(dict):
+    def __getattr__(self,name):
+        return self[name]
 pbar = None
 global_args = {    
-    'cookies': ('Bilibili 所用 Cookies ( 需要 SESSDATA 及 bili_jct ) e.g.cookies=SESSDATA=cb0..; bili_jct=6750... ',''),    
-    'show_progress':('显示上传进度',1),
+    'username' : {'help':'账号密码登陆 - Bilibili 账号名'},
+    'pwd' : {'help' : '账号密码登陆 - Bilibili 账号明文密码'},
+    'cookies': {'help':'Cookies 登陆 - Bilibili 所用 Cookies ( 需要 SESSDATA 及 bili_jct ) e.g.cookies=SESSDATA=cb0..; bili_jct=6750... '},
+    'load' : {'help':'从保存的文件中拉取认证信息，作为认证方式'},
+    'save' : {'help':'在输入上述认证方式之一的前提下，保存该信息于文件，并退出'}
 }
 local_args = {
-    'opts':('解析设置',''),
-    'thread_id': ('分区 ID',17),
-    'tags': ('标签','转载'),
-    'desc_fmt':('描述格式 e.g. ％(desc)s','%(desc)s'),
-    'title_fmt':('标题格式 e.g. ％(title)s','%(title)s'),
-    'seperate_parts':('多个视频独立投稿（不分P）',1),    
-    'no_upload':('只下载资源',0),
+    'opts':{'help':'解析设置，详见 --opts 格式'},
+    'thread_id': {'help':'分区 ID','default':17},
+    'tags': {'help':'标签','default':'转载'},
+    'desc_fmt':{'help':'描述格式 e.g. 原描述：{desc}','default':'{desc}'},
+    'title_fmt':{'help':'标题格式 e.g. [Youtube] {title}','default':'{title}'},
+    'seperate_parts':{'help':'多个视频（e.g. Youtube 播放列表）独立投稿（不分P）（Web上传默认不分 P）','default':0},
+    'no_upload':{'help':'只下载资源','default':0},
 }
 arg_epilog = '''
 本工具支持将给定视频源转载至哔哩哔哩
 
-参数可由 解析器 (如 --youtube) 引导参数串连 视频源选项 (如 "https://youtube.com..." --thread_id 1..）. 此格式可被重复 (如 --youtube ... --youtube ...)
-
-e.g.
-    python bilibili-toolman.py --cookies "cookies=SESSDATA=cb0..; bili_jct=6750..." --youtube "https://www.youtube.com/watch?v=_3Mo7U0XSFo" --thread_id 17 --tags "majima,goro,majima goro" --opts "format=best" --youtube "https://www.youtube.com/playlist?list=PLcU_bi13CiQtVD5iB93I0IRaNvr5tGHzc" --tags "JOJO,HFTF,未来遗产,JOJO的奇妙冒险,Zarythe,TAS" --thread_id 19
+详见项目 README 以获取更多例程 ： github.com/greats3an/bilibili-toolman
 '''
 def setup_logging():
     import coloredlogs
     coloredlogs.DEFAULT_LOG_FORMAT = '[ %(asctime)s %(name)8s %(levelname)6s ] %(message)s'
     coloredlogs.install(0);logging.getLogger('urllib3').setLevel(100);logging.getLogger('PIL.Image').setLevel(100)
 
-def prepare_temp():    
+def prepare_temp(temp_path : str):    
     if not os.path.isdir(temp_path):os.mkdir(temp_path)
     os.chdir(temp_path)    
     return True
-tqdm_bar = None
-def report_progress(current, max_val):
-    from tqdm import tqdm
-    global tqdm_bar
-    if tqdm_bar is None or max_val != tqdm_bar.total or current < tqdm_bar.n:
-        tqdm_bar = tqdm(desc='Uploading', total=max_val,unit='B', unit_scale=True)        
-    tqdm_bar.update(current - tqdm_bar.n)    
-    tqdm_bar.refresh()
 
-
-temp_path = 'temp'
-cookie_path = os.path.join(str(Path.home()), '.bilibili-toolman')
-
-
-def save_cookies(cookie):
-    if not cookie:
-        return
-    with open(cookie_path, 'w+') as target:
-        target.write(cookie)
-
-
-def load_cookies():
-    return open(cookie_path).read()
-
+def report_progress(current, max_val): 
+    from . import precentage_progress
+    precentage_progress.report(current,max_val)
 
 def _enumerate_providers():
     provider_dict = dict()
@@ -69,24 +52,25 @@ def _enumerate_providers():
         provider_dict[provider_name] = getattr(providers, provider)
     return provider_dict
 
-
 provider_args = _enumerate_providers()
 
-
 def _create_argparser():
-    p = argparse.ArgumentParser(description='bilibili-toolman 哔哩哔哩工具人',formatter_class=argparse.RawTextHelpFormatter,epilog=arg_epilog)
-    for arg, arg_ in global_args.items():
-        arg_help,arg_default = arg_
-        p.add_argument('--%s' % arg, type=type(arg_default), help=arg_help,default=arg_default)
+    p = argparse.ArgumentParser(description='使用帮助',formatter_class=argparse.RawTextHelpFormatter,epilog=arg_epilog)
+    g = p.add_argument_group('身份设置 （随方式优先级排序）')
+    for arg_key, arg in global_args.items():
+        g.add_argument('--%s' % arg_key, **arg)
     # global args
-    for arg, arg_ in local_args.items():        
-        arg_help,arg_default = arg_
-        arg_help='  (视频源选项) %s' % arg_help
-        p.add_argument('--%s' % arg, type=type(arg_default), help=arg_help,default=arg_default)
+    g = p.add_argument_group('上传设置')
+    for arg_key, arg in local_args.items():                
+        g.add_argument('--%s' % arg_key, **arg)
     # local args (per source)
+    g = p.add_argument_group('--opts 格式 ： [参数1]=[值1];[参数2]=[值2] (query-string)')
     for provider_name, provider in provider_args.items():
-        p.add_argument('--%s' % provider_name, metavar='%s-URL' %
-                       provider_name.upper(), type=str, help='(解析器选项) %s\n   Options: %s'%(provider.__desc__,provider.__cfg_help__))
+        g.add_argument(
+            '--%s' % provider_name, 
+            metavar='%s-URL' % provider_name.upper(),
+            type=str, help='%s\n   参数:%s'%(provider.__desc__,provider.__cfg_help__)
+        )
     return p
 
 def sanitize_string(string):
@@ -134,4 +118,4 @@ def prase_args(args: list):
         current_line.append(arg)
     if(current_line):
         add()
-    return global_args_dict, local_args_group
+    return AttribuitedDict(global_args_dict), AttribuitedDict(local_args_group)

@@ -1,63 +1,78 @@
 # bilibili-toolman 哔哩哔哩机器人
 搬运各*(?)*大网站的视频资源到 Bilibili
 
+# 亮点
+- PC 端 （账号密码），Web 端 (Cookies) 多 API 实现
+- 多 P 上传 (PC 端 API)
+- 自定义性强
+- 命令行操作
+- 多线程上传
+- ...
+
 # 依赖
     
-    pip install -U requests youtube-dl
-
-# 使用
-
-	python bilibili-toolman.py --cookies "SESSDATA=cb0..; bili_jct=6750..." --youtube "https://www.youtube.com/watch?v=_3Mo7U0XSFo" --opts "no_check_certificate=True" --thread_id 17 --tags "..." 
+    pip install -U requests pycryptodome coloredlogs youtube-dl
 
 ## 参数说明
 
 详见 `--help` 输出
 
-    usage: -h [-h] [--cookies COOKIES] [--show_progress SHOW_PROGRESS] [--opts OPTS] [--thread_id THREAD_ID] [--tags TAGS] [--desc_fmt DESC_FMT] [--title_fmt TITLE_FMT] [--seperate_parts SEPERATE_PARTS] [--no_upload NO_UPLOAD] [--localfile LOCALFILE-URL]
-            [--youtube YOUTUBE-URL]
+    usage: -h [-h] [--username USERNAME] [--pwd PWD] [--cookies COOKIES] [--load LOAD] [--save SAVE] [--opts OPTS] [--thread_id THREAD_ID]
+            [--tags TAGS] [--desc_fmt DESC_FMT] [--title_fmt TITLE_FMT] [--seperate_parts SEPERATE_PARTS] [--no_upload NO_UPLOAD]
+            [--localfile LOCALFILE-URL] [--youtube YOUTUBE-URL]
 
-    bilibili-toolman 哔哩哔哩工具人
+    使用帮助
 
     optional arguments:
     -h, --help            show this help message and exit
-    --cookies COOKIES     Bilibili 所用 Cookies ( 需要 SESSDATA 及 bili_jct ) e.g.cookies=SESSDATA=cb0..; bili_jct=6750...
-    --show_progress SHOW_PROGRESS
-                            显示上传进度
-    --opts OPTS             (视频源选项) 解析设置
+
+    身份设置 （随方式优先级排序）:
+    --username USERNAME   账号密码登陆 - Bilibili 账号名
+    --pwd PWD             账号密码登陆 - Bilibili 账号明文密码
+    --cookies COOKIES     Cookies 登陆 - Bilibili 所用 Cookies ( 需要 SESSDATA 及 bili_jct ) e.g.cookies=SESSDATA=cb0..; bili_jct=6750... 
+    --load LOAD           从保存的文件中拉取认证信息，作为认证方式
+    --save SAVE           在输入上述认证方式之一的前提下，保存该信息于文件，并退出
+
+    上传设置:
+    --opts OPTS           解析设置，详见 --opts 格式
     --thread_id THREAD_ID
-                            (视频源选项) 分区 ID
-    --tags TAGS             (视频源选项) 标签
-    --desc_fmt DESC_FMT     (视频源选项) 描述格式 e.g. ％(desc)s
+                            分区 ID
+    --tags TAGS           标签
+    --desc_fmt DESC_FMT   描述格式 e.g. 原描述：{desc}
     --title_fmt TITLE_FMT
-                            (视频源选项) 标题格式 e.g. ％(title)s
+                            标题格式 e.g. [Youtube] {title}
     --seperate_parts SEPERATE_PARTS
-                            (视频源选项) 多个视频独立投稿（不分P）
+                            多个视频（e.g. Youtube 播放列表）独立投稿（不分P）（Web上传默认不分 P）
     --no_upload NO_UPLOAD
-                            (视频源选项) 只下载资源
+                            只下载资源
+
+    --opts 格式 ： [参数1]=[值1];[参数2]=[值2] (query-string):
     --localfile LOCALFILE-URL
-                            (解析器选项) 本地文件
-                            Options: cover - 封面图片路径
+                            本地文件
+                            参数:
+                                cover (str) - 封面图片路径
+                            e.g. --localfile "le video.mp4" --opts cover="le cover.png" --tags ...
     --youtube YOUTUBE-URL
-                            (解析器选项) Youtube 视频
-                            Options: format - 同 youtube-dl -f
-                            ( 另可跟随其他 yotube-dl 参数 e.g. format=best;quiet=True )
+                            Youtube 视频
+                            参数:
+                                format (str) - 同 youtube-dl -f
+                                quite (True,False) - 是否屏蔽 youtube-dl 日志 (默认 False)
+                            ( 另可跟随其他 youtube-dl 参数 ）
+                            e.g. --youtube "..." --opts format=best;quiet=True --tags ...
 
     本工具支持将给定视频源转载至哔哩哔哩
 
-    参数可由 解析器 (如 --youtube) 引导参数串连 视频源选项 (如 "https://youtube.com..." --thread_id 1..）. 此格式可被重复 (如 --youtube ... --youtube ...)
-
-# 注意
-
-- Web端分P上传 API 自 2020/03 起被限制，目前除换用 PC 客户端 API (WIP) 外别无他法
+    详见项目 README 以获取更多例程 ： github.com/greats3an/bilibili-toolman
 
 # 截图
 ![le screen shot of le console](https://raw.githubusercontent.com/greats3an/bilibili-toolman/master/readme.png)
 
 # 感谢
-[FortuneDayssss/BilibiliUploader](https://github.com/FortuneDayssss/BilibiliUploader)
-[分区数据，API 参考 · Passkou · bilibili_api](https://github.com/Passkou/bilibili_api "Passkou · bilibili_api")
+[PC 上传助手逆向 · FortuneDayssss/BilibiliUploader](https://github.com/FortuneDayssss/BilibiliUploader)
 
-[Youtube 解析 · ytdl-org · youtube-dl](https://github.com/ytdl-org/youtube-dl "ytdl-org · youtube-dl")
+[分区数据，API 参考 · Passkou/bilibili_api](https://github.com/Passkou/bilibili_api "Passkou · bilibili_api")
+
+[Youtube 解析 · ytdl-org/youtube-dl](https://github.com/ytdl-org/youtube-dl "ytdl-org · youtube-dl")
 
 # 分区表
 

@@ -1,7 +1,7 @@
 '''Content provider modules'''
 class DownloadResult:
-    video_path : str
-    cover_path : str
+    video_path : str = ''
+    cover_path : str = ''
 
     title : str = ''
     description : str = ''    

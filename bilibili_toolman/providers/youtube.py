@@ -5,8 +5,11 @@ import re
 from . import DownloadResult
 import logging,youtube_dl,requests
 __desc__ = '''Youtube 视频'''
-__cfg_help__ = '''format - 同 youtube-dl -f
-( 另可跟随其他 yotube-dl 参数 e.g. format=best;quiet=True )'''
+__cfg_help__ = '''
+    format (str) - 同 youtube-dl -f
+    quite (True,False) - 是否屏蔽 youtube-dl 日志 (默认 False)
+( 另可跟随其他 youtube-dl 参数 ）
+e.g. --youtube "..." --opts format=best;quiet=True --tags ...'''
 logger = logging.getLogger('youtube')
 youtube_dl.utils.std_headers['User-Agent'] = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
 params = {

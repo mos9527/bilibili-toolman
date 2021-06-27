@@ -78,7 +78,7 @@ class Submission:
     @cover_url.setter
     def cover_url(self,value):
         # note : this will strip the HTTP prefix        
-        self._cover_url = '//' + value.split('//')[-1] 
+        if value:self._cover_url = '//' + value.split('//')[-1]         
     # region Per video attributes    
     _video_filename = ''
     @property
@@ -120,19 +120,21 @@ class Submission:
     @property
     def archive(self):
         '''returns a dict containing all our info'''
-        return {
+        kv_pair = {
             "copyright": self.copyright,
             "videos": self.videos.archive,
             "source": self.source,
-            "tid": int(self.thread),
-            "cover": self.cover_url,
+            "tid": int(self.thread),            
             "title": self.title,
             "tag": ','.join(set(self.tags)),
             "desc_format_id": 31,
             "desc": self.description,
             "up_close_reply": self.close_reply,
             "up_close_danmu": self.close_danmu
-        }              
+        }        
+        if self.cover_url:
+            kv_pair = {**kv_pair,"cover": self.cover_url}
+        return kv_pair
 
 def create_submission_by_arc(arc : dict):
     '''Generates a `Submission` object via a `arc` dict'''
