@@ -16,12 +16,17 @@ class WebUploadChunk(FileIterator):
     session : Session
     
     def upload_via_session(self,session = None):
-        (session or self.session).put(
-            self.url_endpoint,
-            params=self.params,
-            headers=self.headers,
-            data=self
-        )
+        for retries in range(1,BiliSession.RETRIES_UPLOAD_ID+1):
+            try:
+                (session or self.session).put(
+                    self.url_endpoint,
+                    params=self.params,
+                    headers=self.headers,
+                    data=self
+                )
+                return True
+            except Exception as e:
+                logger.warning('While downloading (n=%s): %s. Retrying...' % (retries,e))
 
 class BiliSession(Session):
     '''Bilibili Web Upload API Implementation'''
@@ -39,6 +44,9 @@ class BiliSession(Session):
     DELAY_REPORT_PROGRESS = .5
 
     WORKERS_UPLOAD = 3
+
+    MISC_MAX_TITLE_LENGTH = 80
+    MISC_MAX_DESCRIPTION_LENGTH = 2000
 
     def __init__(self, cookies: str = '') -> None:      
         super().__init__()
@@ -123,7 +131,7 @@ class BiliSession(Session):
         return self.post('https://member.bilibili.com/x/vu/web/edit',json=json,params={'csrf': self.cookies.get('bili_jct')})
 
     @JSONResponse
-    def EditArchvie(self,submission : Submission):
+    def EditSubmission(self,submission : Submission):
         '''Editing submission
 
         Args:
@@ -145,14 +153,26 @@ class BiliSession(Session):
                 "title": submission.title,
                 "tag": ','.join(set(submission.tags)),
                 "desc_format_id": 31,
-                "desc": submission.description,
-                "up_close_reply": submission.close_reply,
-                "up_close_danmu": submission.close_danmu,        
+                "desc": submission.description, 
         })
+
+    def ViewSubmission(self,bvid) -> Submission:
+        '''Helper function for `ViewArchive`
+
+        Args:
+            bvid (str) : bvid?
+
+        Returns:
+            Submission: said video in Submission class
+        '''
+        arc = self.ViewArchive(bvid)['data']
+        return create_submission_by_arc(arc)
 
     def ListSubmissions(self,pubing=True,pubed=True,not_pubed=True,limit=1000) -> List[Submission]:
         '''Helper function for `ListArchives`,allows one to fetch videos 
         by numeric limit instead of page-numbers & parsing them to `Submission` objects
+
+        ! WARNING: Multi-part videos may not show all its parts. In which case use ViewSubmission instead for said videos.
 
         Args: refer to `ListArchives` ; `limit` specifies the count of videos to be fetched
 

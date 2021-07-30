@@ -1,5 +1,5 @@
 '''bilibili - PC API implementation'''
-from typing import Iterable, Tuple, Union
+from typing import Iterable, Optional, Text, Tuple, Union
 from requests.sessions import Session
 from urllib.parse import quote,urlencode
 from Crypto.PublicKey import RSA
@@ -60,7 +60,7 @@ class SingableDict(dict):
     def signed(self):
         '''returns our sorted self with calculated `sign` as a new key-value pair at the end'''
         _sorted = self.sorted
-        return {**_sorted, 'sign': Crypto.sign(_sorted)} # tfw this had wasted too much of my time
+        return {**_sorted, 'sign': Crypto.sign(_sorted)}
 
 class ClientUploadChunk(FileIterator):
     url_endpoint : str
@@ -72,17 +72,22 @@ class ClientUploadChunk(FileIterator):
 
     def upload_via_session(self,session = None):
         chunk_bytes = self.to_bytes()
-        (session or self.session).post(
-            self.url_endpoint,
-            params=self.params,
-            headers=self.headers,
-            files={
-                **self.files,
-                'md5':(None,Crypto.md5(chunk_bytes)),
-                'file': (self.path, chunk_bytes, 'application/octet-stream')
-            },
-            cookies=self.cookies,            
-        )
+        for retries in range(1,BiliSession.RETRIES_UPLOAD_ID+1):
+            try:
+                (session or self.session).post(
+                    self.url_endpoint,
+                    params=self.params,
+                    headers=self.headers,
+                    files={
+                        **self.files,
+                        'md5':(None,Crypto.md5(chunk_bytes)),
+                        'file': (self.path, chunk_bytes, 'application/octet-stream')
+                    },
+                    cookies=self.cookies,            
+                )
+                return True
+            except Exception as e:
+                logger.warning('While downloading (n=%s): %s. Retrying...' % (retries,e))
 
 class BiliSession(BiliSession):
     '''Bilibili Client (ugc_assistant) Upload API Implementation'''
@@ -92,11 +97,15 @@ class BiliSession(BiliSession):
     BUILD_NO = int(BUILD_VER[0] * 1e8 + BUILD_VER[1] * 1e6 + BUILD_VER[2] * 1e2 + BUILD_VER[3])
     BUILD_STR = '.'.join(map(lambda v: str(v), BUILD_VER))    
 
+    MISC_MAX_TITLE_LENGTH = 80
+    MISC_MAX_DESCRIPTION_LENGTH = 1500 # somehow larger than expected
+
     def __init__(self) -> None:
         Session.__init__(self) # no need to init the web variant
         self.headers = {
             'User-Agent': '',
-            'Accept-Encoding': 'gzip,deflate'
+            'Accept-Encoding': 'gzip,deflate',
+            'Host':'member.bilibili.com'
         }
         self.login_tokens = dict()
     # region Properties
@@ -140,21 +149,36 @@ class BiliSession(BiliSession):
             json={'build': self.BUILD_VER[-1],**submission.archive}
         )        
 
+
+    def _list_archives(self,params):
+        return self.get(
+            'https://member.bilibili.com/x/client/archives',
+            params=SingableDict({
+                "access_key": self.access_token,
+                **params
+            }).signed
+        )
+
     def _view_archive(self, bvid):
-        return self.post(
+        return self.get(
             'https://member.bilibili.com/x/client/archive/view',
             params=SingableDict({
                 "access_key": self.access_token,
-                "aid": bvid,
+                "bvid": bvid,
                 'build': self.BUILD_VER[-1]
             }).signed
         )
 
-    def _edit_archive(self, json: dict):
+    def _edit_archive(self, json: dict):                
         return self.post(
-            "http://member.bilibili.com/x/vu/client/edit",
+            "https://member.bilibili.com/x/vu/client/edit",
             params=self.access_key_param,
-            json=json
+            json=SingableDict({
+                'build': self.BUILD_VER[-1],
+                'no_reprint':0,
+                'open_elec':0,
+                **json,                
+            }).sorted 
         )
     # endregion
 

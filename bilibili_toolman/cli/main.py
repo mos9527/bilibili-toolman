@@ -20,8 +20,7 @@ def download_sources(provider,arg) -> DownloadResult:
     '''Passing options'''
     logger.info('Fectching source video')
     logger.info('  - Type: %s - %s' % (provider.__name__,provider.__desc__))
-    logger.info('  - URI : %s' % resource)
-    for k,v in largs.items():logger.info('  - %s : %s' % (list(v.values())[0],arg[k]))
+    logger.info('  - URI : %s' % resource)    
     '''Downloading source'''
     try:
         return provider.download_video(resource)
@@ -48,7 +47,7 @@ def upload_sources(sources : DownloadResult,arg):
     logging.info('Processing total of %s sources' % len(sources.results))    
     def sanitize(title,desc,**kw):
         blocks = {'title':title,'desc':desc,**kw}
-        return sanitize_string(truncate_string(arg.title_fmt.format(**blocks),80)),sanitize_string(truncate_string(arg.desc_fmt.format(**blocks),2000))
+        return truncate_string(sanitize_string(arg.title_fmt.format(**blocks)),sess.MISC_MAX_TITLE_LENGTH),truncate_string(sanitize_string(arg.desc_fmt.format(**blocks)),sess.MISC_MAX_DESCRIPTION_LENGTH)
     for source in sources.results:       
         '''If one or multipule sources'''        
         title,description = sanitize(source.title,source.description)
@@ -75,15 +74,14 @@ def upload_sources(sources : DownloadResult,arg):
             video.source = sources.soruce         
             video.thread = arg.thread_id
             video.tags = arg.tags.split(',')
-            video.description = source.description # This does NOT change per video
+            # video.description = source.description # This does NOT change per video - Deprecated
             video.title = title # This shows up as title per-part, invisible if video is single-part only
         '''Use the last given thread,tags,cover & description per multiple uploads'''                           
         submission.copyright = video.copyright or submission.copyright
         submission.thread = video.thread or submission.thread        
         submission.tags.extend(video.tags)
         submission.videos.append(video) # to the main submission
-    '''Filling submission info'''    
-    title,description = sanitize(sources.title,sources.description)
+    '''Filling submission info'''        
     submission.source = sources.soruce
     submission.title = title # This shows up as the main title of the submission
     submission.description = description # This is the only description that gets shown
@@ -104,7 +102,7 @@ global_args,local_args = None,None
 
 def setup_session():
     '''Setup session with cookies in query strings & setup temp root'''
-    global sess
+    global sess    
     if global_args.username and global_args.pwd:
         logger.info('Client Session - Logging in with username & password')
         from ..bilisession.client import BiliSession
@@ -144,18 +142,22 @@ def __main__():
     if not setup_session():
         logging.fatal('Unable to set up session!')
         sys.exit(2)    
-    else:
+    else:         
         if global_args.save:
             logging.warning('Saving credentials to %s' % global_args.save)
             open(global_args.save,'wb').write(pickle.dumps(sess.__dict__()))            
             sys.exit(0)
-        prepare_temp(TEMP_PATH)        
-        logging.info('Total tasks: %s' % len(local_args.items()))
+        prepare_temp(TEMP_PATH)
+        # Output current settings        
+        logging.info('Total tasks: %s' % len(local_args.items()))        
         success,failure = [],[]
-
+        fmt = lambda s: ('×','√')[s] if type(s) is bool else s
         for provider,arg_ in local_args.items():
             arg = AttribuitedDict(arg_)
-            sources = download_sources(provider,arg)                
+            logger.info('Task info:')
+            for k,v in largs.items():
+                logger.info('  - %s : %s' % (list(v.values())[0],fmt(arg[k])))
+            sources = download_sources(provider,arg)                   
             if arg.no_upload:
                 logger.warn('Not uploading - no_upload sepceified on this resource')
             else:

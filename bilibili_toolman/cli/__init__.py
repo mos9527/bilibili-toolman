@@ -22,7 +22,7 @@ local_args = {
     'desc_fmt':{'help':'描述格式 e.g. "原描述：{desc}"','default':'{desc}'},
     'title_fmt':{'help':'标题格式 e.g. "[Youtube] {title}"','default':'{title}'},
     'seperate_parts':{'help':'多个视频（e.g. --youtube [播放列表],--localfile [文件夹]）独立投稿（不分P）（Web上传默认不分 P）','default':0},
-    'no_upload':{'help':'只下载资源','default':0},
+    'no_upload':{'help':'只下载资源','default':0,'action':'store_true'},
 }
 arg_epilog = '''
 本工具支持将给定视频源转载至哔哩哔哩

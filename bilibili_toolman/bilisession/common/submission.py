@@ -1,4 +1,7 @@
 '''basic submission tree model impl'''
+from re import sub
+
+
 class SubmissionVideos(list):
     '''Parent submission'''
     def extend(self, __iterable) -> None:
@@ -31,7 +34,6 @@ class SubmissionVideos(list):
             "filename": video.video_endpoint,
             "title": video.title,
             "desc": video.description,
-            "cid": video.biz_id,
         } for video in target]
 
     def __init__(self,parent=None):
@@ -60,7 +62,7 @@ class Submission:
     '''Description for the video'''
     title: str = ''
     '''Title for the submission'''
-    copyright: int = 0
+    copyright: int = COPYRIGHT_REUPLOAD
     '''Copyright type'''
     source: str = ''
     '''Reupload source'''    
@@ -127,10 +129,10 @@ class Submission:
             "tid": int(self.thread),            
             "title": self.title,
             "tag": ','.join(set(self.tags)),
-            "desc_format_id": 31,
+            # "desc_format_id": 31,
             "desc": self.description,
-            "up_close_reply": self.close_reply,
-            "up_close_danmu": self.close_danmu
+            # "up_close_reply": self.close_reply,
+            # "up_close_danmu": self.close_danmu
         }        
         if self.cover_url:
             kv_pair = {**kv_pair,"cover": self.cover_url}
@@ -139,11 +141,14 @@ class Submission:
 def create_submission_by_arc(arc : dict):
     '''Generates a `Submission` object via a `arc` dict'''
     with Submission() as submission:
-        submission.stat = arc['stat']
-        submission.aid = submission.stat['aid']
-        submission.parent_tname = arc['parent_tname']
-        submission.thread_name = arc['typename']
-        if 'Archive' in arc:arc['archive'] = arc['Archive']
+        submission.stat = arc['stat'] if 'stat' in arc else arc['archive']
+        submission.aid = submission.stat['aid']        
+        if 'parent_tname' in arc: # Web version only
+            submission.parent_tname = arc['parent_tname']
+            submission.thread_name = arc['typename']
+        if 'Archive' in arc:
+            arc['archive'] = arc['Archive']                
+        submission.copyright = arc['archive']['copyright']
         submission.bvid = arc['archive']['bvid']
         submission.title = arc['archive']['title']
         submission.cover_url = arc['archive']['cover']
@@ -153,6 +158,7 @@ def create_submission_by_arc(arc : dict):
         submission.state_desc = arc['archive']['state_desc']
         submission.state = arc['archive']['state']
         submission.reject_reason = arc['archive']['reject_reason']  
-        if 'Videos' in arc:arc['videos'] = arc['Videos']
+        if 'Videos' in arc:
+            arc['videos'] = arc['Videos']
         submission.videos.extend(arc['videos'])
     return submission

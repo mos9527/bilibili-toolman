@@ -4,7 +4,7 @@ from math import inf
 import re
 from . import DownloadResult
 import logging,youtube_dl,requests
-__desc__ = '''Youtube 视频'''
+__desc__ = '''Youtube / Twitch / etc 视频下载 (youtube-dl)'''
 __cfg_help__ = '''
     format (str) - 同 youtube-dl -f
     quite (True,False) - 是否屏蔽 youtube-dl 日志 (默认 False)
