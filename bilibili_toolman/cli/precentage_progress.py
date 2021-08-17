@@ -5,3 +5,5 @@ def report(current,max_val):
     tqdm_.n = current    
     tqdm_.update(0)
     tqdm_.refresh()
+def close():
+    tqdm_.close()

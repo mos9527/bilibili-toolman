@@ -53,8 +53,6 @@ def update_config(cfg):
         ydl.add_post_processor(HardcodeSubProcesser(ydl,hardcodeSettings))
 
 class HardcodeSettings():
-    disabled = False 
-    '''is hardcoding disabled?'''
     style = 'FontName=Segoe UI,FontSize=24'
     '''alternative font style for subs filter'''
     input = '' # params for input file
@@ -93,16 +91,15 @@ class HardcodeSubProcesser(FFmpegPostProcessor):
                 + [encodeFilename(self._ffmpeg_filename_argument(out_path), True)])
         self._downloader.to_screen('[debug] ffmpeg command line: %s' % shell_quote(cmd))
         p = subprocess.Popen(cmd, stdout=sys.stdout, stderr=sys.stderr, stdin=subprocess.PIPE)
-        stdout, stderr = p.communicate()
+        p.communicate()
         if p.returncode != 0:
-            stderr = stderr.decode('utf-8', 'replace')
-            msg = stderr.strip().split('\n')[-1]
-            raise FFmpegPostProcessorError(msg)
+            raise FFmpegPostProcessorError('See stderr for more info')
         self.try_utime(out_path, oldest_mtime, oldest_mtime)
 
     def __init__(self, downloader,settings : HardcodeSettings):
         self.settings = settings
         super().__init__(downloader=downloader)
+
     def run(self, information):
         sub = information['requested_subtitles']        
         if sub: 

@@ -1,11 +1,12 @@
 # region Setup
+from bilibili_toolman.cli import precentage_progress
 from ..bilisession import logger
 from ..bilisession.common.submission import Submission
 from ..providers import DownloadResult
 from . import AttribuitedDict,setup_logging,prepare_temp,prase_args,sanitize_string,truncate_string,local_args as largs
 import pickle,logging,sys,urllib.parse
 
-TEMP_PATH = 'temp' # TODO : NOT chroot-ing for downloading into a different folder
+TEMP_PATH = 'temp'
 sess = None
 
 def download_sources(provider,arg) -> DownloadResult:
@@ -62,6 +63,7 @@ def upload_sources(sources : DownloadResult,arg):
             logger.critical('URI 获取失败!')
             break
         logger.info('资源已上传')
+        precentage_progress.close()
         with Submission() as video:
             '''Creatating a video per submission'''
             # A lot of these doesn't really matter as per-part videos only identifies themselves through UI via their titles
@@ -152,10 +154,10 @@ def __main__():
             sys.exit(0)
         prepare_temp(TEMP_PATH)
         # Output current settings        
-        logging.info('任务总数: %s' % len(local_args.items()))        
+        logging.info('任务总数: %s' % len(local_args))        
         success,failure = [],[]
         fmt = lambda s: ('×','√')[s] if type(s) is bool else s
-        for provider,arg_ in local_args.items():
+        for provider,arg_ in local_args:
             arg = AttribuitedDict(arg_)
             logger.info('任务信息：')
             for k,v in largs.items():

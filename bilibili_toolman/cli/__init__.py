@@ -17,7 +17,7 @@ global_args = {
     'http' : {'help':'强制使用 HTTP （不推荐）','default':False,'action':'store_true'}
 }
 local_args = {
-    'opts':{'help':'解析可选参数 ，详见 --opts 格式'},
+    'opts':{'help':'解析可选参数 ，详见 --opts 格式','default':''},
     'thread_id': {'help':'分区 ID','default':17},
     'tags': {'help':'标签','default':'转载'},
     'desc':{'help':'描述格式 e.g. "原描述：{desc}" (其他变量详见下文)','default':'{desc}'},
@@ -97,7 +97,7 @@ def prase_args(args: list):
         return
     args.pop(0)  # remove filename
     parser = _create_argparser()    
-    global_args_dict = dict()
+    global_args_dict = AttribuitedDict()
     for k, v in parser.parse_args(args).__dict__.items():
         if k in global_args:
             global_args_dict[k] = v
@@ -110,17 +110,17 @@ def prase_args(args: list):
     def add(): 
         args = parser.parse_args(current_line).__dict__       
         args['resource'] = args[current_provider]
-        local_args_group.append((provider_args[current_provider],args))
-    
-    for arg in args:
-        if arg[2:] in provider_args:
-            # a new proivder
-            current_provider = arg[2:]
-            if current_line:
-                # non-empty,add to local group
-                add()
-                current_line = []
-        current_line.append(arg)
-    if(current_line):
-        add()
-    return AttribuitedDict(global_args_dict), AttribuitedDict(local_args_group)
+        local_args_group.append((provider_args[current_provider],AttribuitedDict(args)))
+    i = 0
+    while i < len(args):
+        if args[i][2:] in provider_args:
+            # a new proivder. terminates till next provider
+            current_provider = args[i][2:]
+            current_line = ['--' + current_provider]
+            for i in range(i + 1,len(args)):
+                if args[i][2:] in provider_args: break
+                current_line.append(args[i])
+            add()            
+            i -= 1
+        i+=1            
+    return global_args_dict, local_args_group
