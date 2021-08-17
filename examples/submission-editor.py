@@ -10,15 +10,16 @@
 from inquirer.shortcuts import confirm, list_input
 from bilibili_toolman.bilisession.common.submission import Submission
 from bilibili_toolman.bilisession.client import BiliSession
-from pickle import  loads
+from pickle import loads
 from inquirer import text
 import sys
-sess = BiliSession()
+sess = None
 if len(sys.argv) > 1:
     loaded = loads(open(sys.argv[1],'rb').read())
     sess : BiliSession = loaded['session']
     sess.update(loaded)
 else:
+    sess = BiliSession()
     sess.LoginViaUsername(text('用户名'),text('密码'))
 
 def to_yymmdd(ts):

@@ -1,4 +1,5 @@
 '''bilibili - PC API implementation'''
+from time import time
 from typing import Iterable, Optional, Text, Tuple, Union
 from requests.sessions import Session
 from urllib.parse import quote,urlencode
@@ -92,8 +93,8 @@ class ClientUploadChunk(FileIterator):
 class BiliSession(BiliSession):
     '''哔哩哔哩上传助手 API'''
     # this part reused A LOT of old code, some can still be replaced with thier PC counterparts 
-    UPLOAD_CHUNK_SIZE = 2 * (1 << 20)
-    BUILD_VER = (2, 0, 0,1054)
+    UPLOAD_CHUNK_SIZE = 2 * (1 << 20)    
+    BUILD_VER = (2, 3, 0,1066)
     BUILD_NO = int(BUILD_VER[0] * 1e8 + BUILD_VER[1] * 1e6 + BUILD_VER[2] * 1e2 + BUILD_VER[3])
     BUILD_STR = '.'.join(map(lambda v: str(v), BUILD_VER))    
 
@@ -107,7 +108,6 @@ class BiliSession(BiliSession):
         self.headers = {
             'User-Agent': BiliSession.DEFAULT_UA,
             'Accept-Encoding': 'gzip,deflate',
-            'Host':'member.bilibili.com'
         }
         self.login_tokens = dict()
     # region Properties
@@ -195,14 +195,15 @@ class BiliSession(BiliSession):
     # region Client-specific APIs
     @JSONResponse
     def _oauth2_getkey(self):
-        return self.post("https://passport.bilibili.com/api/oauth2/getKey", data=SingableDict({
-            'appkey': Crypto.APPKEY
+        return self.get("https://passport.bilibili.com/x/passport-login/web/key", params=SingableDict({
+            'appkey': Crypto.APPKEY,
+            'platform':'pc'            
         }).signed)
 
     def _post_complete_upload(self,complete_url,size,basename,md5,chunkcount):
         return self.post(
             complete_url,
-            json = {
+            data={
                 'chunks': chunkcount,
                 'filesize': size,
                 'md5': md5,
@@ -234,14 +235,18 @@ class BiliSession(BiliSession):
         '''
         oauth_json = self._oauth2_getkey()
         resp = self.post(
-            "https://passport.bilibili.com/api/oauth2/login",
+            "https://passport.bilibili.com/x/passport-login/oauth2/login",
             data=SingableDict({
                 'appkey': Crypto.APPKEY,
                 'platform': "pc",                
                 'password': Crypto.encrypt_login_password(password, oauth_json),                                
-                'username': quote(username)
+                'username': quote(username),
+                'ts': int(time()*1000),
+                'device_name':'',
+                'device_id':'',
+                'buvid':''
         }).signed)
-        self.login_tokens.update(resp.json()['data'])
+        self.login_tokens.update(resp.json()['data']['token_info'])
         return resp
     
     def UploadVideo(self, path: str) -> Tuple[str,None]:
