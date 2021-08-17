@@ -1,5 +1,4 @@
 # region Setup
-from bilibili_toolman.cli import precentage_progress
 from ..bilisession import logger
 from ..bilisession.common.submission import Submission
 from ..providers import DownloadResult
@@ -63,6 +62,7 @@ def upload_sources(sources : DownloadResult,arg):
             logger.critical('URI 获取失败!')
             break
         logger.info('资源已上传')
+        from bilibili_toolman.cli import precentage_progress
         precentage_progress.close()
         with Submission() as video:
             '''Creatating a video per submission'''

@@ -13,7 +13,9 @@
     pip install bilibili_toolman
 
 ## 参数说明
-    usage: -h [-h] [--username USERNAME] [--pwd PWD] [--cookies COOKIES] [--load LOAD] [--save SAVE] [--http] [--opts OPTS]                                   [--thread_id THREAD_ID] [--tags TAGS] [--desc DESC] [--title TITLE] [--seperate_parts] [--no_upload] [--localfile LOCALFILE-URL]                [--youtube YOUTUBE-URL]                                                                                                               
+    usage: -h [-h] [--username USERNAME] [--pwd PWD] [--cookies COOKIES] [--load LOAD] [--save SAVE] [--http] [--opts OPTS] [--thread_id THREAD_ID] [--tags TAGS] [--desc DESC] [--title TITLE]
+            [--seperate_parts] [--no_upload] [--localfile LOCALFILE-URL] [--youtube YOUTUBE-URL]
+
     使用帮助
 
     optional arguments:
@@ -22,7 +24,7 @@
     身份设置 （随方式优先级排序）:
     --username USERNAME   账号密码登陆 - Bilibili 账号名
     --pwd PWD             账号密码登陆 - Bilibili 账号明文密码
-    --cookies COOKIES     Cookies 登陆 - Bilibili 所用 Cookies ( 需要 SESSDATA 及 bili_jct ) e.g.cookies=SESSDATA=cb0..; bili_jct=6750...
+    --cookies COOKIES     Cookies 登陆 - Bilibili 所用 Cookies ( 需要 SESSDATA 及 bili_jct ) e.g.cookies=SESSDATA=cb0..; bili_jct=6750... 
     --load LOAD           从保存的文件中拉取认证信息，作为认证方式
     --save SAVE           在输入上述认证方式之一的前提下，保存该信息于文件，并退出
     --http                强制使用 HTTP （不推荐）
@@ -78,6 +80,9 @@
     本工具支持将给定视频源转载至哔哩哔哩
 
     详见项目 README 以获取更多例程 ： github.com/greats3an/bilibili-toolman
+
+# 例程
+详见 [examples](https://github.com/greats3an/bilibili-toolman/tree/master/examples)
 
 # 截图
 ![le screen shot of le console](https://raw.githubusercontent.com/greats3an/bilibili-toolman/master/readme.png)

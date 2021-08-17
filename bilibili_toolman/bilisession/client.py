@@ -161,6 +161,7 @@ class BiliSession(BiliSession):
             }).signed
         )
 
+    @JSONResponse
     def _view_archive(self, bvid):
         return self.get(
             'https://member.bilibili.com/x/client/archive/view',
@@ -181,6 +182,13 @@ class BiliSession(BiliSession):
                 'open_elec':0,
                 **json,                
             }).sorted 
+        )
+
+    def _delete_archive(self,bvid):
+        return self.post(
+            "http://member.bilibili.com/x/client/archive/delete",
+            params=self.access_key_param,
+            data={'bvid':bvid}
         )
     # endregion
 
@@ -204,6 +212,15 @@ class BiliSession(BiliSession):
 
     def LoginViaCookiesQueryString(self, cookies: str):
         raise NotImplementedError("Not available for Client APIs!")
+
+    @JSONResponse
+    def DeleteArchive(self,bvid):
+        '''删除作品
+
+        Args:
+            bvid
+        '''
+        return self._delete_archive(bvid)
 
     @JSONResponse
     def LoginViaUsername(self, username: str, password: str):

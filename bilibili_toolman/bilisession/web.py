@@ -123,6 +123,7 @@ class BiliSession(Session):
             'coop':1
         })
     
+    @JSONResponse
     def _view_archive(self,bvid):
         return self.get('https://member.bilibili.com/x/web/archive/view',params={'bvid':bvid})
     
@@ -178,6 +179,8 @@ class BiliSession(Session):
 
         Returns:
             List[Submission]: 请求到的作品
+
+        注：此 API 无法获取完整作品信息，推荐通过所得BVID以其他API检索
         '''
         args = pubing,pubed,not_pubed
         submissions = []
@@ -186,11 +189,13 @@ class BiliSession(Session):
             nonlocal count
             for arc in arcs['arc_audits']:
                 count += submissions.append(create_submission_by_arc(arc)) or 1
-                if count >= limit:raise Exception("受限流控制 (%s)" % limit)                        
+                if count >= limit:return False  
+            return True             
         arc = self.ListArchives(*args,pn=1)['data']
-        add_to_submissions(arc)
-        for pn in range(2,math.ceil(arc['page']['count'] / arc['page']['ps']) + 1):
-            add_to_submissions(self.ListArchives(*args,pn=pn)['data'])
+        result = add_to_submissions(arc)
+        if result:
+            for pn in range(2,math.ceil(arc['page']['count'] / arc['page']['ps']) + 1):
+                add_to_submissions(self.ListArchives(*args,pn=pn)['data'])
         return submissions
 
     def _preupload(self, name='a.flv', size=0):        

@@ -92,11 +92,11 @@ class Submission:
         # note : this will strip the HTTP prefix        
         self._video_filename = value.split('/')[-1].split('.')[0]    
     biz_id = 0
-    '''a.k.a cid'''        
+    '''a.k.a cid.for web apis'''        
     bvid = ''
-    '''video ID'''
+    '''the new video ID'''
     aid = 0
-    '''another ID'''
+    '''another ID for web apis'''
     thread_name = ''
     '''upload thread name i.e. typename'''
     parent_tname = ''
@@ -108,7 +108,7 @@ class Submission:
     state = 0
     '''status of video'''
     state_desc = ''
-    '''description of video'''
+    '''status but human readable'''
     video_duration = 0
     '''duration of video'''
     # endregion
