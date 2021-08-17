@@ -1,6 +1,7 @@
 '''bilibili - Web API implmentation'''
 from concurrent.futures.thread import ThreadPoolExecutor
 from os import stat
+from pickle import FALSE
 from threading import Thread
 from requests import Session
 from typing import List, Tuple
@@ -48,6 +49,14 @@ class BiliSession(Session):
 
     MISC_MAX_TITLE_LENGTH = 80
     MISC_MAX_DESCRIPTION_LENGTH = 2000
+
+    FORCE_HTTP = False
+
+    def request(self, method: str, url,*a,**k):
+        if self.FORCE_HTTP and url[:5] == 'https':
+            url='http' + url[5:]                                   
+        return super().request(method, url,*a,**k)
+
 
     def __init__(self, cookies: str = '') -> None:      
         super().__init__()

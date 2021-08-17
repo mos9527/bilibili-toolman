@@ -12,7 +12,7 @@ def download_sources(provider,arg) -> DownloadResult:
     resource = arg.resource
     opts = arg.opts
     try:
-        opts = urllib.parse.parse_qs(opts)
+        opts = urllib.parse.parse_qs(opts,keep_blank_values=True)
         provider.update_config({k:v[-1] for k,v in opts.items()})
     except:opts = '无效选项'
     '''Passing options'''
@@ -43,12 +43,13 @@ def upload_sources(sources : DownloadResult,arg):
     submission = Submission()    
     if not sources:return None,True
     logging.info('上传资源数：%s' % len(sources.results))    
-    def sanitize(title_,desc_,**kw):
-        blocks = {'title':title_,'desc':desc_,**kw}
-        return truncate_string(sanitize_string(arg.title_fmt.format(**blocks)),sess.MISC_MAX_TITLE_LENGTH),truncate_string(sanitize_string(arg.desc_fmt.format(**blocks)),sess.MISC_MAX_DESCRIPTION_LENGTH)
+    def sanitize(blocks,*a):
+        do = lambda s : truncate_string(sanitize_string(s.format_map(blocks)),sess.MISC_MAX_DESCRIPTION_LENGTH)        
+        return [do(i) for i in a]
     for source in sources.results:       
         '''If one or multipule sources'''        
-        title,description = sanitize(source.title,source.description,**source.extra)
+        blocks = {'title':source.title,'desc':source.description,**source.extra} # for formatting
+        title,description = sanitize(blocks,arg.title,arg.desc)
         logger.info('准备上传: %s' % title)
         '''Summary trimming'''
         try:
@@ -71,7 +72,7 @@ def upload_sources(sources : DownloadResult,arg):
             video.copyright = Submission.COPYRIGHT_REUPLOAD if not source.original else Submission.COPYRIGHT_SELF_MADE
             video.source = sources.soruce         
             video.thread = arg.thread_id
-            video.tags = arg.tags.split(',')
+            video.tags = arg.tags.format_map(blocks).split(',')
             video.description = source.description # why tf do they start to use this again??
             video.title = title # This shows up as title per-part, invisible if video is single-part only
         '''Use the last given thread,tags,cover & description per multiple uploads'''                           
@@ -103,13 +104,15 @@ def setup_session():
     global sess    
     if global_args.username and global_args.pwd:
         from ..bilisession.client import BiliSession
-        sess = BiliSession()        
+        sess = BiliSession() 
+        sess.FORCE_HTTP = global_args.http           
         result = sess.LoginViaUsername(global_args.username,global_args.pwd)        
         logger.warning('MID:%s' % sess.mid)
         return result
     elif global_args.cookies:
         from ..bilisession.web import BiliSession
         sess = BiliSession()
+        sess.FORCE_HTTP = global_args.http
         sess.LoginViaCookiesQueryString(global_args.cookies)
         self_ = sess.Self
         if not 'uname' in self_['data']:
@@ -124,6 +127,7 @@ def setup_session():
         unpickled = pickle.loads(open(global_args.load,'rb').read())
         sess = unpickled['session']
         sess.update(unpickled)
+        sess.FORCE_HTTP = global_args.http
         logger.info('加载之前的登陆态')
         return True
     else:
@@ -139,7 +143,9 @@ def __main__():
         logging.fatal('登陆失败！')
         sys.exit(2)    
     else:         
-        logger.info('使用 %s API' % ('Web端' if sess.DEFAULT_UA else 'PC端'))
+        if global_args.http:
+            logger.warning('强制使用 HTTP')
+        logger.info('使用 %s API' % ('Web端' if sess.DEFAULT_UA else 'PC端'))        
         if global_args.save:
             logging.warning('保存登陆态到： %s' % global_args.save)
             open(global_args.save,'wb').write(pickle.dumps(sess.__dict__()))            

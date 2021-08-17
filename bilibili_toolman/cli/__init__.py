@@ -13,18 +13,23 @@ global_args = {
     'pwd' : {'help' : '账号密码登陆 - Bilibili 账号明文密码'},
     'cookies': {'help':'Cookies 登陆 - Bilibili 所用 Cookies ( 需要 SESSDATA 及 bili_jct ) e.g.cookies=SESSDATA=cb0..; bili_jct=6750... '},
     'load' : {'help':'从保存的文件中拉取认证信息，作为认证方式'},
-    'save' : {'help':'在输入上述认证方式之一的前提下，保存该信息于文件，并退出'}
+    'save' : {'help':'在输入上述认证方式之一的前提下，保存该信息于文件，并退出'},
+    'http' : {'help':'强制使用 HTTP （不推荐）','default':False,'action':'store_true'}
 }
 local_args = {
     'opts':{'help':'解析可选参数 ，详见 --opts 格式'},
     'thread_id': {'help':'分区 ID','default':17},
     'tags': {'help':'标签','default':'转载'},
-    'desc_fmt':{'help':'描述格式 e.g. "原描述：{desc}" (其他变量详见下文)','default':'{desc}'},
-    'title_fmt':{'help':'标题格式 e.g. "[Youtube] {title} (其他变量详见下文)"','default':'{title}'},
-    'seperate_parts':{'help':'多个视频（e.g. --youtube [播放列表],--localfile [文件夹]）独立投稿（不分P）（Web上传默认不分 P）','default':False},
-    'no_upload':{'help':'只下载资源','default':0,'action':'store_true'},
+    'desc':{'help':'描述格式 e.g. "原描述：{desc}" (其他变量详见下文)','default':'{desc}'},
+    'title':{'help':'标题格式 e.g. "[Youtube] {title} (其他变量详见下文)"','default':'{title}'},
+    'seperate_parts':{'help':'不分P （e.g. --youtube [播放列表],--localfile [文件夹]）独立投稿（不分P）（Web上传默认不分 P）','default':False,'action':'store_true'},
+    'no_upload':{'help':'只下载资源','default':False,'action':'store_true'},
 }
 arg_epilog = '''
+变量：
+    {title},{desc} 等变量适用于：
+        title, desc, tags
+
 本工具支持将给定视频源转载至哔哩哔哩
 
 详见项目 README 以获取更多例程 ： github.com/greats3an/bilibili-toolman
@@ -32,7 +37,9 @@ arg_epilog = '''
 def setup_logging():
     import coloredlogs
     coloredlogs.DEFAULT_LOG_FORMAT = '[ %(asctime)s %(name)8s %(levelname)6s ] %(message)s'
-    coloredlogs.install(0);logging.getLogger('urllib3').setLevel(100);logging.getLogger('PIL.Image').setLevel(100)
+    coloredlogs.install(0)
+    logging.getLogger('urllib3').setLevel(logging.CRITICAL)
+    logging.getLogger('PIL.Image').setLevel(logging.CRITICAL)
 
 def prepare_temp(temp_path : str):    
     if not os.path.isdir(temp_path):os.mkdir(temp_path)
@@ -95,8 +102,6 @@ def prase_args(args: list):
         if k in global_args:
             global_args_dict[k] = v
             if not '--%s' % k in args:continue
-            args.pop(args.index('--%s' % k) + 1)
-            args.pop(args.index('--%s' % k))
     '''pre-parse : fetch global args,then remove them'''
     local_args_group = []
     current_line = []

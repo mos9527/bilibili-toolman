@@ -14,11 +14,7 @@
     pip install bilibili_toolman
 
 ## 参数说明
-
-    usage: -h [-h] [--username USERNAME] [--pwd PWD] [--cookies COOKIES] [--load LOAD] [--save SAVE] [--opts OPTS]
-            [--thread_id THREAD_ID] [--tags TAGS] [--desc_fmt DESC_FMT] [--title_fmt TITLE_FMT] [--seperate_parts SEPERATE_PARTS]  
-            [--no_upload] [--localfile LOCALFILE-URL] [--youtube YOUTUBE-URL]
-
+    usage: -h [-h] [--username USERNAME] [--pwd PWD] [--cookies COOKIES] [--load LOAD] [--save SAVE] [--http] [--opts OPTS]                                   [--thread_id THREAD_ID] [--tags TAGS] [--desc DESC] [--title TITLE] [--seperate_parts] [--no_upload] [--localfile LOCALFILE-URL]                [--youtube YOUTUBE-URL]                                                                                                               
     使用帮助
 
     optional arguments:
@@ -30,17 +26,16 @@
     --cookies COOKIES     Cookies 登陆 - Bilibili 所用 Cookies ( 需要 SESSDATA 及 bili_jct ) e.g.cookies=SESSDATA=cb0..; bili_jct=6750...
     --load LOAD           从保存的文件中拉取认证信息，作为认证方式
     --save SAVE           在输入上述认证方式之一的前提下，保存该信息于文件，并退出
+    --http                强制使用 HTTP （不推荐）
 
     上传设置:
     --opts OPTS           解析可选参数 ，详见 --opts 格式
     --thread_id THREAD_ID
                             分区 ID
     --tags TAGS           标签
-    --desc_fmt DESC_FMT   描述格式 e.g. "原描述：{desc}" (其他变量详见下文)
-    --title_fmt TITLE_FMT
-                            标题格式 e.g. "[Youtube] {title} (其他变量详见下文)"
-    --seperate_parts SEPERATE_PARTS
-                            多个视频（e.g. --youtube [播放列表],--localfile [文件夹]）独立投稿（不分P）（Web上传默认不分 P）
+    --desc DESC           描述格式 e.g. "原描述：{desc}" (其他变量详见下文)
+    --title TITLE         标题格式 e.g. "[Youtube] {title} (其他变量详见下文)"
+    --seperate_parts      不分P （e.g. --youtube [播放列表],--localfile [文件夹]）独立投稿（不分P）（Web上传默认不分 P）
     --no_upload           只下载资源
 
     解析可选参数 "opts" （格式 ： [参数1]=[值1];[参数2]=[值2] (query-string)）:
@@ -51,12 +46,17 @@
                             e.g. --localfile "le videos/" --opts cover="le cover.png" --tags ...
     --youtube YOUTUBE-URL
                             Youtube / Twitch / etc 视频下载 (youtube-dl)
-                            参数:
+                            参数:youtube-dl 参数：
                                 format (str) - 同 youtube-dl -f
                                 quite (True,False) - 是否屏蔽 youtube-dl 日志 (默认 False)
-                            ( 另可跟随其他 youtube-dl 参数 ）
-                            e.g. --youtube "..." --opts format=best;quiet=True --tags ...
-                                此外，还提供其他..._fmt变量:
+                            特殊参数：
+                                hardcode - 烧入硬字幕选项
+                                    e.g. 启用    ..;hardcode;...
+                                    e.g. 换用字体 ..;hardcode=style:FontName=Segoe UI
+                                    e.g. NV硬解码   ..;hardcode=input:-hwaccel cuda/output:-c:v h264_nvenc -crf 17 -b:v 5M
+                                    多个选项用 / 隔开
+                            e.g. --youtube "..." --opts "format=best;quiet=True;hardcode" --tags ...
+                                此外，还提供其他变量:
                                     {id}
                                     {title}
                                     {descrption}
@@ -70,6 +70,11 @@
                                     {view_count}
                                     {avereage_rating}
                                     ...
+                            默认配置：不烧入字幕，下载最高质量音视频，下载字幕但不操作
+
+    变量：
+        {title},{desc} 等变量适用于：
+            title, desc, tags
 
     本工具支持将给定视频源转载至哔哩哔哩
 
