@@ -137,7 +137,8 @@ class Submission:
         if self.cover_url:
             kv_pair = {**kv_pair,"cover": self.cover_url}
         return kv_pair
-
+    def __repr__(self) -> str:
+        return '< bvid : "%s" , title : "%s", desc : "%s" , video_endpoint : "%s" >' % (self.bvid,self.title,self.description,self.video_endpoint)
 def create_submission_by_arc(arc : dict):
     '''Generates a `Submission` object via a `arc` dict'''
     with Submission() as submission:

@@ -15,10 +15,9 @@
 
 ## 参数说明
 
-    python -m bilibili_toolman -h
-
-    usage: -h [-h] [--username USERNAME] [--pwd PWD] [--cookies COOKIES] [--load LOAD] [--save SAVE] [--opts OPTS] [--thread_id THREAD_ID] [--tags TAGS]
-            [--desc_fmt DESC_FMT] [--title_fmt TITLE_FMT] [--seperate_parts SEPERATE_PARTS] [--no_upload NO_UPLOAD] [--localfile LOCALFILE-URL] [--youtube YOUTUBE-URL]   
+    usage: -h [-h] [--username USERNAME] [--pwd PWD] [--cookies COOKIES] [--load LOAD] [--save SAVE] [--opts OPTS]
+            [--thread_id THREAD_ID] [--tags TAGS] [--desc_fmt DESC_FMT] [--title_fmt TITLE_FMT] [--seperate_parts SEPERATE_PARTS]  
+            [--no_upload] [--localfile LOCALFILE-URL] [--youtube YOUTUBE-URL]
 
     使用帮助
 
@@ -33,17 +32,16 @@
     --save SAVE           在输入上述认证方式之一的前提下，保存该信息于文件，并退出
 
     上传设置:
-    --opts OPTS           解析可选参数，详见 --opts 格式
+    --opts OPTS           解析可选参数 ，详见 --opts 格式
     --thread_id THREAD_ID
                             分区 ID
     --tags TAGS           标签
-    --desc_fmt DESC_FMT   描述格式 e.g. "原描述：{desc}"
+    --desc_fmt DESC_FMT   描述格式 e.g. "原描述：{desc}" (其他变量详见下文)
     --title_fmt TITLE_FMT
-                            标题格式 e.g. "[Youtube] {title}"
+                            标题格式 e.g. "[Youtube] {title} (其他变量详见下文)"
     --seperate_parts SEPERATE_PARTS
                             多个视频（e.g. --youtube [播放列表],--localfile [文件夹]）独立投稿（不分P）（Web上传默认不分 P）
-    --no_upload NO_UPLOAD
-                            只下载资源
+    --no_upload           只下载资源
 
     解析可选参数 "opts" （格式 ： [参数1]=[值1];[参数2]=[值2] (query-string)）:
     --localfile LOCALFILE-URL
@@ -52,12 +50,26 @@
                                 cover (str) - 封面图片路径
                             e.g. --localfile "le videos/" --opts cover="le cover.png" --tags ...
     --youtube YOUTUBE-URL
-                            Youtube 视频
+                            Youtube / Twitch / etc 视频下载 (youtube-dl)
                             参数:
                                 format (str) - 同 youtube-dl -f
                                 quite (True,False) - 是否屏蔽 youtube-dl 日志 (默认 False)
                             ( 另可跟随其他 youtube-dl 参数 ）
                             e.g. --youtube "..." --opts format=best;quiet=True --tags ...
+                                此外，还提供其他..._fmt变量:
+                                    {id}
+                                    {title}
+                                    {descrption}
+                                    {upload_date}
+                                    {uploader}
+                                    {uploader_id}
+                                    {uploader_url}
+                                    {channel_id}
+                                    {channel_url}
+                                    {duration}
+                                    {view_count}
+                                    {avereage_rating}
+                                    ...
 
     本工具支持将给定视频源转载至哔哩哔哩
 

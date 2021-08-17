@@ -1,5 +1,5 @@
 from tqdm import tqdm
-tqdm_ = tqdm(desc='Uploading', unit='B', unit_scale=True)  
+tqdm_ = tqdm(desc='↑', unit='B', unit_scale=True)  
 def report(current,max_val):
     tqdm_.total = max_val
     tqdm_.n = current    

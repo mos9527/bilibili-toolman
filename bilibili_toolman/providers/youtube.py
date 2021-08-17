@@ -9,7 +9,22 @@ __cfg_help__ = '''
     format (str) - 同 youtube-dl -f
     quite (True,False) - 是否屏蔽 youtube-dl 日志 (默认 False)
 ( 另可跟随其他 youtube-dl 参数 ）
-e.g. --youtube "..." --opts format=best;quiet=True --tags ...'''
+e.g. --youtube "..." --opts format=best;quiet=True --tags ...
+    此外，还提供其他..._fmt变量:
+        {id}
+        {title}    
+        {descrption}
+        {upload_date}
+        {uploader}
+        {uploader_id}
+        {uploader_url}
+        {channel_id}
+        {channel_url}
+        {duration}
+        {view_count}
+        {avereage_rating}
+        ...
+'''
 logger = logging.getLogger('youtube')
 youtube_dl.utils.std_headers['User-Agent'] = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
 params = {
@@ -29,6 +44,7 @@ def download_video(res) -> DownloadResult:
         # downloading the cover            
         def append_result(entry):
             with DownloadResult() as result:
+                result.extra = entry
                 result.title = entry['title']
                 result.soruce = entry['webpage_url']
                 result.video_path = '%s.%s'%(entry['display_id'],entry['ext'])
@@ -37,11 +53,11 @@ def download_video(res) -> DownloadResult:
                 date = __to_yyyy_mm_dd(entry['upload_date'])
                 results.description = result.description = f'''作者 : {entry['uploader']} [{date} 上传]
 
-来源 : {result.soruce}
+来源 : https://youtu.be/{entry['id']}
 
-{entry['description']}'''
+{entry['description']}'''                
             results.results.append(result)
-
+            
         info = ydl.extract_info(res,download=True)
         results.soruce = info['webpage_url']
         results.title = info['title']

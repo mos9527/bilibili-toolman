@@ -87,15 +87,17 @@ class ClientUploadChunk(FileIterator):
                 )
                 return True
             except Exception as e:
-                logger.warning('While downloading (n=%s): %s. Retrying...' % (retries,e))
+                logger.warning('第 %s 次重试时：%s' % (retries,e))
 
 class BiliSession(BiliSession):
-    '''Bilibili Client (ugc_assistant) Upload API Implementation'''
+    '''哔哩哔哩上传助手 API'''
     # this part reused A LOT of old code, some can still be replaced with thier PC counterparts 
     UPLOAD_CHUNK_SIZE = 2 * (1 << 20)
     BUILD_VER = (2, 0, 0,1054)
     BUILD_NO = int(BUILD_VER[0] * 1e8 + BUILD_VER[1] * 1e6 + BUILD_VER[2] * 1e2 + BUILD_VER[3])
     BUILD_STR = '.'.join(map(lambda v: str(v), BUILD_VER))    
+
+    DEFAULT_UA = ''
 
     MISC_MAX_TITLE_LENGTH = 80
     MISC_MAX_DESCRIPTION_LENGTH = 1500 # somehow larger than expected
@@ -103,7 +105,7 @@ class BiliSession(BiliSession):
     def __init__(self) -> None:
         Session.__init__(self) # no need to init the web variant
         self.headers = {
-            'User-Agent': '',
+            'User-Agent': BiliSession.DEFAULT_UA,
             'Accept-Encoding': 'gzip,deflate',
             'Host':'member.bilibili.com'
         }
@@ -205,7 +207,7 @@ class BiliSession(BiliSession):
 
     @JSONResponse
     def LoginViaUsername(self, username: str, password: str):
-        '''Logging in via Username and Password
+        '''用户名密码登陆
 
         Args:
             username (str), password (str)
@@ -226,15 +228,22 @@ class BiliSession(BiliSession):
         return resp
     
     def UploadVideo(self, path: str) -> Tuple[str,None]:
-        # behaves more-or-less the same as in `bilisession.web`,refer to that for more info
+        '''上传视频
+
+        Args:
+            path (str): 视频文件路径
+
+        Returns:
+            Tuple[str,None]: [远端 URI,None]        
+        '''
         path, basename, size = check_file(path)        
         preupload_token = self._preupload().json()
         # preprae the chunks then uploads them
         chunksize = self.UPLOAD_CHUNK_SIZE
         chunkcount = math.ceil(size/chunksize)
         file_manager.open(path)
-        logger.debug('Upload chunks: %s' % chunkcount)
-        logger.debug('Upload chunk size: %s' % chunksize)
+        logger.debug('上传分块: %s' % chunkcount)
+        logger.debug('分块大小: %s B' % chunksize)
         def iter_chunks():
             for chunk_n in range(0,chunkcount):
                 start = chunksize * chunk_n
@@ -251,15 +260,14 @@ class BiliSession(BiliSession):
                     'PHPSESSID':preupload_token['filename']
                 }
                 yield chunk        
-        self._upload_chunks_to_endpoint_blocking(iter_chunks())
-        logger.debug('Successfully finished uploading chunks')
+        self._upload_chunks_to_endpoint_blocking(iter_chunks())        
         # recalulating md5
         md5_ = Crypto.iterable_md5(FileIterator(path,0,size))        
         file_manager.close(path)
-        logger.debug('File hash: %s' % md5_)
+        logger.debug('MD5: %s' % md5_)
         # finalizing upload
         post_r = self._post_complete_upload(preupload_token['complete'],size,basename,md5_,chunkcount)
-        logger.debug('Completed upload: %s' % ReprExDict(post_r.json()))
+        logger.debug('上传完毕: %s' % ReprExDict(post_r.json()))
         return preupload_token['filename'], None
     # endregion
 

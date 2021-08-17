@@ -16,12 +16,12 @@ global_args = {
     'save' : {'help':'在输入上述认证方式之一的前提下，保存该信息于文件，并退出'}
 }
 local_args = {
-    'opts':{'help':'解析可选参数，详见 --opts 格式'},
+    'opts':{'help':'解析可选参数 ，详见 --opts 格式'},
     'thread_id': {'help':'分区 ID','default':17},
     'tags': {'help':'标签','default':'转载'},
-    'desc_fmt':{'help':'描述格式 e.g. "原描述：{desc}"','default':'{desc}'},
-    'title_fmt':{'help':'标题格式 e.g. "[Youtube] {title}"','default':'{title}'},
-    'seperate_parts':{'help':'多个视频（e.g. --youtube [播放列表],--localfile [文件夹]）独立投稿（不分P）（Web上传默认不分 P）','default':0},
+    'desc_fmt':{'help':'描述格式 e.g. "原描述：{desc}" (其他变量详见下文)','default':'{desc}'},
+    'title_fmt':{'help':'标题格式 e.g. "[Youtube] {title} (其他变量详见下文)"','default':'{title}'},
+    'seperate_parts':{'help':'多个视频（e.g. --youtube [播放列表],--localfile [文件夹]）独立投稿（不分P）（Web上传默认不分 P）','default':False},
     'no_upload':{'help':'只下载资源','default':0,'action':'store_true'},
 }
 arg_epilog = '''
