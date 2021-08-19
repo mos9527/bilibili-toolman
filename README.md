@@ -81,9 +81,13 @@
 
     详见项目 README 以获取更多例程 ： github.com/greats3an/bilibili-toolman
 
-# 例程
-详见 [examples](https://github.com/greats3an/bilibili-toolman/tree/master/examples)
-
+## API / 命令行 使用说明
+### 例程 :
+- [examples](https://github.com/greats3an/bilibili-toolman/tree/master/examples)
+- [main.py](https://github.com/greats3an/bilibili-toolman/blob/master/bilibili_toolman/cli/main.py)
+### API 实现 ：
+- [client.py](https://github.com/greats3an/bilibili-toolman/blob/master/bilibili_toolman/bilisession/client.py)
+- [web.py](https://github.com/greats3an/bilibili-toolman/blob/master/bilibili_toolman/bilisession/web.py)
 # 截图
 ![le screen shot of le console](https://raw.githubusercontent.com/greats3an/bilibili-toolman/master/readme.png)
 
