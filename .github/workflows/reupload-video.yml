@@ -12,8 +12,8 @@ on:
         required: true
         default: ''
       opts:
-        description: '转载设置，如 --tags 3kliksphilip,csgo,cs:go --thread_id 171 --opts "hardcode"'
-        required: false
+        description: '转载设置，如 --tags [标签,逗号隔开] --thread_id [分区 id,见 README]'
+        required: true
         default: ''
 jobs:
   deploy:
