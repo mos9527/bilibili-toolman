@@ -57,16 +57,15 @@ def upload_sources(sources : DownloadResult,arg):
             cover_url = sess.UploadCover(source.cover_path)['data']['url'] if source.cover_path else ''
         except Exception as e:
             logger.critical('上传失败! - %s' % e)
-            break
+            return [],True
         if not endpoint:
             logger.critical('URI 获取失败!')
-            break
+            return [],True
         logger.info('资源已上传')
         from bilibili_toolman.cli import precentage_progress
         precentage_progress.close()
         with Submission() as video:
             '''Creatating a video per submission'''
-            # A lot of these doesn't really matter as per-part videos only identifies themselves through UI via their titles
             video.cover_url = cover_url
             video.video_endpoint = endpoint
             video.biz_id = bid
@@ -75,7 +74,7 @@ def upload_sources(sources : DownloadResult,arg):
             video.source = sources.soruce         
             video.thread = arg.thread_id
             video.tags = arg.tags.format_map(blocks).split(',')
-            video.description = source.description # why tf do they start to use this again??
+            video.description = source.description
             video.title = title # This shows up as title per-part, invisible if video is single-part only
         '''Use the last given thread,tags,cover & description per multiple uploads'''                           
         submission.copyright = video.copyright or submission.copyright
