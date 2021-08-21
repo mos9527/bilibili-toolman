@@ -146,6 +146,15 @@ def __main__():
     else:         
         if global_args.http:
             logger.warning('强制使用 HTTP')
+        if sess.DEFAULT_UA: # specifiy CDN whilst using WEB apis
+            bup = ['ws','qn','bda2']
+            bupfetch = ['kodo','gcs','bos']
+            if global_args.cdn in bup:
+                sess.UPLOAD_PROFILE = 'ugcupos/bup'                                
+            elif global_args.cdn in bupfetch:
+                sess.UPLOAD_PROFILE = 'ugcupos/bupfetch'
+            sess.UPLOAD_CDN     = global_args.cdn
+            logger.info('CDN ： %s [%s]' % (sess.UPLOAD_CDN,sess.UPLOAD_PROFILE))            
         logger.info('使用 %s API' % ('Web端' if sess.DEFAULT_UA else 'PC端'))        
         if global_args.save:
             logging.warning('保存登陆态到： %s' % global_args.save)

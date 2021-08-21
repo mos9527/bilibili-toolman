@@ -13,8 +13,8 @@
     pip install bilibili_toolman
 
 ## 参数说明
-    usage: -h [-h] [--username USERNAME] [--pwd PWD] [--cookies COOKIES] [--load LOAD] [--save SAVE] [--http] [--opts OPTS] [--thread_id THREAD_ID] [--tags TAGS] [--desc DESC] [--title TITLE]
-            [--seperate_parts] [--no_upload] [--localfile LOCALFILE-URL] [--youtube YOUTUBE-URL]
+    usage: -h [-h] [--username USERNAME] [--pwd PWD] [--cookies COOKIES] [--load LOAD] [--save SAVE] [--http] [--cdn {ws,qn,bda2,kodo,gcs,bos}] [--opts OPTS] [--thread_id THREAD_ID]
+            [--tags TAGS] [--desc DESC] [--title TITLE] [--seperate_parts] [--no_upload] [--localfile LOCALFILE-URL] [--youtube YOUTUBE-URL]
 
     使用帮助
 
@@ -22,12 +22,14 @@
     -h, --help            show this help message and exit
 
     身份设置 （随方式优先级排序）:
-    --username USERNAME   账号密码登陆 - Bilibili 账号名
-    --pwd PWD             账号密码登陆 - Bilibili 账号明文密码
-    --cookies COOKIES     Cookies 登陆 - Bilibili 所用 Cookies ( 需要 SESSDATA 及 bili_jct ) e.g.cookies=SESSDATA=cb0..; bili_jct=6750... 
+    --username USERNAME   PC API - 账号密码登陆 - Bilibili 账号名
+    --pwd PWD             PC API - 账号密码登陆 - Bilibili 账号明文密码
+    --cookies COOKIES     Web API - Cookies 登陆 - Bilibili 所用 Cookies ( 需要 SESSDATA 及 bili_jct ) e.g.cookies=SESSDATA=cb0..; bili_jct=6750...
     --load LOAD           从保存的文件中拉取认证信息，作为认证方式
     --save SAVE           在输入上述认证方式之一的前提下，保存该信息于文件，并退出
     --http                强制使用 HTTP （不推荐）
+    --cdn {ws,qn,bda2,kodo,gcs,bos}
+                            上传用 CDN （限 Web API) （对应 网宿，七牛，百度，七牛，谷歌，百度）
 
     上传设置:
     --opts OPTS           解析可选参数 ，详见 --opts 格式
@@ -88,7 +90,10 @@
 - Fork 此项目
 - 在项目 Settings > Secret > New repository secret 创建：
     - Name  : USER_CRED
+    若使用 PC API：
     - Value : --username [ B站用户名 ] --pwd [ B站密码 ]
+    若使用 Web API:
+    - Value : --cookies [ SESSDATA=cb0..; bili_jct=6750... ]
 - 在项目 Actions > 转载 Youtube 视频 > Run Workflow 填入值
 - 运行即可
 

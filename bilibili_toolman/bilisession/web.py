@@ -35,8 +35,12 @@ class BiliSession(Session):
     BUILD_VER = (2, 8, 12)
     BUILD_NO = int(BUILD_VER[0] * 1e6 + BUILD_VER[1] * 1e4 + BUILD_VER[2] * 1e2)
     BUILD_STR = '.'.join(map(lambda v: str(v), BUILD_VER))
-    DEFAULT_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36'
     '''Build variant & version'''
+    
+    DEFAULT_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36'
+    
+    UPLOAD_PROFILE = 'ugcupos/bup'    
+    UPLOAD_CDN     = 'bda2'
 
     RETRIES_UPLOAD_ID = 5
 
@@ -68,7 +72,7 @@ class BiliSession(Session):
         '''设置本 Session 的 Cookies
 
         Args:
-            cookies (str): e.g. cookies=SESSDATA=cb0..; bili_jct=6750...
+            cookies (str): e.g. SESSDATA=cb0..; bili_jct=6750...
         '''
         if not cookies: return
         for item in cookies.replace(' ', '').split(';'):
@@ -92,7 +96,7 @@ class BiliSession(Session):
         '''检查网页端上传结果，限网页端使用'''
         return self.post(endpoint, params={
             'output': 'json',
-            'profile': 'ugcupos/bup',
+            'profile': self.UPLOAD_PROFILE,
             'name': name,
             'uploadId': upload_id,
             'biz_id': biz_id
@@ -203,11 +207,11 @@ class BiliSession(Session):
             'name': name,
             'size': int(size),
             'r': 'upos',
-            'profile': 'ugcupos/bup',
+            'profile': self.UPLOAD_PROFILE,
             'ssl': 0,
             'version': self.BUILD_STR,
             'build': self.BUILD_NO,
-            'upcdn': 'bda2',
+            'upcdn': self.UPLOAD_CDN,
             'probe_version': self.BUILD_NO
         })
 

@@ -98,6 +98,8 @@ class BiliSession(BiliSession):
     BUILD_NO = int(BUILD_VER[0] * 1e8 + BUILD_VER[1] * 1e6 + BUILD_VER[2] * 1e2 + BUILD_VER[3])
     BUILD_STR = '.'.join(map(lambda v: str(v), BUILD_VER))    
 
+    UPLOAD_PROFILE = 'ugcfr/pc3'
+    
     DEFAULT_UA = ''
 
     MISC_MAX_TITLE_LENGTH = 80
@@ -133,7 +135,7 @@ class BiliSession(BiliSession):
             params={
                 'access_key':self.access_token,
                 'mid':self.mid,
-                'profile':'ugcfr/pc3'
+                'profile': self.UPLOAD_PROFILE
             }
         )
 

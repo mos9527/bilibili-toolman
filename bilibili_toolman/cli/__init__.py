@@ -9,12 +9,13 @@ class AttribuitedDict(dict):
         return self[name]
 pbar = None
 global_args = {    
-    'username' : {'help':'账号密码登陆 - Bilibili 账号名'},
-    'pwd' : {'help' : '账号密码登陆 - Bilibili 账号明文密码'},
-    'cookies': {'help':'Cookies 登陆 - Bilibili 所用 Cookies ( 需要 SESSDATA 及 bili_jct ) e.g.cookies=SESSDATA=cb0..; bili_jct=6750... '},
+    'username' : {'help':'PC API - 账号密码登陆 - Bilibili 账号名'},
+    'pwd' : {'help' : 'PC API - 账号密码登陆 - Bilibili 账号明文密码'},
+    'cookies': {'help':'Web API - Cookies 登陆 - Bilibili 所用 Cookies ( 需要 SESSDATA 及 bili_jct ) e.g.SESSDATA=cb0..; bili_jct=6750... '},
     'load' : {'help':'从保存的文件中拉取认证信息，作为认证方式'},
     'save' : {'help':'在输入上述认证方式之一的前提下，保存该信息于文件，并退出'},
-    'http' : {'help':'强制使用 HTTP （不推荐）','default':False,'action':'store_true'}
+    'http' : {'help':'强制使用 HTTP （不推荐）','default':False,'action':'store_true'},
+    'cdn'  : {'help':'上传用 CDN （限 Web API) （对应 网宿，七牛，百度，七牛，谷歌，百度）','choices':['ws','qn','bda2','kodo','gcs','bos'],'default':'bda2'},
 }
 local_args = {
     'opts':{'help':'解析可选参数 ，详见 --opts 格式','default':''},
