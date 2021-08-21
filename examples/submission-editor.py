@@ -5,6 +5,8 @@
 附加依赖：
 
     inquirer
+
+本 API 不限版本
 '''
 
 from inquirer.shortcuts import confirm, list_input
@@ -81,8 +83,9 @@ def main_entrance():
         @register('修改子视频内容',routines)
         def edit_sub_video():
             path = text('新视频路径')
-            ep,_ = sess.UploadVideo(path)
+            ep,bid = sess.UploadVideo(path)            
             print('新节点：',ep)
+            if bid:v.biz_id = bid
             v.video_endpoint = ep        
         while select_and_execute(routines):
             print(v)
@@ -97,4 +100,5 @@ def main_entrance():
             return False        
     while select_and_execute(routines):pass
 
-while select_and_execute(routines):pass
+if __name__ == '__main__':
+    while select_and_execute(routines):pass

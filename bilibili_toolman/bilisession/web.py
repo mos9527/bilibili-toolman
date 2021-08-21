@@ -1,5 +1,6 @@
 '''bilibili - Web API implmentation'''
 from concurrent.futures.thread import ThreadPoolExecutor
+import json
 from os import stat
 from pickle import FALSE
 from threading import Thread
@@ -65,8 +66,8 @@ class BiliSession(Session):
     def __init__(self, cookies: str = '') -> None:      
         super().__init__()
         self.LoginViaCookiesQueryString(cookies)
-        self.headers['User-Agent'] = self.DEFAULT_UA        
-    
+        self.headers['User-Agent'] = self.DEFAULT_UA       
+        
     # region Web-client APIs
     def LoginViaCookiesQueryString(self,cookies:str):
         '''设置本 Session 的 Cookies
@@ -133,6 +134,26 @@ class BiliSession(Session):
     
     def _edit_archive(self,json : dict):
         return self.post('https://member.bilibili.com/x/vu/web/edit',json=json,params={'csrf': self.cookies.get('bili_jct')})
+
+    @JSONResponse
+    def ViewPublicArchive(self,bvid):
+        '''以 BVID 获取公布作品信息
+
+        Args:
+            bvid    
+        仅适用于已发布的作品
+        '''
+        return self.get('https://api.bilibili.com/x/web-interface/view',params={'bvid':bvid})
+        
+    @JSONResponse
+    def ViewPlayerArchive(self,cid : int,bvid : str):
+        '''获取作品中子视频详情 （含字幕相关字段）
+
+        Args:
+            cid (int): cid
+            bvid (str): bvid
+        '''
+        return self.get('https://api.bilibili.com/x/player/v2',params={'cid':cid,'bvid':bvid})
 
     @JSONResponse
     def EditSubmission(self,submission : Submission):
@@ -334,8 +355,8 @@ class BiliSession(Session):
         logger.debug('上传封面图 (%s B)' % len(content))
         return self._upload_cover(content,mime)
 
-    def sub_submit_submission(self,submission : Submission):
-        return self.post("https://member.bilibili.com/x/vu/web/add", json=submission.archive, params={'csrf': self.cookies.get('bili_jct')})
+    def _submit_submission(self,archive : dict):
+        return self.post("https://member.bilibili.com/x/vu/web/add", json=archive, params={'csrf': self.cookies.get('bili_jct')})
 
     def SubmitSubmission(self, submission: Submission,seperate_parts=False):
         '''提交作品，适用于初次上传；否则请使用 `EditSubmission`
@@ -346,7 +367,7 @@ class BiliSession(Session):
         '''
         if not seperate_parts:
             logger.debug('准备提交多 P 内容: %s' % submission.title)            
-            result = self._submit_submission(submission).json()
+            result = self._submit_submission(submission.archive).json()
             return {'code:':result['code'],'results':[result]}
         else:
             results = []
@@ -354,7 +375,7 @@ class BiliSession(Session):
             for submission in submission.videos:
                 logger.debug('准备提交单 P 内容: %s' % submission.title)
                 while True:
-                    result = self._submit_submission(submission).json()
+                    result = self._submit_submission(submission.archive).json()
                     if result['code'] == 21070:
                         logger.warning('请求受限（限流），准备重试')
                         time.sleep(self.DELAY_VIDEO_SUBMISSION)
@@ -367,6 +388,88 @@ class BiliSession(Session):
                 codes += result['code'] # we want to see if its 0 or else
                 results.append(result)
             return {'code':codes,'results':results}
+
+    @JSONResponse
+    def ListReceivedSubtitles(self,page=1,size=10,status=0):
+        '''Web 端 - 枚举已收到的字幕
+
+        Args:
+            page (int, optional): 页码. Defaults to 1.
+            size (int, optional): 单页个数. Defaults to 10.
+            status (int , optional): 状态. (0=全部，2=待审核,5=已发布). Defaults to 5
+        '''
+        return self.get("https://api.bilibili.com/x/v2/dm/subtitle/search/assist",params={
+            'type':1,'status':status,'page':page,'size':size
+        })
+
+    @JSONResponse
+    def ListSubmittedSubtitles(self,page=1,size=10,status=0):
+        '''Web 端 - 枚举已投稿的字幕
+
+        Args:
+            page (int, optional): 页码. Defaults to 1.
+            size (int, optional): 单页个数. Defaults to 10.
+            status (int , optional): 状态. (0=全部，2=待审核,5=已发布). Defaults to 5
+        '''
+        return self.get("https://api.bilibili.com/x/v2/dm/subtitle/search/author/list",params={
+            'status':status,'page':page,'size':size
+        })
+
+
+    @JSONResponse
+    def SaveSubtitleDraft(self,bvid : str,biz_id : int,data:dict,lang='zh-CN',submit=True):
+        '''Web 端 - 提交、保存字幕
+
+        Args:
+            bvid (str) : bvid
+            biz (int) : 作品 cid
+            data (dict): 字幕数据 e.g. {"font_size":0.4,"font_color":"#FFFFFF","background_alpha":0.5,"background_color":"#9C27B0","Stroke":"none","body":[{"from":0,"to":5,"location":2,"content":"ts-00-05"}]}
+            lang (str, optional): 语言. Defaults to 'zh-CN'.
+            submit (bool, optional): 是否提交. Defaults to True.
+        '''
+        return self.post("https://api.bilibili.com/x/v2/dm/subtitle/draft/save",data={
+            'type':1,
+            'oid':biz_id,
+            'lan':lang,
+            'data':json.dumps(data),
+            'submit':submit,
+            'sign':False,
+            'csrf':self.cookies.get('bili_jct'),
+            'bvid':bvid
+        })
+
+
+    @JSONResponse
+    def RevokeSubtitle(self,biz_id : int,subtitle_id:int,comment:str,type=1):
+        '''Web 端 - 退回字幕
+
+        Args:
+            biz_id : 作品 cid
+            subtitle_id (int): 字幕id
+            comment (str): 退回理由
+            type (int, optional): 退回类型，未知. Defaults to 1.    
+        '''
+        return self.post("https://api.bilibili.com/x/v2/dm/subtitle/assit/audit",data={
+            'type':1,
+            'oid':biz_id,
+            'pass':False,
+            'csrf':self.cookies.get('bili_jct'),
+            'subtitle_id':subtitle_id,
+            'reject_comment':comment
+        })     
+
+    @JSONResponse
+    def GetSubtitleDetail(self,biz_id : int,subtitle_id:int):
+        '''获取字幕详情
+
+        Args:
+            biz_id : 作品 cid
+            subtitle_id (int): 字幕 id
+        '''
+        return self.get("https://api.bilibili.com/x/v2/dm/subtitle/show",params={
+            'oid':biz_id,
+            'subtitle_id':subtitle_id
+        })
     # endregion
 
     # region Pickling

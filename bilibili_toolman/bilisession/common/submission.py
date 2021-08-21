@@ -20,6 +20,7 @@ class SubmissionVideos(list):
                 submission.biz_id = video['cid']
                 submission.aid = video['aid']
                 submission.stat = video
+                submission.parent = self
             return super().append(submission)            
         elif isinstance(video,Submission):
             return super().append(video)
@@ -111,6 +112,15 @@ class Submission:
     '''status but human readable'''
     video_duration = 0
     '''duration of video'''
+    _parent = None
+    @property
+    def parent(self):
+        self._parent : Submission
+        return self._parent
+    @parent.setter
+    def parent(self,v):
+        self._parent = v
+    '''parent object. used for videos property'''
     # endregion
     def __init__(self) -> None:
         self.tags = [] # creates new instance for mutables
