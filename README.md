@@ -90,8 +90,10 @@
 - Fork 此项目
 - 在项目 Settings > Secret > New repository secret 创建：
     - Name  : USER_CRED
+    
     若使用 PC API：
     - Value : --username [ B站用户名 ] --pwd [ B站密码 ]
+
     若使用 Web API:
     - Value : --cookies [ SESSDATA=cb0..; bili_jct=6750... ]
 - 在项目 Actions > 转载 Youtube 视频 > Run Workflow 填入值
