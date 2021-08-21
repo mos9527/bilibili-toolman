@@ -1,0 +1,36 @@
+# 转载指定 Youtube视频到Bilibili
+# 使用前,在 Settings > Secrets 创建如下键值
+# USER_CRED : (登陆设置) e.g. --username [B站用户名] --pwd [B站密码]
+
+name: 转载 Youtube 视频
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: 'Youtube 视频链接'
+        required: true
+        default: ''
+      opts:
+        description: '转载设置，如 --tags 3kliksphilip,csgo,cs:go --thread_id 171 --opts "hardcode"'
+        required: false
+        default: ''
+jobs:
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    - name: Install dependencies
+      run: |
+        python -m pip install -r requirements.txt        
+    - name: Build and publish
+      env:     
+        USER_CRED : ${{ secrets.USER_CRED }}     
+      run: |
+        python -m bilibili_toolman $USER_CRED --http --youtube ${{ github.event.inputs.url }} ${{ github.event.inputs.opts }}

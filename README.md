@@ -82,6 +82,8 @@
     详见项目 README 以获取更多例程 ： github.com/greats3an/bilibili-toolman
 
 ## API / 命令行 使用说明
+### 使用 Github Actions 转载视频：
+- [reupload-video.yml](https://github.com/greats3an/bilibili-toolman/blob/master/.github/workflows/reupload-video.yml)
 ### 例程 :
 - [examples](https://github.com/greats3an/bilibili-toolman/tree/master/examples)
 - [main.py](https://github.com/greats3an/bilibili-toolman/blob/master/bilibili_toolman/cli/main.py)
