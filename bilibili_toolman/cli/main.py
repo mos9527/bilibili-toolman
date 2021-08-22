@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # region Setup
 from ..bilisession import logger
 from ..bilisession.common.submission import Submission
@@ -70,8 +71,12 @@ def upload_sources(sources : DownloadResult,arg):
             video.video_endpoint = endpoint
             video.biz_id = bid
             '''Sources identifiers'''   
-            video.copyright = Submission.COPYRIGHT_REUPLOAD if not source.original else Submission.COPYRIGHT_SELF_MADE
-            video.source = sources.soruce         
+            if not arg.original:
+                video.copyright = Submission.COPYRIGHT_REUPLOAD
+                video.source = sources.soruce         
+            else:
+                video.copyright = Submission.COPYRIGHT_ORIGINAL
+                video.source = ''
             video.thread = arg.thread_id
             video.tags = arg.tags.format_map(blocks).split(',')
             video.description = source.description

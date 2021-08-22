@@ -1,14 +1,15 @@
+# -*- coding: utf-8 -*-
 import setuptools,bilibili_toolman
 
 requirements = [
-    requirement.strip() for requirement in open('requirements.txt','r',encoding='utf-8').readlines()
+    requirement.strip() for requirement in open('requirements.txt','r').readlines()
 ]
 
 with open("README.md", "r",encoding='utf-8') as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="bilibili-toolman", # Replace with your own username
+    name="bilibili-toolman",
     version=bilibili_toolman.__version__,
     author="greats3an",
     author_email="greats3an@gmail.com",

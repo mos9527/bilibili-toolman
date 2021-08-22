@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''Content provider modules'''
 from typing import List
 
@@ -10,7 +11,7 @@ class DownloadResult:
     description : str = ''    
     soruce : str = ''
 
-    original : bool = False
+    original : bool = False # now this really is just a placeholder
     results = None
 
     extra = dict() # BAD MOVE! though this SHOULD be overwritten and not accessed

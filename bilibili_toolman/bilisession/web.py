@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''bilibili - Web API implmentation'''
 from concurrent.futures.thread import ThreadPoolExecutor
 import json

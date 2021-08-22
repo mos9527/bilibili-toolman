@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''basic submission tree model impl'''
 from re import sub
 
@@ -47,7 +48,7 @@ class SubmissionVideos(list):
 
 class Submission:
     '''Submission meta set'''
-    COPYRIGHT_SELF_MADE = 1
+    COPYRIGHT_ORIGINAL = 1
     COPYRIGHT_REUPLOAD = 2
     '''Copyright consts'''
     close_reply: bool = False

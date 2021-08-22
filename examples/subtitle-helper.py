@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''API 实例 - 字幕提交
 
 适用于 VTT，BCC（B站字幕）的互转和上传
@@ -68,7 +69,7 @@ class Subtitles(list):
                 buffer.append(line.content)
             else:            
                 new.append(SubtitleLine(round(t_last,2),round(line.t_to,2),'\n'.join(buffer + [line.content])))
-                t_last = line.t_to + 0.5
+                t_last = line.t_to + t_delta
                 buffer.clear()
         if buffer:
             new[-1].t_to = lst[-1].t_to

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''API 实例 - 稿件修改
 
 可提供 '--save' 产生的登陆态跳过登陆过程, e.g. this.py credentials.sav

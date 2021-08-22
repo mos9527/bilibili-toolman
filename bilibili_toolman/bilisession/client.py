@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''bilibili - PC API implementation'''
 from time import time
 from typing import Iterable, Optional, Text, Tuple, Union

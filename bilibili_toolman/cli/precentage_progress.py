@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 try:
     from tqdm import tqdm
     tqdm_ = tqdm(desc='↑', unit='B', unit_scale=True)  

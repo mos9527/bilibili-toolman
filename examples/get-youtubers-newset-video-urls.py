@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''获取 Youtube 最新视频链接，多个视频空格隔开'''
 import youtube_dl,argparse
 parser = argparse.ArgumentParser(description='获取 Youtuber 的最新视频')

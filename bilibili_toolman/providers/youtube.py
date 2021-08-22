@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''Youtube video provier - youtube-dl'''
 from youtube_dl.postprocessor.ffmpeg import FFmpegPostProcessor, FFmpegPostProcessorError
 from youtube_dl.utils import encodeArgument, encodeFilename, prepend_extension, shell_quote
