@@ -5,6 +5,7 @@
 
 本 API 限用 Web 版，需要 Cookies 登陆
 '''
+import re
 from typing import List
 from inquirer.shortcuts import confirm, list_input
 from requests.models import ProtocolError
@@ -21,6 +22,9 @@ if len(sys.argv) > 1:
 else:
     sess = BiliSession()
     sess.LoginViaCookiesQueryString(text("输入 Cookies e.g. SESSDATA=...;bili_jct=..."))
+
+TIMECODE = re.compile(r'\d{2}:\d{2}:\d{2}.\d{3}')
+HTMLTAGS = re.compile(r'(<[0-9a-zA-Z\/\.:]*>)')
 
 class SubtitleLine:
     @staticmethod    
@@ -47,7 +51,7 @@ class SubtitleLine:
     def __repr__(self) -> str:        
         return '%s --> %s\n%s' % (self.stamp2tag(self.t_from),self.stamp2tag(self.t_to),self.content)        
     def __dict__(self) -> dict:
-        return {'from':round(self.t_from,2),'to':round(self.t_to,2),'content':self.content,'location':self.location}
+        return {'from':round(self.t_from,2),'to':round(self.t_to,2),'content': HTMLTAGS.sub('',self.content),'location':self.location}
 
 class Subtitles(list):
     '''简单 VTT,BCC 解编码器'''
@@ -85,11 +89,11 @@ class Subtitles(list):
         if from_json:
             for line in from_json:
                 self.append(SubtitleLine(line['from'],line['to'],line['content'],line['location']))
-        elif from_vtt:
+        elif from_vtt:        
             lines,i = from_vtt.split('\n'),0            
             while i < len(lines):                
                 if '-->' in lines[i]:
-                    t_start,t_end = lines[i].split('-->')
+                    t_start,t_end = TIMECODE.findall(lines[i])
                     i+=1
                     content = []
                     while lines[i]:
@@ -153,6 +157,7 @@ def main_entrance():
     @register('编辑子视频',routines)
     def edit_sub_archive():            
         vid = list_input('选择子视频',choices=[ReprByKey(v,'part') for v in sub.pages])    
+        print(vid,'时长：',vid['duration'])
         routines = {}    
         @register('查看已有字幕',routines)
         def view_current_subs():
@@ -175,9 +180,25 @@ def main_entrance():
             lan=list_input('字幕语言',choices=['zh-CN','zh-HK','zh-TW','en-US','ja','ko'])
             fp=text('输入 VTT 格式字幕路径：')
             vsub = Subtitles(from_vtt=open(fp,encoding='utf-8').read())
+            asub = vsub.archive
+            # 检查时长
+            flag = False
+            buffer = []
+            for line in asub[::-1]:                                
+                if line['to'] > vid['duration']:
+                    line['to'] = vid['duration']                
+                    flag = True
+                if line['from'] > vid['duration']:       
+                    buffer.append(line['content'])
+                    del line                                 
+                    flag = True
+                if not flag:break              
+            if buffer:
+                asub[-1].content = [asub[-1].content] + buffer
+                asub[-1].content = '\n'.join(asub[-1].content)                
             result=sess.SaveSubtitleDraft(
                 sub.bvid,vid['cid'],
-                data={"font_size":0.4,"font_color":"#FFFFFF","background_alpha":0.5,"background_color":"#9C27B0","Stroke":"none","body":vsub.archive},
+                data={"font_size":0.4,"font_color":"#FFFFFF","background_alpha":0.5,"background_color":"#9C27B0","Stroke":"none","body":asub},
                 lang=lan
             )
             return print(result) or False
