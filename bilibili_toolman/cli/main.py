@@ -3,7 +3,7 @@
 from ..bilisession import logger
 from ..bilisession.common.submission import Submission
 from ..providers import DownloadResult
-from . import AttribuitedDict,setup_logging,prepare_temp,prase_args,sanitize_string,truncate_string,local_args as largs
+from . import AttribuitedDict,setup_logging,prepare_temp,prase_args,sanitize,truncate,local_args as largs
 import pickle,logging,sys,urllib.parse
 
 TEMP_PATH = 'temp'
@@ -44,13 +44,11 @@ def upload_sources(sources : DownloadResult,arg):
     submission = Submission()    
     if not sources:return None,True
     logging.info('上传资源数：%s' % len(sources.results))    
-    def sanitize(blocks,*a):
-        do = lambda s : truncate_string(sanitize_string(s.format_map(blocks)),sess.MISC_MAX_DESCRIPTION_LENGTH)        
-        return [do(i) for i in a]
     for source in sources.results:       
         '''If one or multipule sources'''        
-        blocks = {'title':source.title,'desc':source.description,**source.extra} # for formatting
-        title,description = sanitize(blocks,arg.title,arg.desc)
+        blocks      = {'title':source.title,'desc':source.description,**source.extra} # for formatting
+        title       = truncate(sanitize(arg.title.format_map(blocks)),sess.MISC_MAX_TITLE_LENGTH)   
+        description = truncate(sanitize(arg.desc .format_map(blocks)),sess.MISC_MAX_DESCRIPTION_LENGTH)        
         logger.info('准备上传: %s' % title)
         '''Summary trimming'''
         try:

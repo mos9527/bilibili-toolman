@@ -83,12 +83,12 @@ def _create_argparser():
         )
     return p
 
-def sanitize_string(string):
+def sanitize(string):
     # limits characters to CJK & ascii chars
     import re
     return re.sub('[^\u0000-\u007F\uac00-\ud7a3\u3040-\u30ff\u4e00-\u9FFF]*','',string) # remove emojis
 
-def truncate_string(string,max):
+def truncate(string,max):
     # truncate & add ... to string over the length of `max`
     if len(string) > max:string = string[:max-3] + '...'
     return string
