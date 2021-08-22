@@ -17,6 +17,9 @@ def JSONResponse(classfunc) -> dict:
 # endregion
 
 # common models
+class LoginException(Exception):
+    def __init__(self, resp : Response,desc='') -> None:
+        super().__init__('登陆失败：%s\n<Response %s>:%s' % (desc,resp.status_code,resp.text))
 class ReprExDict(dict): 
     '''fancy __repr__-ed dict'''
     def __repr__(self) -> str:

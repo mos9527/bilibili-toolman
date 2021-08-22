@@ -10,7 +10,7 @@ from base64 import b64encode
 import math
 
 from .web import BiliSession,logger
-from .common import FileIterator, JSONResponse , ReprExDict, file_manager, check_file 
+from .common import FileIterator, JSONResponse, LoginException , ReprExDict, file_manager, check_file 
 from .common.submission import Submission
 
 class Crypto:
@@ -248,7 +248,10 @@ class BiliSession(BiliSession):
                 'device_id':'',
                 'buvid':''
         }).signed)
-        self.login_tokens.update(resp.json()['data']['token_info'])
+        try:
+            self.login_tokens.update(resp.json()['data']['token_info'])
+        except Exception as e:
+            raise LoginException(resp,e)
         return resp
     
     def UploadVideo(self, path: str) -> Tuple[str,None]:
