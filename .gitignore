@@ -3,7 +3,7 @@ __pycache__
 *.pyc
 research
 temp*
-test*
+*test*
 dist
 *.egg-info
 build

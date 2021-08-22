@@ -102,6 +102,8 @@
 
 ### 例程 :
 - [examples](https://github.com/greats3an/bilibili-toolman/tree/master/examples)
+- - [控制台编辑稿件信息](https://github.com/greats3an/bilibili-toolman/blob/master/examples/submission-editor.py)
+- - [控制台投稿VTT字幕](https://github.com/greats3an/bilibili-toolman/blob/master/examples/subtitle-helper.py)
 - [main.py](https://github.com/greats3an/bilibili-toolman/blob/master/bilibili_toolman/cli/main.py)
 ### API 实现 ：
 - [client.py](https://github.com/greats3an/bilibili-toolman/blob/master/bilibili_toolman/bilisession/client.py)
