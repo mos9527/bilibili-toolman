@@ -79,12 +79,13 @@ def upload_sources(sources : DownloadResult,arg):
             video.tags = arg.tags.format_map(blocks).split(',')
             video.description = description
             video.title = title # This shows up as title per-part, invisible if video is single-part only
-        '''Use the last given thread,tags,cover & description per multiple uploads'''                           
-        submission.copyright = video.copyright or submission.copyright
+        '''Use the last given thread,tags,cover & description per multiple uploads'''                                       
         submission.thread = video.thread or submission.thread        
         submission.tags.extend(video.tags)
         submission.videos.append(video) # to the main submission
     '''Filling submission info'''        
+    submission.copyright = submission.COPYRIGHT_REUPLOAD if not arg.original else submission.COPYRIGHT_ORIGINAL
+    submission.no_reprint = submission.REPRINT_ALLOWED if not arg.no_reprint else submission.REPRINT_DISALLOWED
     submission.source = sources.soruce
     submission.title = title # This shows up as the main title of the submission
     submission.description = description # This is the only description that gets shown

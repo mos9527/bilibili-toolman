@@ -14,7 +14,7 @@
 
 ## 参数说明
     usage: -h [-h] [--username USERNAME] [--pwd PWD] [--cookies COOKIES] [--load LOAD] [--save SAVE] [--http] [--cdn {ws,qn,bda2,kodo,gcs,bos}] [--opts OPTS] [--thread_id THREAD_ID]
-            [--tags TAGS] [--desc DESC] [--title TITLE] [--seperate_parts] [--no_upload] [--localfile LOCALFILE-URL] [--youtube YOUTUBE-URL]
+            [--tags TAGS] [--desc DESC] [--title TITLE] [--seperate_parts] [--no_upload] [--original] [--no_reprint] [--localfile LOCALFILE-URL] [--youtube YOUTUBE-URL]
 
     使用帮助
 
@@ -24,7 +24,7 @@
     身份设置 （随方式优先级排序）:
     --username USERNAME   PC API - 账号密码登陆 - Bilibili 账号名
     --pwd PWD             PC API - 账号密码登陆 - Bilibili 账号明文密码
-    --cookies COOKIES     Web API - Cookies 登陆 - Bilibili 所用 Cookies ( 需要 SESSDATA 及 bili_jct ) e.g.cookies=SESSDATA=cb0..; bili_jct=6750...
+    --cookies COOKIES     Web API - Cookies 登陆 - Bilibili 所用 Cookies ( 需要 SESSDATA 及 bili_jct ) e.g.SESSDATA=cb0..; bili_jct=6750... 
     --load LOAD           从保存的文件中拉取认证信息，作为认证方式
     --save SAVE           在输入上述认证方式之一的前提下，保存该信息于文件，并退出
     --http                强制使用 HTTP （不推荐）
@@ -41,6 +41,7 @@
     --seperate_parts      不分P （e.g. --youtube [播放列表],--localfile [文件夹]）独立投稿（不分P）（Web上传默认不分 P）
     --no_upload           只下载资源
     --original            设置稿件为原创
+    --no_reprint          设置稿件不允许转载
 
     解析可选参数 "opts" （格式 ： [参数1]=[值1];[参数2]=[值2] (query-string)）:
     --localfile LOCALFILE-URL

@@ -47,9 +47,12 @@ class SubmissionVideos(list):
         super().__init__()
 
 class Submission:
-    '''Submission meta set'''
+    '''COPYRIGHT types'''
     COPYRIGHT_ORIGINAL = 1
     COPYRIGHT_REUPLOAD = 2
+    '''REPRINT types'''
+    REPRINT_DISALLOWED = 1
+    REPRINT_ALLOWED = 0
     '''Copyright consts'''
     close_reply: bool = False
     close_danmu: bool = False
@@ -64,8 +67,10 @@ class Submission:
     '''Description for the video'''
     title: str = ''
     '''Title for the submission'''
-    copyright: int = COPYRIGHT_REUPLOAD
+    copyright : int = COPYRIGHT_REUPLOAD
     '''Copyright type'''
+    no_reprint : int = REPRINT_ALLOWED
+    '''Reupload allowance type''' 
     source: str = ''
     '''Reupload source'''    
     thread: int = 19
@@ -144,6 +149,7 @@ class Submission:
             "desc": self.description,
             # "up_close_reply": self.close_reply,
             # "up_close_danmu": self.close_danmu
+            "no_reprint":self.no_reprint
         }        
         if self.cover_url:
             kv_pair = {**kv_pair,"cover": self.cover_url}
@@ -170,6 +176,7 @@ def create_submission_by_arc(arc : dict):
         submission.state_desc = arc['archive']['state_desc']
         submission.state = arc['archive']['state']
         submission.reject_reason = arc['archive']['reject_reason']  
+        submission.no_reprint = arc['archive']['no_reprint']
         if 'Videos' in arc:
             arc['videos'] = arc['Videos']
         submission.videos.extend(arc['videos'])
