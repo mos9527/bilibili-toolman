@@ -12,7 +12,7 @@ on:
         required: true
         default: ''
       opts:
-        description: '转载设置，如 --tags [标签,逗号隔开] --thread_id [分区 id,见 README]'
+        description: '转载设置，如 --tags [标签,半角逗号隔开] --thread_id [分区 id,见 README] e.g. --tags 游戏,单机 --thread_id 17'
         required: true
         default: ''
 jobs:
