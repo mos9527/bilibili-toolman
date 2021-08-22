@@ -355,8 +355,8 @@ class BiliSession(Session):
         logger.debug('上传封面图 (%s B)' % len(content))
         return self._upload_cover(content,mime)
 
-    def _submit_submission(self,archive : dict):
-        return self.post("https://member.bilibili.com/x/vu/web/add", json=archive, params={'csrf': self.cookies.get('bili_jct')})
+    def _submit_submission(self,submission : Submission):
+        return self.post("https://member.bilibili.com/x/vu/web/add", json=submission.archive, params={'csrf': self.cookies.get('bili_jct')})
 
     def SubmitSubmission(self, submission: Submission,seperate_parts=False):
         '''提交作品，适用于初次上传；否则请使用 `EditSubmission`
@@ -367,7 +367,7 @@ class BiliSession(Session):
         '''
         if not seperate_parts:
             logger.debug('准备提交多 P 内容: %s' % submission.title)            
-            result = self._submit_submission(submission.archive).json()
+            result = self._submit_submission(submission).json()
             return {'code:':result['code'],'results':[result]}
         else:
             results = []
@@ -375,7 +375,7 @@ class BiliSession(Session):
             for submission in submission.videos:
                 logger.debug('准备提交单 P 内容: %s' % submission.title)
                 while True:
-                    result = self._submit_submission(submission.archive).json()
+                    result = self._submit_submission(submission).json()
                     if result['code'] == 21070:
                         logger.warning('请求受限（限流），准备重试')
                         time.sleep(self.DELAY_VIDEO_SUBMISSION)
