@@ -49,7 +49,7 @@ class BiliSession(Session):
     DELAY_FETCH_UPLOAD_ID = .1
     DELAY_RETRY_UPLOAD_ID = 1
     DELAY_VIDEO_SUBMISSION = 30
-    DELAY_REPORT_PROGRESS = .5
+    DELAY_REPORT_PROGRESS = 1
 
     WORKERS_UPLOAD = 3
 
@@ -267,7 +267,7 @@ class BiliSession(Session):
                 size_all += v['length']
             cli.report_progress(read_all,size_all)
             if chunk_queue.unfinished_tasks == 0: break
-            time.sleep(0.5)
+            time.sleep(self.DELAY_REPORT_PROGRESS)
         del tConsume
         return True
 

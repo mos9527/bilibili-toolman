@@ -287,9 +287,9 @@ class BiliSession(BiliSession):
                 chunk.cookies = {
                     'PHPSESSID':preupload_token['filename']
                 }
-                yield chunk        
+                yield chunk              
         self._upload_chunks_to_endpoint_blocking(iter_chunks())        
-        # recalulating md5
+        # recalulating md5        
         md5_ = Crypto.iterable_md5(FileIterator(path,0,size))        
         file_manager.close(path)
         logger.debug('MD5: %s' % md5_)

@@ -79,7 +79,7 @@ def upload_sources(sources : DownloadResult,arg):
                 video.source = ''
             video.thread = arg.thread_id
             video.tags = arg.tags.format_map(blocks).split(',')
-            video.description = source.description
+            video.description = description
             video.title = title # This shows up as title per-part, invisible if video is single-part only
         '''Use the last given thread,tags,cover & description per multiple uploads'''                           
         submission.copyright = video.copyright or submission.copyright
@@ -99,7 +99,7 @@ def upload_sources(sources : DownloadResult,arg):
     for result in submit_result['results']:
         if result['code'] == 0:logger.info('上传成功 - BVid: %s' % result['data']['bvid'])        
         else:
-            logger.warning('上传失败: %s' % result['message'])        
+            logger.warning('%s 上传失败 : %s' % (submission,result['message']))
             dirty = True
     return submit_result,dirty
 
