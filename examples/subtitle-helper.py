@@ -21,8 +21,7 @@ if len(sys.argv) > 1:
 else:
     sess = BiliSession()
     sess.LoginViaCookiesQueryString(text("输入 Cookies e.g. SESSDATA=...;bili_jct=..."))
-sess.proxies={'http':'http://localhost:8080'}
-sess.FORCE_HTTP = True
+
 class SubtitleLine:
     @staticmethod    
     def stamp2tag(timestamp):
