@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       url:
-        description: 'Youtube 视频链接'
+        description: 'Youtube / Twitch / Twitter / etc 视频链接'
         required: true
         default: ''
       opts:

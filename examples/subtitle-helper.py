@@ -5,13 +5,14 @@
 
 本 API 限用 Web 版，需要 Cookies 登陆
 '''
+import os
 import re
 from typing import List
 from inquirer.shortcuts import confirm, list_input
 from requests.models import ProtocolError
 from bilibili_toolman.bilisession.common.submission import Submission
 from bilibili_toolman.bilisession.web import BiliSession
-from pickle import loads
+from pickle import TRUE, loads
 from inquirer import text
 import sys,json
 sess = None
@@ -22,6 +23,7 @@ if len(sys.argv) > 1:
 else:
     sess = BiliSession()
     sess.LoginViaCookiesQueryString(text("输入 Cookies e.g. SESSDATA=...;bili_jct=..."))
+sess.FORCE_HTTP = True
 
 TIMECODE = re.compile(r'\d{2}:\d{2}:\d{2}.\d{3}')
 HTMLTAGS = re.compile(r'(<[0-9a-zA-Z\/\.:]*>)')
@@ -178,7 +180,28 @@ def main_entrance():
         @register('上传字幕',routines)
         def upload_sub():            
             lan=list_input('字幕语言',choices=['zh-CN','zh-HK','zh-TW','en-US','ja','ko'])
-            fp=text('输入 VTT 格式字幕路径：')
+            fp=text('输入 VTT 格式字幕路径')
+            if not fp:
+                if confirm('使用 Youtube 字幕?'):
+                    url=text('输入 Youtube 链接：')                  
+                    vtt = [f for f in os.listdir() if 'sub-temp' in f]
+                    if vtt:os.remove(vtt[0]) # 删除曾用缓存
+                    import youtube_dl
+                    ydl = youtube_dl.YoutubeDL(params={
+                        'skip_download':True,
+                        'writesubtitles':True,
+                        'writeautomaticsub':True,
+                        'outtmpl':'sub-temp'
+                    })
+                    ydl.download([url])
+                    vtt = [f for f in os.listdir() if 'sub-temp' in f]
+                    if vtt:
+                        fp = vtt[0]
+                    else:
+                        print('字幕下载失败')
+                        return False
+                else:
+                    return False
             vsub = Subtitles(from_vtt=open(fp,encoding='utf-8').read())
             asub = vsub.archive
             # 检查时长
