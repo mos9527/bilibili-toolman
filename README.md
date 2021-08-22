@@ -40,6 +40,7 @@
     --title TITLE         标题格式 e.g. "[Youtube] {title} (其他变量详见下文)"
     --seperate_parts      不分P （e.g. --youtube [播放列表],--localfile [文件夹]）独立投稿（不分P）（Web上传默认不分 P）
     --no_upload           只下载资源
+    --original            设置稿件为原创
 
     解析可选参数 "opts" （格式 ： [参数1]=[值1];[参数2]=[值2] (query-string)）:
     --localfile LOCALFILE-URL
