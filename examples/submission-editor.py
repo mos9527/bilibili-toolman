@@ -7,7 +7,7 @@
 
     inquirer
 
-本 API 不限版本
+除【删除稿件】限 PC端 API 外，其余 API 不限版本,
 '''
 
 from inquirer.shortcuts import confirm, list_input
