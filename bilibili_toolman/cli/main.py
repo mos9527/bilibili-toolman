@@ -14,7 +14,7 @@ def download_sources(provider,arg) -> DownloadResult:
     opts = arg.opts
     try:
         opts = urllib.parse.parse_qs(opts,keep_blank_values=True)
-        provider.update_config({k:v[-1] for k,v in opts.items()})
+        provider.update_config({k:v[-1].replace(';','') for k,v in opts.items()}) # shouldnt you use & anyways?
     except:opts = '无效选项'
     '''Passing options'''
     logger.info('下载源视频')
@@ -55,11 +55,11 @@ def upload_sources(sources : DownloadResult,arg):
             endpoint, bid = sess.UploadVideo(source.video_path)
             cover_url = sess.UploadCover(source.cover_path)['data']['url'] if source.cover_path else ''
         except Exception as e:
-            logger.critical('上传失败! - %s' % e)
-            return [],True
+            logger.critical('%s 上传失败! - %s - 跳过' % (source,e))            
+            continue
         if not endpoint:
-            logger.critical('URI 获取失败!')
-            return [],True
+            logger.critical('URI 获取失败 - 跳过')
+            continue
         logger.info('资源已上传')
         from bilibili_toolman.cli import precentage_progress
         precentage_progress.close()

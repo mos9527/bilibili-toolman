@@ -28,5 +28,8 @@ class DownloadResult:
     def __enter__(self):        
         return DownloadResult()
     def __exit__(self,*args):pass
+
+    def __repr__(self) -> str:
+        return '< title : %s , src : %s>' % (self.title,self.soruce)
 from . import youtube as provider_youtube
 from . import localfile as provider_localfile
