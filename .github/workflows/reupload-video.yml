@@ -18,7 +18,7 @@ on:
       ydl_opts:
         description: 'Youtube-DL 设置，默认设置使用 aria2 下载；遇到限流可考虑添加 format=best'
         required: false
-        default: 'external_downloader=aria2c;'
+        default: 'external_downloader=aria2c'
 
 jobs:
   deploy:
