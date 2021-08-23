@@ -2,7 +2,7 @@
 # 使用前,在 Settings > Secrets 创建如下键值
 # USER_CRED : (登陆设置) e.g. --username [B站用户名] --pwd [B站密码]
 
-name: 转载 Youtube 视频
+name: 转载视频
 
 on:
   workflow_dispatch:
@@ -15,6 +15,11 @@ on:
         description: '转载设置，如 --tags [标签,半角逗号隔开] --thread_id [分区 id,见 README] e.g. --tags 游戏,单机 --thread_id 17'
         required: true
         default: ''
+      ydl_opts:
+        description: 'Youtube-DL 设置，默认设置使用 aria2 下载；遇到限流可考虑添加 format=best'
+        required: false
+        default: 'external_downloader=aria2c;'
+
 jobs:
   deploy:
 
@@ -30,8 +35,10 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install -r requirements.txt        
+    - name: Install external downloader (aria2c)
+      run: sudo apt-get install aria2c
     - name: Begin Reuploading      
       env:     
         USER_CRED : ${{ secrets.USER_CRED }}     
       run: |
-        python -m bilibili_toolman $USER_CRED --http --youtube ${{ github.event.inputs.url }} ${{ github.event.inputs.opts }}
+        python -m bilibili_toolman $USER_CRED --http --youtube ${{ github.event.inputs.url }} ${{ github.event.inputs.opts }} --opts "${{ github.event.inputs.ydl_opts }}"
