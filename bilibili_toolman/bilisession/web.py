@@ -13,6 +13,12 @@ import math,time,mimetypes,base64
 from .common import JSONResponse , FileIterator, ReprExDict , file_manager , chunk_queue , check_file
 from .common.submission import Submission , create_submission_by_arc
 
+def WebOnlyAPI(_classmethod):
+    def wrapper(self,*a,**k):
+        assert type(self) == BiliSession,"限 Web API 使用"
+        return _classmethod(self,*a,**k)
+    return wrapper     
+
 class WebUploadChunk(FileIterator):
     url_endpoint : str
     params : dict
@@ -56,20 +62,20 @@ class BiliSession(Session):
     MISC_MAX_TITLE_LENGTH = 80
     MISC_MAX_DESCRIPTION_LENGTH = 2000
 
-    FORCE_HTTP = False
+    FORCE_HTTP = False   
 
     def request(self, method: str, url,*a,**k):
         if self.FORCE_HTTP and url[:5] == 'https':
             url='http' + url[5:]                                   
         return super().request(method, url,*a,**k)
 
-
     def __init__(self, cookies: str = '') -> None:      
         super().__init__()
         self.LoginViaCookiesQueryString(cookies)
         self.headers['User-Agent'] = self.DEFAULT_UA       
         
-    # region Web-client APIs
+    # region Web-client APIs    
+    @WebOnlyAPI
     def LoginViaCookiesQueryString(self,cookies:str):
         '''设置本 Session 的 Cookies
 
@@ -389,7 +395,8 @@ class BiliSession(Session):
                 codes += result['code'] # we want to see if its 0 or else
                 results.append(result)
             return {'code':codes,'results':results}
-
+    
+    @WebOnlyAPI
     @JSONResponse
     def ListReceivedSubtitles(self,page=1,size=10,status=0):
         '''Web 端 - 枚举已收到的字幕
@@ -403,6 +410,7 @@ class BiliSession(Session):
             'type':1,'status':status,'page':page,'size':size
         })
 
+    @WebOnlyAPI
     @JSONResponse
     def ListSubmittedSubtitles(self,page=1,size=10,status=0):
         '''Web 端 - 枚举已投稿的字幕
@@ -416,7 +424,7 @@ class BiliSession(Session):
             'status':status,'page':page,'size':size
         })
 
-
+    @WebOnlyAPI
     @JSONResponse
     def SaveSubtitleDraft(self,bvid : str,biz_id : int,data:dict,lang='zh-CN',submit=True):
         '''Web 端 - 提交、保存字幕
@@ -439,7 +447,7 @@ class BiliSession(Session):
             'bvid':bvid
         })
 
-
+    @WebOnlyAPI
     @JSONResponse
     def RevokeSubtitle(self,biz_id : int,subtitle_id:int,comment:str,type=1):
         '''Web 端 - 退回字幕
@@ -459,6 +467,7 @@ class BiliSession(Session):
             'reject_comment':comment
         })     
 
+    @WebOnlyAPI
     @JSONResponse
     def GetSubtitleDetail(self,biz_id : int,subtitle_id:int):
         '''获取字幕详情

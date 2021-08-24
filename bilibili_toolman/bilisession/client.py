@@ -10,9 +10,15 @@ from hashlib import md5
 from base64 import b64encode
 import math
 
-from .web import BiliSession,logger
+from .web import BiliSession as WebBiliSession,logger
 from .common import FileIterator, JSONResponse, LoginException , ReprExDict, file_manager, check_file 
 from .common.submission import Submission
+
+def PCOnlyAPI(_classmethod):
+    def wrapper(self,*a,**k):
+        assert type(self) == BiliSession,"限 PC API 使用"
+        return _classmethod(self,*a,**k)
+    return wrapper     
 
 class Crypto:
     '''THANK YOU! https://github.com/FortuneDayssss/BilibiliUploader'''
@@ -91,7 +97,7 @@ class ClientUploadChunk(FileIterator):
             except Exception as e:
                 logger.warning('第 %s 次重试时：%s' % (retries,e))
 
-class BiliSession(BiliSession):
+class BiliSession(WebBiliSession):
     '''哔哩哔哩上传助手 API'''
     # this part reused A LOT of old code, some can still be replaced with thier PC counterparts 
     UPLOAD_CHUNK_SIZE = 2 * (1 << 20)    
@@ -214,9 +220,7 @@ class BiliSession(BiliSession):
                 'version': self.BUILD_STR,
             })
 
-    def LoginViaCookiesQueryString(self, cookies: str):
-        raise NotImplementedError("Not available for Client APIs!")
-
+    @PCOnlyAPI
     @JSONResponse
     def DeleteArchive(self,bvid):
         '''删除作品
@@ -226,6 +230,7 @@ class BiliSession(BiliSession):
         '''
         return self._delete_archive(bvid)
 
+    @PCOnlyAPI
     @JSONResponse
     def LoginViaUsername(self, username: str, password: str):
         '''用户名密码登陆

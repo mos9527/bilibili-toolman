@@ -45,8 +45,12 @@ def register(key,calltable):
 def select_and_execute(from_calltable):
     choices={**from_calltable,'退出':lambda:False}
     choice = list_input('',choices=choices)
-    result = choices[choice]()
+    try:
+        result = choices[choice]()
+    except:
+        result = False
     return result == None or result
+
 routines = {}
 @register('选择作品',routines)
 def main_entrance():
@@ -96,6 +100,7 @@ def main_entrance():
         return False            
     @register('删除作品',routines)
     def delete_archive():
+        assert type(sess) == BiliSession,"限 PC 客户端"
         if confirm('该操作不可逆，确定？'):
             print(sess.DeleteArchive(sub.bvid))
             return False        

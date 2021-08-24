@@ -2,7 +2,7 @@
 __pycache__
 *.pyc
 research
-temp*
+*temp*
 *test*
 dist
 *.egg-info

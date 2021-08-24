@@ -23,10 +23,12 @@ if len(sys.argv) > 1:
 else:
     sess = BiliSession()
     sess.LoginViaCookiesQueryString(text("输入 Cookies e.g. SESSDATA=...;bili_jct=..."))
+assert type(sess) == BiliSession,"限 Web API"
 sess.FORCE_HTTP = True
 
 TIMECODE = re.compile(r'\d{2}:\d{2}:\d{2}.\d{3}')
 HTMLTAGS = re.compile(r'(<[0-9a-zA-Z\/\.:]*>)')
+UTUBEURL = re.compile(r'(https?\:\/\/)?((www\.)?youtube\.com|youtu\.?be)\/.*',re.MULTILINE)
 
 class SubtitleLine:
     @staticmethod    
@@ -133,11 +135,13 @@ def register(key,calltable):
         calltable[key] = func
         return func
     return wrapper
-
 def select_and_execute(from_calltable):
     choices={**from_calltable,'退出':lambda:False}
     choice = list_input('',choices=choices)
-    result = choices[choice]()
+    try:
+        result = choices[choice]()
+    except:
+        result = False
     return result == None or result
 routines = {}
 @register('选择作品',routines)
@@ -163,6 +167,7 @@ def main_entrance():
         routines = {}    
         @register('查看已有字幕',routines)
         def view_current_subs():
+            routines = {}
             vs = sess.ViewPlayerArchive(vid['cid'],sub.bvid)['data']['subtitle']['subtitles']
             if not vs:return print('无字幕') or False
             v = list_input('选择字幕',choices=[ReprByKey(i,'lan_doc') for i in vs])
@@ -176,14 +181,22 @@ def main_entrance():
             def revoke_sub():
                 t = text('撤回理由')
                 result=sess.RevokeSubtitle(vid['cid'],v['id'],t)                
-                return print(result) or False                
+                return print(result) or False           
+            while select_and_execute(routines):pass     
         @register('上传字幕',routines)
         def upload_sub():            
-            lan=list_input('字幕语言',choices=['zh-CN','zh-HK','zh-TW','en-US','ja','ko'])
+            lan=list_input('字幕语言',choices=['en-US','zh-CN','zh-HK','zh-TW','ja','ko'])
             fp=text('输入 VTT 格式字幕路径')
             if not fp:
-                if confirm('使用 Youtube 字幕?'):
-                    url=text('输入 Youtube 链接：')                  
+                if not confirm('跳过使用 Youtube 字幕?'):
+                    url=text('输入 Youtube 链接')              
+                    if not url:
+                        # try to scrape it from... the description?   
+                        results = UTUBEURL.search(sub.desc)                        
+                        if results:
+                            url = results.group()
+                            if confirm('跳过使用找到的 URL [%s]?' % url):return False
+                        else:return False
                     vtt = [f for f in os.listdir() if 'sub-temp' in f]
                     if vtt:os.remove(vtt[0]) # 删除曾用缓存
                     import youtube_dl
