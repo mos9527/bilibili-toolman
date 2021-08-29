@@ -40,4 +40,4 @@ jobs:
       env:     
         USER_CRED : ${{ secrets.USER_CRED }}     
       run: |
-        python -m bilibili_toolman $USER_CRED --http --youtube ${{ github.event.inputs.url }} ${{ github.event.inputs.opts }} --opts "${{ github.event.inputs.ydl_opts }}"
+        python -m bilibili_toolman $USER_CRED --http --youtube "${{ github.event.inputs.url }}" ${{ github.event.inputs.opts }} --opts "${{ github.event.inputs.ydl_opts }}"
