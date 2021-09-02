@@ -94,7 +94,7 @@
     - Name  : USER_CRED
     
     若使用 PC API：
-    - Value : --username [ B站用户名 ] --pwd [ B站密码 ]
+    - Value : --username [ B站手机号或用户名（非昵称）] --pwd [ B站密码 ]
 
     若使用 Web API:
     - Value : --cookies [ SESSDATA=cb0..; bili_jct=6750... ]
