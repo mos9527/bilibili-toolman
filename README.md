@@ -96,7 +96,7 @@
     若使用 PC API：
     - Value : --username [ B站手机号或用户名（非昵称）] --pwd [ B站密码 ]
 
-    若使用 Web API:
+    若使用 Web API（不推荐，Actions 日志会明文显示）:
     - Value : --cookies [ SESSDATA=cb0..; bili_jct=6750... ]
 - 在项目 Actions > 转载 Youtube 视频 > Run Workflow 填入值
 - 运行即可
