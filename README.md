@@ -2,7 +2,7 @@
 搬运各大(yt-dlp支持的)网站的视频资源到 Bilibili
 
 # 亮点
-- PC 端 （账号密码），Web 端 (Cookies) 多 API 实现
+- ~~ PC 端 （账号密码） (broken) ~~，Web 端 (Cookies) 多 API 实现
 - 多 P 上传 (PC 端 API)
 - 多线程上传
 - 自定义编码流水线
