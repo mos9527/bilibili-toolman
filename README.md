@@ -117,7 +117,7 @@
 
 [分区数据，API 参考 · Passkou/bilibili_api](https://github.com/Passkou/bilibili_api "Passkou · bilibili_api")
 
-[Youtube 解析 · ytdl-org/yt-dlp](https://github.com/ytdl-org/yt-dlp "ytdl-org · yt-dlp")
+[Youtube 解析 · yt-dlp/yt-dlp](https://github.com/yt-dlp/yt-dlp "yt-dlp · yt-dlp")
 
 # 分区表
 
