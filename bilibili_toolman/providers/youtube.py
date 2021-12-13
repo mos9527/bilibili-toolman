@@ -131,7 +131,7 @@ def download_video(res) -> DownloadResult:
                 result.soruce = entry['webpage_url']
                 result.video_path = '%s.%s'%(entry['display_id'],entry['ext'])
                 '''For both total results and local sub-results'''
-                results.cover_path = result.cover_path = '%s.%s'%(entry['display_id'],'jpg')            
+                results.cover_path = result.cover_path = '%s.%s'%(entry['display_id'],'webp')            
                 date = __to_yyyy_mm_dd(entry['upload_date'])
                 results.description = result.description = f'''作者 : {entry['uploader']} [{date} 上传]
 
