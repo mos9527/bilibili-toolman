@@ -24,6 +24,7 @@ class WebUploadChunk(FileIterator):
     params : dict
     headers : dict    
     session : Session
+
     
     def upload_via_session(self,session = None):
         for retries in range(1,BiliSession.RETRIES_UPLOAD_ID+1):
@@ -70,7 +71,7 @@ class BiliSession(Session):
         return super().request(method, url,*a,**k)
 
     def __init__(self, cookies: str = '') -> None:      
-        super().__init__()
+        Session.__init__(self)
         self.LoginViaCookiesQueryString(cookies)
         self.headers['User-Agent'] = self.DEFAULT_UA       
         

@@ -1,5 +1,5 @@
 # bilibili-toolman 哔哩哔哩搬运工具
-搬运各大(youtube-dl支持的)网站的视频资源到 Bilibili
+搬运各大(yt-dlp支持的)网站的视频资源到 Bilibili
 
 # 亮点
 - PC 端 （账号密码），Web 端 (Cookies) 多 API 实现
@@ -50,10 +50,10 @@
                                 cover (str) - 封面图片路径
                             e.g. --localfile "le videos/" --opts cover="le cover.png" --tags ...
     --youtube YOUTUBE-URL
-                            Youtube / Twitch / etc 视频下载 (youtube-dl)
-                            参数:youtube-dl 参数：
-                                format (str) - 同 youtube-dl -f
-                                quite (True,False) - 是否屏蔽 youtube-dl 日志 (默认 False)
+                            Youtube / Twitch / etc 视频下载 (yt-dlp)
+                            参数:yt-dlp 参数：
+                                format (str) - 同 yt-dlp -f
+                                quite (True,False) - 是否屏蔽 yt-dlp 日志 (默认 False)
                             特殊参数：
                                 hardcode - 烧入硬字幕选项
                                     e.g. 启用    ..;hardcode;...
@@ -117,7 +117,7 @@
 
 [分区数据，API 参考 · Passkou/bilibili_api](https://github.com/Passkou/bilibili_api "Passkou · bilibili_api")
 
-[Youtube 解析 · ytdl-org/youtube-dl](https://github.com/ytdl-org/youtube-dl "ytdl-org · youtube-dl")
+[Youtube 解析 · ytdl-org/yt-dlp](https://github.com/ytdl-org/yt-dlp "ytdl-org · yt-dlp")
 
 # 分区表
 

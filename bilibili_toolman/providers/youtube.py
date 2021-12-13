@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-'''Youtube video provier - youtube-dl'''
-from youtube_dl.postprocessor.ffmpeg import FFmpegPostProcessor, FFmpegPostProcessorError
-from youtube_dl.utils import encodeArgument, encodeFilename, prepend_extension, shell_quote
+'''Youtube video provier - yt-dlp'''
+from yt_dlp.postprocessor.ffmpeg import FFmpegPostProcessor, FFmpegPostProcessorError
+from yt_dlp.utils import encodeArgument, encodeFilename, prepend_extension, shell_quote
 from . import DownloadResult
-import logging,youtube_dl,os,subprocess,sys
-__desc__ = '''Youtube / Twitch / etc 视频下载 (youtube-dl)'''
-__cfg_help__ = '''youtube-dl 参数：
-    format (str) - 同 youtube-dl -f
-    quite (True,False) - 是否屏蔽 youtube-dl 日志 (默认 False)
+import logging,yt_dlp,os,subprocess,sys
+__desc__ = '''Youtube / Twitch / etc 视频下载 (yt-dlp)'''
+__cfg_help__ = '''yt-dlp 参数：
+    format (str) - 同 yt-dlp -f
+    quite (True,False) - 是否屏蔽 yt-dlp 日志 (默认 False)
 特殊参数：
     hardcode - 烧入硬字幕选项
         e.g. 启用    ..;hardcode;...
@@ -32,8 +32,8 @@ e.g. --youtube "..." --opts "format=best;quiet=True;hardcode" --tags ...
 默认配置：不烧入字幕，下载最高质量音视频，下载字幕但不操作
 '''
 ydl = None
-logger = logging.getLogger('youtube')
-youtube_dl.utils.std_headers['User-Agent'] = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
+logger = logging.getLogger('yt-dlp')
+yt_dlp.utils.std_headers['User-Agent'] = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
 params = {
     'logger':logger,
     'outtmpl':'%(id)s.%(ext)s',
@@ -49,7 +49,7 @@ def update_config(cfg):
     if 'hardcode' in cfg: # private implementation of hardcoding subtitles                    
         hardcodeSettings = HardcodeSettings(from_cmd=cfg['hardcode'])
         del cfg['hardcode']        
-    ydl = youtube_dl.YoutubeDL({**params,**cfg})    
+    ydl = yt_dlp.YoutubeDL({**params,**cfg})    
     if hardcodeSettings:
         ydl.add_post_processor(HardcodeSubProcesser(ydl,hardcodeSettings))
 

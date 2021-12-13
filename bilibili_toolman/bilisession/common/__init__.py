@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+
 from threading import Lock
 from typing import Tuple
 from requests import Session
@@ -58,12 +59,14 @@ class FileManager(dict):
 
 class FileIterator():
     '''__iter__ impl for `FileManager` with i/o usage monitoring'''
+    tell = None 
+
     def __init__(self, path, start, end) -> None:
         self.path, self.start, self.end = path, start, end
 
     def __getattr__(self,name): # defining fallback
         return {}
-
+    
     def __iter__(self):
         start = self.start
         for start in range(self.start, self.end, FileManager.CHUNK_SIZE):
@@ -76,7 +79,8 @@ class FileIterator():
 
     def to_bytes(self):
         buffer = bytearray()
-        for chunk in self:buffer.extend(chunk)
+        for chunk in self:
+            buffer.extend(chunk)
         return buffer
 
 def get_timestamp() -> int:

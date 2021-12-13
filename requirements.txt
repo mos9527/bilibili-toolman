@@ -1,5 +1,5 @@
 requests
 pycryptodome
 coloredlogs
-youtube-dl
+yt-dlp
 tqdm

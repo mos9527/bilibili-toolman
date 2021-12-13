@@ -199,8 +199,8 @@ def main_entrance():
                         else:return False
                     vtt = [f for f in os.listdir() if 'sub-temp' in f]
                     if vtt:os.remove(vtt[0]) # 删除曾用缓存
-                    import youtube_dl
-                    ydl = youtube_dl.YoutubeDL(params={
+                    import yt_dlp
+                    ydl = yt_dlp.YoutubeDL(params={
                         'skip_download':True,
                         'writesubtitles':True,
                         'writeautomaticsub':True,
