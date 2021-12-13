@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 '''Youtube video provier - yt-dlp'''
 from yt_dlp.postprocessor.ffmpeg import FFmpegPostProcessor, FFmpegPostProcessorError
+from yt_dlp.postprocessor.embedthumbnail import FFmpegThumbnailsConvertorPP
 from yt_dlp.utils import encodeArgument, encodeFilename, prepend_extension, shell_quote
 from . import DownloadResult
 import logging,yt_dlp,os,subprocess,sys
@@ -39,7 +40,7 @@ params = {
     'outtmpl':'%(id)s.%(ext)s',
     'format':'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',    
     'writethumbnail':True,
-    'writesubtitles':True,   
+    'writesubtitles':True,     
 } # default params,can be overridden
 def __to_yyyy_mm_dd(date):
     return date[:4] + '/' + date[4:6] + '/' + date[6:] 
@@ -50,6 +51,7 @@ def update_config(cfg):
         hardcodeSettings = HardcodeSettings(from_cmd=cfg['hardcode'])
         del cfg['hardcode']        
     ydl = yt_dlp.YoutubeDL({**params,**cfg})    
+    ydl.add_post_processor(FFmpegThumbnailsConvertorPP(ydl,format='png'))
     if hardcodeSettings:
         ydl.add_post_processor(HardcodeSubProcesser(ydl,hardcodeSettings))
 
@@ -131,7 +133,10 @@ def download_video(res) -> DownloadResult:
                 result.soruce = entry['webpage_url']
                 result.video_path = '%s.%s'%(entry['display_id'],entry['ext'])
                 '''For both total results and local sub-results'''
-                results.cover_path = result.cover_path = '%s.%s'%(entry['display_id'],'webp')            
+                results.cover_path = result.cover_path = '%s.%s'%(entry['display_id'],'png')            
+                if not os.path.isfile(results.cover_path):
+                    logger.error('Thumbnail not found. Discarding info.')
+                    results.cover_path = ''
                 date = __to_yyyy_mm_dd(entry['upload_date'])
                 results.description = result.description = f'''作者 : {entry['uploader']} [{date} 上传]
 
