@@ -364,7 +364,7 @@ class BiliSession(Session):
         return self._upload_cover(content,mime)
 
     def _submit_submission(self,submission : Submission):
-        return self.post("https://member.bilibili.com/x/vu/web/add", json=submission.archive, params={'csrf': self.cookies.get('bili_jct')})
+        return self.post("https://member.bilibili.com/x/vu/web/add/v3", json=submission.archive, params={'csrf': self.cookies.get('bili_jct')})
 
     def SubmitSubmission(self, submission: Submission,seperate_parts=False):
         '''提交作品，适用于初次上传；否则请使用 `EditSubmission`
