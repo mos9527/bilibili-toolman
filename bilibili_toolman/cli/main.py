@@ -124,9 +124,9 @@ def setup_session():
             logger.error('Cookies无效: %s' % self_['message'])        
             return False
         logger.warning('ID:%s' % self_['data']['uname'])
-        for task,arg in local_args:
-            arg['seperate_parts'] = True
-        logger.warning('Web端 API 无法进行多 P 上传！多P项目将被分为多个视频')  
+        # for task,arg in local_args:
+        #     arg['seperate_parts'] = True
+        # logger.warning('Web端 API 无法进行多 P 上传！多P项目将被分为多个视频')  
         return True
     elif global_args.load:    
         unpickled = pickle.loads(open(global_args.load,'rb').read())
