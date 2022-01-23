@@ -36,6 +36,7 @@ class SubmissionVideos(list):
             "filename": video.video_endpoint,
             "title": video.title,
             "desc": video.description,
+            "cid":video.biz_id
         } for video in target]
 
     def __init__(self,parent=None):
@@ -155,7 +156,10 @@ class Submission:
             kv_pair = {**kv_pair,"cover": self.cover_url}
         return kv_pair
     def __repr__(self) -> str:
-        return '< bvid : "%s" , title : "%s", desc : "%s" , video_endpoint : "%s" >' % (self.bvid,self.title,self.description,self.video_endpoint)
+        return '< bvid : "%s" , title : "%s", desc : "%s" , video_endpoint : "%s" >' % (
+            self.bvid,self.title,self.description,
+            self.video_endpoint or ','.join([video.video_endpoint for video in self.videos])
+        )
 def create_submission_by_arc(arc : dict):
     '''Generates a `Submission` object via a `arc` dict'''
     with Submission() as submission:
