@@ -2,8 +2,8 @@
 搬运各大(yt-dlp支持的)网站的视频资源到 Bilibili
 
 # 亮点
-- ~~PC 端 （账号密码） (broken)~~ ，Web 端 (Cookies) 多 API 实现
-- 多 P 上传 (PC 端 API)
+- ~~PC 端 （账号密码） (已作废)~~ ，Web 端 (Cookies) 实现
+- 多 P 上传
 - 多线程上传
 - 自定义编码流水线
 - ...
@@ -91,13 +91,13 @@
 #### 使用：
 - Fork 此项目
 - 在项目 Settings > Secret > New repository secret 创建：
-    - Name  : USER_CRED
-    
-   ~~若使用 PC API~~： 
-    - Value : --username [ B站手机号或用户名（非昵称）] --pwd [ B站密码 ]
+    - Name  : USER_CRED        
+    - 若使用 Web API:
 
-    若使用 Web API:
-    - Value : --cookies SESSDATA=cb0..; bili_jct=6750...
+            Value : --cookies 'SESSDATA=cb0..; bili_jct=6750...'
+   
+   - <strike>(作废）若使用 PC API： 
+    - Value : --username [ B站手机号或用户名（非昵称）] --pwd [ B站密码 ]</strike>    
 - 在项目 Actions > 转载 Youtube 视频 > Run Workflow 填入值
 - 运行即可
 
