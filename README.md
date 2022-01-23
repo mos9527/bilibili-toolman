@@ -94,8 +94,8 @@
     - Name  : USER_CRED        
     - 若使用 Web API:
 
-            Value : --cookies 'SESSDATA=cb0..; bili_jct=6750...'
-   
+            Value : SESSDATA=cb0..; bili_jct=6750...
+   即填入 Cookies
    - <strike>(作废）若使用 PC API： 
     - Value : --username [ B站手机号或用户名（非昵称）] --pwd [ B站密码 ]</strike>    
 - 在项目 Actions > 转载 Youtube 视频 > Run Workflow 填入值
