@@ -24,7 +24,7 @@ class Crypto:
     '''THANK YOU! https://github.com/FortuneDayssss/BilibiliUploader'''
     APPKEY = '661dbf0ee792f083'
     APPSECRET = '397c810e126bfbbb584667583e11976a'
-    
+    # thx x69dbg ( ͡° ͜ʖ ͡°)
     @staticmethod
     def iterable_md5(stream : Iterable) -> str:
         md5_ = md5()
@@ -101,7 +101,7 @@ class BiliSession(WebBiliSession):
     '''哔哩哔哩上传助手 API'''
     # this part reused A LOT of old code, some can still be replaced with thier PC counterparts 
     UPLOAD_CHUNK_SIZE = 2 * (1 << 20)    
-    BUILD_VER = (2, 3, 0,1066)
+    BUILD_VER = (2, 3, 0,1073)
     BUILD_NO = int(BUILD_VER[0] * 1e8 + BUILD_VER[1] * 1e6 + BUILD_VER[2] * 1e2 + BUILD_VER[3])
     BUILD_STR = '.'.join(map(lambda v: str(v), BUILD_VER))    
 
@@ -248,7 +248,7 @@ class BiliSession(WebBiliSession):
         Returns:
             dict
         '''
-        raise DeprecationWarning # sorry bud.        
+        raise DeprecationWarning("Deprecated by %s. Use SMS login instead."  % self.BUILD_STR)
         oauth_json = self._oauth2_getkey()
         resp = self.post(
             "https://passport.bilibili.com/x/passport-login/oauth2/login",
@@ -294,6 +294,7 @@ class BiliSession(WebBiliSession):
         }).signed)
         try:
             self.login_tokens['captcha_key'] = resp.json()['data']['captcha_key']
+            assert self.login_tokens['captcha_key']               
         except Exception as e:
             raise LoginException(resp,e)        
         return resp
@@ -311,7 +312,7 @@ class BiliSession(WebBiliSession):
         Returns:
             dict
         '''
-        assert 'captcha_key' in self.login_tokens,"`RenewSMSCaptcha` not called or failed."
+        assert self.login_tokens.get('captcha_key',None),"`RenewSMSCaptcha` not called or failed."
         resp = self.post(
             "https://passport.bilibili.com/x/passport-login/login/sms",
             data=SingableDict({
@@ -378,11 +379,7 @@ class BiliSession(WebBiliSession):
 
     # region Pickling
     def __dict__(self):
-        return {
-            'cookies':self.cookies,
-            'login_tokens':self.login_tokens,
-            'session':self
-        }
+        return {'cookies':self.cookies,'login_tokens':self.login_tokens,'session':self}
     
     def update(self,state_dict : dict):
         self.cookies = state_dict['cookies']        

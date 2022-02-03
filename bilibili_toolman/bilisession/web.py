@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 '''bilibili - Web API implmentation'''
 from concurrent.futures.thread import ThreadPoolExecutor
-import json
-from os import stat
-from pickle import FALSE
+import json,pickle,gzip
 from threading import Thread
 from requests import Session
 from typing import List, Tuple
@@ -496,4 +494,14 @@ class BiliSession(Session):
     
     def update(self,state_dict : dict):
         self.cookies = state_dict['cookies']        
+    
+    def to_bytes(self):                
+        return gzip.compress(pickle.dumps(self.__dict__()))
+
+    @staticmethod
+    def from_bytes(b : bytes):
+        unpickled = pickle.loads(gzip.decompress(b))
+        sess = unpickled['session']
+        sess.update(unpickled)
+        return sess
     # endregion

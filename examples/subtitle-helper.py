@@ -9,20 +9,21 @@ import os
 import re
 from typing import List
 from inquirer.shortcuts import confirm, list_input
-from requests.models import ProtocolError
-from bilibili_toolman.bilisession.common.submission import Submission
 from bilibili_toolman.bilisession.web import BiliSession
-from pickle import TRUE, loads
 from inquirer import text
-import sys,json
+import sys,base64
 sess = None
+def print_usage_and_quit():
+    print('usage : python submission-editor.py 登陆凭据')
+    print('        详情见 README / 准备凭据')
 if len(sys.argv) > 1:
-    loaded = loads(open(sys.argv[1],'rb').read())
-    sess : BiliSession = loaded['session']
-    sess.update(loaded)
+    try:
+        sess = BiliSession.from_bytes(base64.b64decode(sys.argv[1]))
+    except Exception as e:        
+        print(e)
+        print_usage_and_quit()        
 else:
-    sess = BiliSession()
-    sess.LoginViaCookiesQueryString(text("输入 Cookies e.g. SESSDATA=...;bili_jct=..."))
+    print_usage_and_quit() 
 assert type(sess) == BiliSession,"限 Web API"
 sess.FORCE_HTTP = True
 

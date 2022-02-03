@@ -9,14 +9,13 @@ class AttribuitedDict(dict):
     def __getattr__(self,name):
         return self[name]
 pbar = None
-global_args = {    
-    'username' : {'help':'PC API - 账号密码登陆 - Bilibili 账号名'},
-    'pwd' : {'help' : 'PC API - 账号密码登陆 - Bilibili 账号明文密码'},
-    'cookies': {'help':'Web API - Cookies 登陆 - Bilibili 所用 Cookies ( 需要 SESSDATA 及 bili_jct ) e.g.SESSDATA=cb0..; bili_jct=6750... '},
-    'load' : {'help':'从保存的文件中拉取认证信息，作为认证方式'},
-    'save' : {'help':'在输入上述认证方式之一的前提下，保存该信息于文件，并退出'},
+global_args = {            
+    'cookies' : {'help':'登陆： 使用 Cookies 登陆，即使用 Web API （不可多 P 上传） ( 需要 SESSDATA 及 bili_jct ) e.g.SESSDATA=cb0..; bili_jct=6750...'},
+    'sms' : {'help':'登陆：使用短信验证码登陆，即使用 上传助手 API （可多 P 上传）（需手动交互）（有日获取限制，请配合 --save 使用）','default':False,'action':'store_true'},
+    'load' : {'help':'登陆：使用保存过的凭据登陆，由该参数读入'},
+    'save' : {'help':'登陆：向stdout输出当前登陆凭据并退出（其他输出转移至stderr）','default':False,'action':'store_true'},
     'http' : {'help':'强制使用 HTTP （不推荐）','default':False,'action':'store_true'},
-    'cdn'  : {'help':'上传用 CDN （限 Web API) （对应 网宿，七牛，百度，七牛，谷歌，百度）','choices':['ws','qn','bda2','kodo','gcs','bos'],'default':'bda2'},
+    'cdn'  : {'help':'上传用 CDN （限 Web API) （对应 网宿（适合海外），七牛，百度（默认），七牛，谷歌，百度）','choices':['ws','qn','bda2','kodo','gcs','bos'],'default':'bda2'},
 }
 local_args = {
     'opts':{'help':'解析可选参数 ，详见 --opts 格式','default':''},

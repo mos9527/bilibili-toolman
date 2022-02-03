@@ -38,6 +38,6 @@ jobs:
         sudo apt-get install aria2
     - name: Begin Reuploading      
       env:     
-        USER_CRED : ${{ secrets.USER_CRED }}     
+        SESSION : ${{ secrets.SESSION }}     
       run: |
-        python -m bilibili_toolman --cookies "$USER_CRED" --http --cdn ws --youtube "${{ github.event.inputs.url }}" ${{ github.event.inputs.opts }} --opts "${{ github.event.inputs.ydl_opts }}"
+        python -m bilibili_toolman --load "$SESSION" --http --cdn ws --youtube "${{ github.event.inputs.url }}" ${{ github.event.inputs.opts }} --opts "${{ github.event.inputs.ydl_opts }}"

@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 '''API 实例 - 稿件修改
 
-可提供 '--save' 产生的登陆态跳过登陆过程, e.g. this.py credentials.sav
-
 附加依赖：
 
     inquirer
@@ -13,18 +11,20 @@
 from inquirer.shortcuts import confirm, list_input
 from bilibili_toolman.bilisession.common.submission import Submission
 from bilibili_toolman.bilisession.client import BiliSession
-from pickle import loads
 from inquirer import text
-import sys
+import sys,base64
 sess = None
+def print_usage_and_quit():
+    print('usage : python submission-editor.py 登陆凭据')
+    print('        详情见 README / 准备凭据')
 if len(sys.argv) > 1:
-    loaded = loads(open(sys.argv[1],'rb').read())
-    sess : BiliSession = loaded['session']
-    sess.update(loaded)
+    try:
+        sess = BiliSession.from_bytes(base64.b64decode(sys.argv[1]))
+    except Exception as e:        
+        print(e)
+        print_usage_and_quit()        
 else:
-    sess = BiliSession()
-    sess.LoginViaUsername(text('用户名'),text('密码'))
-
+    print_usage_and_quit()        
 def to_yymmdd(ts):
     from datetime import datetime
     ts = datetime.fromtimestamp(ts)
