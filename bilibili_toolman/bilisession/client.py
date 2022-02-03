@@ -108,7 +108,9 @@ class BiliSession(WebBiliSession):
     UPLOAD_PROFILE = 'ugcfr/pc3'
     
     DEFAULT_UA = ''
-
+    
+    RETRIES_UPLOAD_ID = 5
+    
     MISC_MAX_TITLE_LENGTH = 80
     MISC_MAX_DESCRIPTION_LENGTH = 1500 # somehow larger than expected
 
@@ -138,7 +140,7 @@ class BiliSession(WebBiliSession):
     # region Overrides
     def _preupload(self):
         return self.get(
-            "https://member.bilibili.com/preupload",
+            "http://member.bilibili.com/preupload",
             params={
                 'access_key':self.access_token,
                 'mid':self.mid,

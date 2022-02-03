@@ -16,7 +16,7 @@ __cfg_help__ = '''yt-dlp 参数：
         e.g. NV硬解码   ..;hardcode=input:-hwaccel cuda/output:-c:v h264_nvenc -crf 17 -b:v 5M
         多个选项用 / 隔开   
 e.g. --youtube "..." --opts "format=best;quiet=True;hardcode" --tags ...
-    此外，还提供其他变量:
+    此外，针对视频对象，还提供其他变量:
         {id}
         {title}    
         {descrption}
@@ -30,6 +30,8 @@ e.g. --youtube "..." --opts "format=best;quiet=True;hardcode" --tags ...
         {view_count}
         {avereage_rating}
         ...
+    注：输入播放列表且多 P 时，稿件标题为播放列表标题，稿件描述仅为 `来自Youtube`
+
 默认配置：不烧入字幕，下载最高质量音视频，下载字幕但不操作
 '''
 ydl = None
@@ -124,6 +126,8 @@ class HardcodeSubProcesser(FFmpegPostProcessor):
                 os.rename(encodeFilename(temp_filename), encodeFilename(filename))
         return [], information  # by default, keep file and do nothing                            
 def download_video(res) -> DownloadResult:            
+    def format_desc(entry):
+        return 
     with DownloadResult() as results:
         # downloading the cover            
         def append_result(entry):
@@ -138,7 +142,7 @@ def download_video(res) -> DownloadResult:
                     logger.error('Thumbnail not found. Discarding info.')
                     results.cover_path = ''
                 date = __to_yyyy_mm_dd(entry['upload_date'])
-                results.description = result.description = f'''作者 : {entry['uploader']} [{date} 上传]
+                result.description = f'''作者 : {entry['uploader']} [{date} 上传]
 
 来源 : https://youtu.be/{entry['id']}
 
@@ -149,9 +153,10 @@ def download_video(res) -> DownloadResult:
         results.soruce = info['webpage_url']
         results.title = info['title']
         '''Appending our results'''
-        if 'entries' in info:
+        if 'entries' in info: # A playlist
             for entry in info['entries']:
                 append_result(entry)
-        else:
+            results.description = '转自Youtube'
+        else: # Singular videos
             append_result(info)
         return results

@@ -6,6 +6,7 @@ from ..bilisession import logger
 from ..bilisession.common.submission import Submission
 from ..providers import DownloadResult
 from . import AttribuitedDict,setup_logging,prepare_temp,prase_args,sanitize,truncate,local_args as largs
+from collections import defaultdict
 import base64,logging,sys,urllib.parse
 
 TEMP_PATH = 'temp'
@@ -46,21 +47,27 @@ def upload_sources(sources : DownloadResult,arg):
     submission = Submission()    
     if not sources:return None,True
     logging.info('上传资源数：%s' % len(sources.results))    
-    for source in sources.results:       
-        '''If one or multipule sources'''        
-        blocks      = {'title':source.title,'desc':source.description,**source.extra} # for formatting
+    def format(source):
+        blocks      = defaultdict(lambda:'...',{'title':source.title,'desc':source.description,**source.extra})
         title       = truncate(sanitize(arg.title.format_map(blocks)),sess.MISC_MAX_TITLE_LENGTH)   
         description = truncate(sanitize(arg.desc .format_map(blocks)),sess.MISC_MAX_DESCRIPTION_LENGTH)        
+        return blocks,title,description        
+            
+    for source in sources.results:       
+        '''If one or multipule sources'''        
+        blocks,title,description = format(source)
         logger.info('准备上传: %s' % title)
         '''Summary trimming'''
-        try:
-            endpoint, bid = sess.UploadVideo(source.video_path)
-            cover_url = sess.UploadCover(source.cover_path)['data']['url'] if source.cover_path else ''
-        except Exception as e:
-            logger.critical('%s 上传失败! - %s - 跳过' % (source,e))            
-            continue
+        endpoint = None
+        for _ in range(0,sess.RETRIES_UPLOAD_ID):
+            try:
+                endpoint, bid = sess.UploadVideo(source.video_path)
+                cover_url = sess.UploadCover(source.cover_path)['data']['url'] if source.cover_path else ''
+                break
+            except Exception as e:
+                logger.warning('%s 上传失败! - %s - 重试' % (source,e))                
         if not endpoint:
-            logger.critical('URI 获取失败 - 跳过')
+            logger.error('URI 获取失败 - 跳过')
             continue
         logger.info('资源已上传')
         from bilibili_toolman.cli import precentage_progress
@@ -79,21 +86,23 @@ def upload_sources(sources : DownloadResult,arg):
                 video.source = ''
             video.thread = arg.thread_id
             video.tags = arg.tags.format_map(blocks).split(',')
-            video.description = description
-            video.title = title # This shows up as title per-part, invisible if video is single-part only
-        '''Use the last given thread,tags,cover & description per multiple uploads'''                                       
+            video.description = description # This don't gets shown per video. Only the main description is shown
+            video.title = title # This shows up as title per-part
+        '''Use the last given thread per multiple uploads,while the tags are extended.'''
         submission.thread = video.thread or submission.thread        
         submission.tags.extend(video.tags)
         submission.videos.append(video) # to the main submission
     '''Filling submission info'''        
     submission.copyright = submission.COPYRIGHT_REUPLOAD if not arg.original else submission.COPYRIGHT_ORIGINAL
     submission.no_reprint = submission.REPRINT_ALLOWED if not arg.no_reprint else submission.REPRINT_DISALLOWED
-    submission.source = sources.soruce
-    submission.title = title # This shows up as the main title of the submission
+    '''Use title & description from main sources (e.g. Uploading a YT Playlist)'''
+    blocks,title,description = format(sources)
+    submission.title = title
     submission.description = description # This is the only description that gets shown
+    submission.source = sources.soruce
     '''Upload cover images for all our submissions as well'''
     cover_url = sess.UploadCover(sources.cover_path)['data']['url'] if sources.cover_path else ''
-    submission.cover_url = cover_url
+    submission.cover_url = cover_url    
     '''Finally submitting the video'''
     submit_result=sess.SubmitSubmission(submission,seperate_parts=arg.seperate_parts)  
     dirty = False
@@ -109,10 +118,18 @@ global_args,local_args = None,None
 def setup_session():
     '''Setup session with cookies in query strings & setup temp root'''
     global sess
+    def setup_params(sess):
+        if global_args.http:
+            logger.warning('强制使用 HTTP')
+            sess.FORCE_HTTP = True
+
+        if global_args.noenv:
+            logger.warning('不使用环境变量；请求将绕过代理')
+            sess.trust_env = False                    
     if global_args.cookies:
         from ..bilisession.web import BiliSession
-        sess = BiliSession()
-        sess.FORCE_HTTP = global_args.http
+        sess = BiliSession()    
+        setup_params(sess)
         sess.LoginViaCookiesQueryString(global_args.cookies)
         self_ = sess.Self
         if not 'uname' in self_['data']:
@@ -122,9 +139,10 @@ def setup_session():
         #     arg['seperate_parts'] = True
         logger.warning('Web端 API 需 Lv3+ 及 1000+ 关注量才可多 P 上传，若出错请悉知')
         return True
-    elif global_args.sms:
+    elif global_args.sms:        
         from ..bilisession.client import BiliSession
         sess = BiliSession()
+        setup_params(sess)
         logger.warning('短信验证码有日发送条数限制（5 条），无论验证成败，超限后将无法发送验证码')
         logger.warning('建议使用 --save 保存验证凭据，再次使用则利用 --load 读取，而不需再次登陆')
         logger.info('准备登陆，输入手机号后，按Enter发送验证码')
@@ -144,7 +162,7 @@ def setup_session():
     elif global_args.load:    
         from ..bilisession.web import BiliSession
         sess = BiliSession.from_bytes(base64.b64decode(global_args.load))
-        sess.FORCE_HTTP = global_args.http
+        setup_params(sess)
         logger.info('加载之前的登陆凭据')
         return True
     else:
@@ -163,9 +181,6 @@ def __main__():
     if not setup_session():
         logger.fatal('登陆失败！')
         sys.exit(2)            
-
-    if global_args.http:
-        logger.warning('强制使用 HTTP')
     
     if global_args.save:
         logger.info('保存登陆凭据')        

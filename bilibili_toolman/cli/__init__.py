@@ -15,14 +15,15 @@ global_args = {
     'load' : {'help':'登陆：使用保存过的凭据登陆，由该参数读入'},
     'save' : {'help':'登陆：向stdout输出当前登陆凭据并退出（其他输出转移至stderr）','default':False,'action':'store_true'},
     'http' : {'help':'强制使用 HTTP （不推荐）','default':False,'action':'store_true'},
-    'cdn'  : {'help':'上传用 CDN （限 Web API) （对应 网宿（适合海外），七牛，百度（默认），七牛，谷歌，百度）','choices':['ws','qn','bda2','kodo','gcs','bos'],'default':'bda2'},
+    'noenv' : {'help':'上传时，不采用环境变量（如代理）','default':False,'action':'store_true'},
+    'cdn'  : {'help':'上传用 CDN （限 Web API) （对应 网宿（适合海外），七牛，百度（默认），七牛，谷歌，百度）','choices':['ws','qn','bda2','kodo','gcs','bos'],'default':'bda2'},    
 }
 local_args = {
     'opts':{'help':'解析可选参数 ，详见 --opts 格式','default':''},
     'thread_id': {'help':'分区 ID','default':17},
     'tags': {'help':'标签','default':'转载'},
-    'desc':{'help':'描述格式 e.g. "原描述：{desc}" (其他变量详见下文)','default':'{desc}'},
-    'title':{'help':'标题格式 e.g. "[Youtube] {title} (其他变量详见下文)"','default':'{title}'},
+    'desc':{'help':'描述格式 e.g. "原描述：{desc}" (其他变量详见下文)（仅稿件有描述）','default':'{desc}'},
+    'title':{'help':'标题格式 e.g. "[Youtube] {title} (其他变量详见下文)（使用于稿件及分P）"','default':'{title}'},    
     'seperate_parts':{'help':'不分P （e.g. --youtube [播放列表],--localfile [文件夹]）独立投稿（不分P）（Web上传默认不分 P）','default':False,'action':'store_true'},
     'no_upload':{'help':'只下载资源','default':False,'action':'store_true'},
     'original':{'help':'设置稿件为原创','default':False,'action':'store_true'},

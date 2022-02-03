@@ -37,6 +37,7 @@
 - [examples](https://github.com/greats3an/bilibili-toolman/tree/master/examples)
 - - [编辑稿件信息](https://github.com/greats3an/bilibili-toolman/blob/master/examples/submission-editor.py)
 - - [投稿VTT字幕](https://github.com/greats3an/bilibili-toolman/blob/master/examples/subtitle-helper.py)
+- - [解码 `--save` 凭据](https://github.com/greats3an/bilibili-toolman/blob/master/examples/token-info.py)
 - [main.py](https://github.com/greats3an/bilibili-toolman/blob/master/bilibili_toolman/cli/main.py)
 ### API 实现 ：
 - [client.py](https://github.com/greats3an/bilibili-toolman/blob/master/bilibili_toolman/bilisession/client.py)
@@ -53,8 +54,9 @@
 
 
 ## 参数说明
-    usage: __main__.py [-h] [--cookies COOKIES] [--sms] [--load LOAD] [--save] [--http] [--cdn {ws,qn,bda2,kodo,gcs,bos}] [--opts OPTS] [--thread_id THREAD_ID] [--tags TAGS] [--desc DESC] [--title TITLE] [--seperate_parts]
-                    [--no_upload] [--original] [--no_reprint] [--localfile LOCALFILE-URL] [--youtube YOUTUBE-URL]
+    usage: __main__.py [-h] [--cookies COOKIES] [--sms] [--load LOAD] [--save] [--http] [--noenv] [--cdn {ws,qn,bda2,kodo,gcs,bos}] [--opts OPTS]
+                    [--thread_id THREAD_ID] [--tags TAGS] [--desc DESC] [--title TITLE] [--seperate_parts] [--no_upload] [--original] [--no_reprint]
+                    [--localfile LOCALFILE-URL] [--youtube YOUTUBE-URL]
 
     使用帮助
 
@@ -67,6 +69,7 @@
     --load LOAD           登陆：使用保存过的凭据登陆，由该参数读入
     --save                登陆：向stdout输出当前登陆凭据并退出（其他输出转移至stderr）
     --http                强制使用 HTTP （不推荐）
+    --noenv               上传时，不采用环境变量（如代理）
     --cdn {ws,qn,bda2,kodo,gcs,bos}
                             上传用 CDN （限 Web API) （对应 网宿（适合海外），七牛，百度（默认），七牛，谷歌，百度）
 
@@ -75,8 +78,8 @@
     --thread_id THREAD_ID
                             分区 ID
     --tags TAGS           标签
-    --desc DESC           描述格式 e.g. "原描述：{desc}" (其他变量详见下文)
-    --title TITLE         标题格式 e.g. "[Youtube] {title} (其他变量详见下文)"
+    --desc DESC           描述格式 e.g. "原描述：{desc}" (其他变量详见下文)（仅稿件有描述）
+    --title TITLE         标题格式 e.g. "[Youtube] {title} (其他变量详见下文)（使用于稿件及分P）"
     --seperate_parts      不分P （e.g. --youtube [播放列表],--localfile [文件夹]）独立投稿（不分P）（Web上传默认不分 P）
     --no_upload           只下载资源
     --original            设置稿件为原创
@@ -100,7 +103,7 @@
                                     e.g. NV硬解码   ..;hardcode=input:-hwaccel cuda/output:-c:v h264_nvenc -crf 17 -b:v 5M
                                     多个选项用 / 隔开
                             e.g. --youtube "..." --opts "format=best;quiet=True;hardcode" --tags ...
-                                此外，还提供其他变量:
+                                此外，针对视频对象，还提供其他变量:
                                     {id}
                                     {title}
                                     {descrption}
@@ -114,6 +117,8 @@
                                     {view_count}
                                     {avereage_rating}
                                     ...
+                                注：输入播放列表且多 P 时，稿件标题为播放列表标题，稿件描述仅为 `来自Youtube`
+
                             默认配置：不烧入字幕，下载最高质量音视频，下载字幕但不操作
 
     变量：
