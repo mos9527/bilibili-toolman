@@ -47,7 +47,10 @@ def select_and_execute(from_calltable):
     choice = list_input('',choices=choices)
     try:
         result = choices[choice]()
-    except:
+    except Exception as e:
+        print('[!] %s' % e)
+        result = False
+    except KeyboardInterrupt:
         result = False
     return result == None or result
 

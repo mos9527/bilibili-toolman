@@ -27,7 +27,7 @@ else:
 assert type(sess) == BiliSession,"限 Web API"
 sess.FORCE_HTTP = True
 
-TIMECODE = re.compile(r'\d{2}:\d{2}:\d{2}.\d{3}')
+TIMECODE = re.compile(r'[\d:]*\.\d*')
 HTMLTAGS = re.compile(r'(<[0-9a-zA-Z\/\.:]*>)')
 UTUBEURL = re.compile(r'(https?\:\/\/)?((www\.)?youtube\.com|youtu\.?be)\/.*',re.MULTILINE)
 
@@ -43,7 +43,8 @@ class SubtitleLine:
     @staticmethod
     def tag2stamp(tag):            
         tag = tag.strip()
-        hh,mm,sx = tag.split(':')
+        hmsx = tag.split(':')        
+        hh,mm,sx = (0,*hmsx) if len(hmsx) < 3 else hmsx
         ss,xx = sx.split('.')
         timestamp = int(hh) * 3600 + int(mm) * 60 + int(ss) + int(xx) * (0.1 ** len(xx))        
         return timestamp
@@ -97,8 +98,11 @@ class Subtitles(list):
         elif from_vtt:        
             lines,i = from_vtt.split('\n'),0            
             while i < len(lines):                
-                if '-->' in lines[i]:
-                    t_start,t_end = TIMECODE.findall(lines[i])
+                if '-->' in lines[i]:                    
+                    result =  TIMECODE.findall(lines[i])
+                    if not result: # ffmpeg produces this output
+                        result = TIMECODE.findall('00:' + lines[i])
+                    t_start,t_end = result
                     i+=1
                     content = []
                     while lines[i]:
@@ -141,7 +145,10 @@ def select_and_execute(from_calltable):
     choice = list_input('',choices=choices)
     try:
         result = choices[choice]()
-    except:
+    except Exception as e:
+        print('[!] %s' % e)
+        result = False
+    except KeyboardInterrupt:
         result = False
     return result == None or result
 routines = {}

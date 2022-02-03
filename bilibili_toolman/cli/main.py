@@ -118,9 +118,9 @@ def setup_session():
         if not 'uname' in self_['data']:
             logger.error('Cookies无效: %s' % self_['message'])        
             return False        
-        for task,arg in local_args:
-            arg['seperate_parts'] = True
-        logger.warning('Web端 API 无法进行多 P 上传！多P项目将被分为多个视频')  
+        # for task,arg in local_args:
+        #     arg['seperate_parts'] = True
+        logger.warning('Web端 API 需 Lv3+ 及 1000+ 关注量才可多 P 上传，若出错请悉知')
         return True
     elif global_args.sms:
         from ..bilisession.client import BiliSession

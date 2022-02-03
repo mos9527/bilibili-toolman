@@ -220,13 +220,6 @@ class BiliSession(WebBiliSession):
                 'version': self.BUILD_STR,
             })
 
-    @JSONResponse
-    def qrcode_testme(self):
-        return self.post("http://passport.bilibili.com/x/passport/qrcode/getLoginUrl",params=SingableDict({
-            'appkey': Crypto.APPKEY,
-            'platform':'pc'      
-        }).signed)
-
     @PCOnlyAPI
     @JSONResponse
     def DeleteArchive(self,bvid):
