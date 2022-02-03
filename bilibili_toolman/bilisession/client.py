@@ -22,8 +22,8 @@ def PCOnlyAPI(_classmethod):
 
 class Crypto:
     '''THANK YOU! https://github.com/FortuneDayssss/BilibiliUploader'''
-    APPKEY = 'aae92bc66f3edfab'
-    APPSECRET = 'af125a0d5279fd576c1b4418a3e8276d'
+    APPKEY = '661dbf0ee792f083'
+    APPSECRET = '397c810e126bfbbb584667583e11976a'
     
     @staticmethod
     def iterable_md5(stream : Iterable) -> str:
@@ -220,6 +220,13 @@ class BiliSession(WebBiliSession):
                 'version': self.BUILD_STR,
             })
 
+    @JSONResponse
+    def qrcode_testme(self):
+        return self.post("http://passport.bilibili.com/x/passport/qrcode/getLoginUrl",params=SingableDict({
+            'appkey': Crypto.APPKEY,
+            'platform':'pc'      
+        }).signed)
+
     @PCOnlyAPI
     @JSONResponse
     def DeleteArchive(self,bvid):
@@ -241,6 +248,7 @@ class BiliSession(WebBiliSession):
         Returns:
             dict
         '''
+        raise DeprecationWarning # sorry bud.        
         oauth_json = self._oauth2_getkey()
         resp = self.post(
             "https://passport.bilibili.com/x/passport-login/oauth2/login",
@@ -259,6 +267,70 @@ class BiliSession(WebBiliSession):
         except Exception as e:
             raise LoginException(resp,e)
         return resp
+    
+    @PCOnlyAPI
+    @JSONResponse
+    def RenewSMSCaptcha(self,tel : str,cid = 86):
+        '''发送验证码
+
+        Args:
+            tel (str) : 手机号
+            cid (int) : 国家代码
+
+        Returns:
+            dict
+        '''        
+        resp = self.post(
+            "https://passport.bilibili.com/x/passport-login/sms/send",
+            data=SingableDict({
+                'appkey': Crypto.APPKEY,
+                'platform': "pc",                
+                'tel':str(tel),
+                'cid':str(cid),
+                'ts': int(time()*1000),
+                'device_name':'',
+                'device_id':'',
+                'buvid':''
+        }).signed)
+        try:
+            self.login_tokens['captcha_key'] = resp.json()['data']['captcha_key']
+        except Exception as e:
+            raise LoginException(resp,e)        
+        return resp
+
+    @PCOnlyAPI
+    @JSONResponse
+    def LoginViaSMSCaptcha(self,tel : str,code : int,cid = 86):        
+        '''验证码登陆
+
+        Args:                    
+            tel (str) : 手机号
+            code (str) : 验证码
+            cid (int) : 国家代码
+
+        Returns:
+            dict
+        '''
+        assert 'captcha_key' in self.login_tokens,"`RenewSMSCaptcha` not called or failed."
+        resp = self.post(
+            "https://passport.bilibili.com/x/passport-login/login/sms",
+            data=SingableDict({
+                'appkey': Crypto.APPKEY,
+                'platform': "pc",                
+                'captcha_key' : self.login_tokens["captcha_key"],
+                'code' : str(code),
+                'tel':str(tel),
+                'cid':str(cid),                
+                'ts': int(time()*1000),
+                'device_name':'',
+                'device_id':'',
+                'buvid':''
+        }).signed)
+        try:
+            self.login_tokens.update(resp.json()['data']['token_info'])
+        except Exception as e:
+            raise LoginException(resp,e)
+        return resp       
     
     def UploadVideo(self, path: str) -> Tuple[str,None]:
         '''上传视频
