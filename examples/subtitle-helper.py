@@ -5,27 +5,12 @@
 
 本 API 限用 Web 版，需要 Cookies 登陆
 '''
-import os
-import re
 from typing import List
 from inquirer.shortcuts import confirm, list_input
 from bilibili_toolman.bilisession.web import BiliSession
 from inquirer import text
-import sys,base64
+import os,re,sys,base64,json
 sess = None
-def print_usage_and_quit():
-    print('usage : python submission-editor.py 登陆凭据')
-    print('        详情见 README / 准备凭据')
-if len(sys.argv) > 1:
-    try:
-        sess = BiliSession.from_bytes(base64.b64decode(sys.argv[1]))
-    except Exception as e:        
-        print(e)
-        print_usage_and_quit()        
-else:
-    print_usage_and_quit() 
-assert type(sess) == BiliSession,"限 Web API"
-sess.FORCE_HTTP = True
 
 TIMECODE = re.compile(r'[\d:]*\.\d*')
 HTMLTAGS = re.compile(r'(<[0-9a-zA-Z\/\.:]*>)')
@@ -83,12 +68,11 @@ class Subtitles(list):
         if buffer:
             new[-1].t_to = lst[-1].t_to
             new[-1].content = new[-1].content + '\n%s' % lst[-1].content
-        return new
-    @property
-    def archive(self) -> List[dict]:
+        return new    
+    def to_bcc(self) -> List[dict]:
         '''输出字典，供 B 站使用'''
-        return [v.__dict__() for v in self.sorted]
-    def __repr__(self) -> str:
+        return [v.__dict__() for v in self.sorted]    
+    def to_vtt(self) -> str:
         '''输出 VTT'''
         return 'WEBVTT\n'+'\n\n'.join(['%s\n%s' % (i+1,v) for i,v in enumerate(self.sorted)])
     def __init__(self,from_json=None,from_vtt='',from_subtitles=None):
@@ -112,6 +96,35 @@ class Subtitles(list):
                 i+=1
         elif from_subtitles:
             super().__init__(from_subtitles)
+
+def print_usage_and_quit():
+    print('usage : python subtitle-helper.py 登陆凭据')
+    print('   or : python subtitle-helper.py vtt-in.vtt bcc-out.bcc')
+    print('        详情见 README / 准备凭据')
+    sys.exit(1)
+if len(sys.argv) == 2:
+    try:
+        sess = BiliSession.from_bytes(base64.b64decode(sys.argv[1]))
+    except Exception as e:        
+        print(e)
+        print_usage_and_quit()        
+elif len(sys.argv) == 3:
+    with open(sys.argv[2],'w',encoding='utf-8') as f:
+        subs = Subtitles(from_vtt=open(sys.argv[1],encoding='utf-8').read())        
+        subs_json = json.dumps({
+            "font_size": 0.4,
+            "font_color": "#FFFFFF",
+            "background_alpha": 0.5,
+            "background_color": "#9C27B0",
+            "Stroke": "none",    
+            "body":subs.to_bcc()
+        },ensure_ascii=False,indent=4)
+        f.writelines(subs_json)
+        sys.exit(0)
+else:
+    print_usage_and_quit() 
+assert type(sess) == BiliSession,"限 Web API"
+sess.FORCE_HTTP = True
 
 class ReprByKey(dict):
     def __init__(self,dict,key):
@@ -224,7 +237,7 @@ def main_entrance():
                 else:
                     return False
             vsub = Subtitles(from_vtt=open(fp,encoding='utf-8').read())
-            asub = vsub.archive
+            asub = vsub.to_bcc()
             # 检查时长
             flag = False
             buffer = []
