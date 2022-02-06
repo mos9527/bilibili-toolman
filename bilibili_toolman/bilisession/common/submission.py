@@ -14,12 +14,12 @@ class SubmissionVideos(list):
         if isinstance(video,dict):
             # try to interpert it as a list of dictionaries sent by server            
             with Submission() as submission:                
-                submission.video_endpoint = video['filename']
-                submission.video_duration = video['duration']
-                submission.title = video['title']            
-                submission.bvid = video['bvid']
-                submission.biz_id = video['cid']
-                submission.aid = video['aid']
+                submission.title = video.get('title','')
+                submission.video_endpoint = video.get('filename','')
+                submission.video_duration = video.get('duration',0)                
+                submission.bvid = video.get('bvid','')
+                submission.biz_id = video.get('cid','')
+                submission.aid = video.get('aid','')
                 submission.stat = video
                 submission.parent = self
             return super().append(submission)            
@@ -35,8 +35,8 @@ class SubmissionVideos(list):
         return [{
             "filename": video.video_endpoint,
             "title": video.title,
-            "desc": video.description,
-            "cid":video.biz_id
+            "desc": video.description,            
+            **({"cid":video.biz_id} if video.biz_id else {})
         } for video in target]
 
     def __init__(self,parent=None):

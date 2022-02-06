@@ -368,7 +368,8 @@ class BiliSession(WebBiliSession):
         logger.debug('MD5: %s' % md5_)
         # finalizing upload
         post_r = self._post_complete_upload(preupload_token['complete'],size,basename,md5_,chunkcount)
-        logger.debug('上传完毕: %s' % ReprExDict(post_r.json()))
+        logger.info('远端结点： %s' % preupload_token.get('filename','<failed>'))
+        logger.debug('上传完毕： %s' % ReprExDict(post_r.json()))
         return preupload_token['filename'], None
     # endregion
 

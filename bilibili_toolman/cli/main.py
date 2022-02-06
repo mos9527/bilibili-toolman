@@ -104,14 +104,19 @@ def upload_sources(sources : DownloadResult,arg):
     cover_url = sess.UploadCover(sources.cover_path)['data']['url'] if sources.cover_path else ''
     submission.cover_url = cover_url    
     '''Finally submitting the video'''
-    submit_result=sess.SubmitSubmission(submission,seperate_parts=arg.seperate_parts)  
-    dirty = False
-    for result in submit_result['results']:
-        if result['code'] == 0:logger.info('上传成功 - BVid: %s' % result['data']['bvid'])        
-        else:
-            logger.warning('%s 上传失败 : %s' % (submission,result['message']))
-            dirty = True
-    return submit_result,dirty
+    if not arg.no_submit:
+        submit_result=sess.SubmitSubmission(submission,seperate_parts=arg.seperate_parts)  
+        dirty = False
+        for result in submit_result['results']:
+            if result['code'] == 0:logger.info('上传成功 - BVid: %s' % result['data']['bvid'])        
+            else:
+                logger.warning('%s 上传失败 : %s' % (submission,result['message']))
+                dirty = True
+        return submit_result,dirty
+    else:
+        logger.warning('已跳过稿件提交')
+        return '',False
+    
 
 global_args,local_args = None,None
 

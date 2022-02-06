@@ -26,6 +26,7 @@ local_args = {
     'title':{'help':'标题格式 e.g. "[Youtube] {title} (其他变量详见下文)（使用于稿件及分P）"','default':'{title}'},    
     'seperate_parts':{'help':'不分P （e.g. --youtube [播放列表],--localfile [文件夹]）独立投稿（不分P）（Web上传默认不分 P）','default':False,'action':'store_true'},
     'no_upload':{'help':'只下载资源','default':False,'action':'store_true'},
+    'no_submit':{'help':'不提交稿件，适用于获取filename参数','default':False,'action':'store_true'},
     'original':{'help':'设置稿件为原创','default':False,'action':'store_true'},
     'no_reprint':{'help':'设置稿件不允许转载','default':False,'action':'store_true'}
 }

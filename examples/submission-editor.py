@@ -9,6 +9,7 @@
 '''
 
 from inquirer.shortcuts import confirm, list_input
+from bilibili_toolman import __version__
 from bilibili_toolman.bilisession.common.submission import Submission
 from bilibili_toolman.bilisession.client import BiliSession
 from inquirer import text
@@ -83,20 +84,54 @@ def main_entrance():
         sub.tags = new_tags.split(',')
     @register('编辑子视频',routines)
     def edit_sub_archive():    
-        v = list_input('选择子视频',choices=[v for v in sub.videos])    
-        routines = {}    
-        @register('修改子视频标题',routines)
-        def edit_sub_title():
-            v.title = text('新标题')
-        @register('修改子视频内容',routines)
-        def edit_sub_video():
-            path = text('新视频路径')
-            ep,bid = sess.UploadVideo(path)            
-            print('新节点：',ep)
-            if bid:v.biz_id = bid
-            v.video_endpoint = ep        
+        routines = {}
+        @register('修改已有子视频',routines)
+        def select_by_sub():
+            v = list_input('选择子视频',choices=[v for v in sub.videos])    
+            routines = {}    
+            @register('修改子视频标题',routines)
+            def edit_sub_title():
+                v.title = text('新标题')
+            @register('修改子视频结点',routines)
+            def overwrite_sub_video():
+                ep = text('新视频结点')
+                v.video_endpoint = ep
+            @register('上传并修改子视频内容',routines)
+            def upload_and_overwrite_sub_video():
+                path = text('新视频路径')
+                ep,bid = sess.UploadVideo(path)            
+                print('新结点：',ep)
+                if bid:v.biz_id = bid
+                v.video_endpoint = ep        
+            while select_and_execute(routines):
+                print(v)
+            return True
+        @register('创建新子视频',routines)
+        def create_sub():
+            routines = {}
+            @register('以结点创建',routines)
+            def overwrite_sub_video():            
+                sub.videos.append({                    
+                    'filename':text('新视频结点'),
+                    'title':text('新视频标题'),
+                })
+                return True
+            @register('上传并修改子视频内容',routines)
+            def upload_and_overwrite_sub_video():
+                path = text('新视频路径')
+                ep,bid = sess.UploadVideo(path)            
+                print('新结点：',ep)
+                sub.videos.append({
+                    'title':text('新视频标题'),
+                    'filename':ep,
+                    'biz_id':bid
+                })                
+                return True
+            while select_and_execute(routines):
+                pass                
+            return True
         while select_and_execute(routines):
-            print(v)
+            pass
     @register('提交更改',routines)
     def submit_sub_video():
         print(sess.EditSubmission(sub))

@@ -295,7 +295,7 @@ class BiliSession(Session):
                         self.headers['X-Upos-Auth'] = config['auth']
                         '''X-Upos-Auth header'''
                         endpoint = 'https:%s/ugcboss/%s' % (config['endpoint'], config['upos_uri'].split('/')[-1])
-                        logger.debug('远端结点： %s' % endpoint)
+                        logger.info('远端结点： %s' % endpoint)
                         logger.debug('第 %s 次刷新 TOKEN...' % i)
                         upload_id = self._upload_id(endpoint).json()['upload_id']
                         return config,endpoint,upload_id
