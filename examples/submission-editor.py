@@ -13,14 +13,14 @@ from bilibili_toolman import __version__
 from bilibili_toolman.bilisession.common.submission import Submission
 from bilibili_toolman.bilisession.client import BiliSession
 from inquirer import text
-import sys,base64
+import sys
 sess = None
 def print_usage_and_quit():
     print('usage : python submission-editor.py 登陆凭据')
     print('        详情见 README / 准备凭据')
 if len(sys.argv) > 1:
     try:
-        sess = BiliSession.from_bytes(base64.b64decode(sys.argv[1]))
+        sess = BiliSession.from_base64_string(sys.argv[1])
     except Exception as e:        
         print(e)
         print_usage_and_quit()        

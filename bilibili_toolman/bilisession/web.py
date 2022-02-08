@@ -495,13 +495,21 @@ class BiliSession(Session):
     def update(self,state_dict : dict):
         self.cookies = state_dict['cookies']        
     
-    def to_bytes(self):                
+    def to_bytes(self):
         return gzip.compress(pickle.dumps(self.__dict__()))
 
+    def to_base64_string(self):
+        return base64.b64encode(self.to_bytes()).decode()
+        
     @staticmethod
     def from_bytes(b : bytes):
         unpickled = pickle.loads(gzip.decompress(b))
         sess = unpickled['session']
         sess.update(unpickled)
         return sess
+
+    @staticmethod
+    def from_base64_string(s : str):
+        b = base64.b64decode(s)
+        return BiliSession.from_bytes(b)
     # endregion

@@ -9,7 +9,7 @@ from typing import List
 from inquirer.shortcuts import confirm, list_input
 from bilibili_toolman.bilisession.web import BiliSession
 from inquirer import text
-import os,re,sys,base64,json
+import os,re,sys,json
 sess = None
 
 TIMECODE = re.compile(r'[\d:]*\.\d*')
@@ -104,7 +104,7 @@ def print_usage_and_quit():
     sys.exit(1)
 if len(sys.argv) == 2:
     try:
-        sess = BiliSession.from_bytes(base64.b64decode(sys.argv[1]))
+        sess = BiliSession.from_base64_string(sys.argv[1])
     except Exception as e:        
         print(e)
         print_usage_and_quit()        

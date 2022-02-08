@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 try:
     from tqdm import tqdm
-    tqdm_ = tqdm(desc='↑', unit='B', unit_scale=True)  
+    tqdm_ = tqdm(unit='B', unit_scale=True)  
 except:
     tqdm_ = None
 def report(current,max_val):

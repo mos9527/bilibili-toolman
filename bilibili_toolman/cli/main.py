@@ -7,7 +7,7 @@ from ..bilisession.common.submission import Submission
 from ..providers import DownloadResult
 from . import AttribuitedDict,setup_logging,prepare_temp,prase_args,sanitize,truncate,local_args as largs
 from collections import defaultdict
-import base64,logging,sys,urllib.parse
+import logging,sys,urllib.parse
 
 TEMP_PATH = 'temp'
 sess : BiliSession
@@ -166,7 +166,7 @@ def setup_session():
         pass
     elif global_args.load:    
         from ..bilisession.web import BiliSession
-        sess = BiliSession.from_bytes(base64.b64decode(global_args.load))
+        sess = BiliSession.from_base64_string(global_args.load)
         setup_params(sess)
         logger.info('加载之前的登陆凭据')
         return True
@@ -189,7 +189,7 @@ def __main__():
     
     if global_args.save:
         logger.info('保存登陆凭据')        
-        print(base64.b64encode(sess.to_bytes()).decode())
+        print(sess.to_base64_string())
         sys.exit(0)
 
     if sess.DEFAULT_UA: # using Web APIs

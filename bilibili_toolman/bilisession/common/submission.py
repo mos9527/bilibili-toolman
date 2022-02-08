@@ -4,13 +4,13 @@ from re import sub
 
 
 class SubmissionVideos(list):
-    '''Parent submission'''
+    '''Container for all videos within a submission (P-arts)'''
     def extend(self, __iterable) -> None:
         for item in __iterable:
             self.append(item)
 
     def append(self, video) -> None:
-        '''Only Submission will be appended to our list'''
+        '''Only Submissions or Dict (translated into Submission) will be appended to our list'''
         if isinstance(video,dict):
             # try to interpert it as a list of dictionaries sent by server            
             with Submission() as submission:                
@@ -26,8 +26,8 @@ class SubmissionVideos(list):
         elif isinstance(video,Submission):
             return super().append(video)
         else:
-            raise Exception("Either a dict or a Submission object can be supplied.")
-            
+            raise Exception("Either a dict or a Submission object can be supplied.")    
+
     @property
     def archive(self):
         '''Dumps current videos as archvies that's to be the payload'''
@@ -47,7 +47,11 @@ class SubmissionVideos(list):
         self.parent = parent
         super().__init__()
 
+    def __repr__(self) -> str:
+        return f'<SubmissionVideos count={len(self)}>'
 class Submission:
+    '''Generic type for a Submission'''
+
     '''COPYRIGHT types'''
     COPYRIGHT_ORIGINAL = 1
     COPYRIGHT_REUPLOAD = 2
@@ -74,7 +78,7 @@ class Submission:
     '''Reupload allowance type''' 
     source: str = ''
     '''Reupload source'''    
-    thread: int = 19
+    thread: int = 0
     '''Thread ID'''
     tags: list = None
     '''Tags of video'''
@@ -129,9 +133,13 @@ class Submission:
         self._parent = v
     '''parent object. used for videos property'''
     # endregion
-    def __init__(self) -> None:
+    def __init__(self,title='',desc='',video_endpoint='') -> None:
         self.tags = [] # creates new instance for mutables
         self.videos = SubmissionVideos(self)
+        self.title = title
+        self.desc = desc
+        self.video_endpoint = video_endpoint
+
     def __enter__(self):
         '''Creates a new,empty submission'''
         return Submission()

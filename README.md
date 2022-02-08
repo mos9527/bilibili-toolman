@@ -1,18 +1,12 @@
-# bilibili-toolman 哔哩哔哩搬运工具
-搬运各大(yt-dlp支持的)网站的视频资源到 Bilibili
-
-# 亮点
-- PC 端 （短信验证码） ，Web 端 (Cookies) 实现
-- 多 P 上传 （PC端登陆无需 Lv3.+）
-- 多线程上传
-- 自定义编码流水线
-- ...
+# bilibili-toolman 哔哩哔哩创作中心 Python API / 搬运工具
+    搬运各大(yt-dlp支持的)网站的视频资源到 Bilibili
 
 # 安装
 
     pip install bilibili_toolman
 
-## 使用 Github Actions 转载视频：
+# 使用
+## 以 Github Actions 转载视频：
 ### 准备凭据
 - [pip 安装 bilibili_toolman](#安装)
 - 使用 Web 端 API
@@ -24,14 +18,56 @@
         python -m bilibili_toolman --save --sms
     跟随输出操作即可
 - 凭据即输出的 Base64 编码内容
-
 ### 准备 Actions
 - Fork 此项目
 - 在项目 Settings > Secret > New repository secret 创建：
     - Name  : `SESSION`
     - Value : `此处为准备好的凭据`
-- 在项目 Actions > 转载 Youtube 视频 > Run Workflow 填入值
+- 在项目 Actions > 转载 Youtube 视频 > Run Workflow 填入值（[详见参数说明](##参数说明)）
 - 运行即可
+## API 使用示例
+```python
+>>> from bilibili_toolman import BiliWebSession,Submission,SubmissionVideos
+# 取决于欲使用的 API，详见 Wiki
+>>> session = BiliWebSession.from_base64_string("H4sIADKW+2EC/5VVWW/bRhB2EF216...") 
+# 从 --save 凭据恢复登录态
+>>> endpoint_1,cid_1 = session.UploadVideo("unfathomabliy_original_content.mp4)
+('n220208141kq78....', ...)
+>>> endpoint_1,cid_2 = session.UploadVideo("disgracefully_stolen_video.mp4)
+('n220209892re88....', ...)
+# 上传视频并拿 key
+>>> submission = Submission(
+    title="【转载】 Boss...",
+    desc="THEY PLAYED US LIKE A DAMN FIDDLE"
+)
+# 新建多 P 稿件 (标题描述内非 CJK/ASCII（如emoji）字符会导致稿件无效)（单 P 过程详见Wiki）
+>>> submission.videos.append(
+    Submission(
+        title="The Ruse",
+        video_endpoint=endpoint_1
+    )
+)
+>>> submission.videos.append(
+    Submission(
+        title="The Fall",
+        video_endpoint=endpoint_2
+    )
+)    
+# 添加视频 (P)，注意仅父节点（稿件）描述会被显示；分 P 视频和父稿件同类型
+>>> cover = session.UploadCover('nice_image_bro.png')
+>>> submission.cover_url = cover['data']['url']    
+# 上传，设置封面
+>>> submission.source = 'uhhhhh internet?'        
+# 设置转载来源
+>>> submission.tags.append('转载')
+# 添加标签
+>>> submission.thread = 69
+# 设置分区（详见Wiki）
+>>> session.SubmitSubmission(submission)           
+{'code:': 0,
+    'results': [{'code': 0, 'message': '0','ttl': 1,
+    'data': {'aid': 5939...., 'bvid': 'BV1oq....'}}]}
+```
 ## 其它
 ### 例程 :
 - [examples](https://github.com/greats3an/bilibili-toolman/tree/master/examples)
