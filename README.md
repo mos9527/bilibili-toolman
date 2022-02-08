@@ -5,6 +5,7 @@
 # 使用
 ## 以 Github Actions 转载视频：
 ### 准备凭据
+凭据需要在本地准备
 - [pip 安装 bilibili_toolman](#安装)
 - 使用 Web 端 API
     
