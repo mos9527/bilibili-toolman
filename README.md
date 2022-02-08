@@ -1,6 +1,3 @@
-# bilibili-toolman 哔哩哔哩创作中心 Python API / 搬运工具
-    搬运各大(yt-dlp支持的)网站的视频资源到 Bilibili
-
 # 安装
 
     pip install bilibili_toolman
@@ -23,7 +20,7 @@
 - 在项目 Settings > Secret > New repository secret 创建：
     - Name  : `SESSION`
     - Value : `此处为准备好的凭据`
-- 在项目 Actions > 转载 Youtube 视频 > Run Workflow 填入值（[详见参数说明](##参数说明)）
+- 在项目 Actions > 转载 Youtube 视频 > Run Workflow 填入值（[详见参数说明](#参数说明)）
 - 运行即可
 ## API 使用示例
 ```python
