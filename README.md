@@ -29,9 +29,9 @@
 # 取决于欲使用的 API，详见 Wiki
 >>> session = BiliWebSession.from_base64_string("H4sIADKW+2EC/5VVWW/bRhB2EF216...") 
 # 从 --save 凭据恢复登录态
->>> endpoint_1,cid_1 = session.UploadVideo("unfathomabliy_original_content.mp4)
+>>> endpoint_1,cid_1 = session.UploadVideo("unfathomably_original_content.mp4")
 ('n220208141kq78....', ...)
->>> endpoint_1,cid_2 = session.UploadVideo("disgracefully_stolen_video.mp4)
+>>> endpoint_1,cid_2 = session.UploadVideo("disgracefully_stolen_video.mp4")
 ('n220209892re88....', ...)
 # 上传视频并拿 key
 >>> submission = Submission(
