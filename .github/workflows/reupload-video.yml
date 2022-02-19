@@ -1,6 +1,4 @@
-# 转载指定 Youtube视频到Bilibili
-# 使用前,在 Settings > Secrets 创建如下键值
-# USER_CRED : (登陆设置) e.g. --username [B站用户名] --pwd [B站密码]
+# 转载指定视频到Bilibili
 
 name: 转载视频
 
@@ -8,15 +6,115 @@ on:
   workflow_dispatch:
     inputs:
       url:
-        description: 'Youtube / Twitch / Twitter / etc 视频链接'
+        description: '视频链接 (Youtube/Twitch/pixiv 等 yt-dlp 支持链接)'
         required: true
         default: ''
-      opts:
-        description: '转载设置，如 --tags [标签,半角逗号隔开] --thread_id [分区 id,见 README] e.g. --tags 游戏,单机 --thread_id 17'
+      title:
+        description: '标题格式 (如：[转载][{uploader}]{title})'
         required: true
+        default: '{title}'
+      desc:
+        description: '描述格式 (如：{desc})'
+        required: true
+        default: '{desc}'
+      tags:
+        description: '视频标签 (半角逗号隔开)'
+        required: true
+        default: '转载'      
+      thread:
+        description: '视频分区'
+        required: true
+        type: choice
+        options:
+         - 单机游戏/17
+         - Mugen/19
+         - 宅舞/20
+         - 日常/21
+         - 鬼畜调教/22
+         - MAD·AMV/24
+         - MMD·3D/25
+         - 音MAD/26
+         - 原创音乐/28
+         - 音乐现场/29
+         - VOCALOID·UTAU/30
+         - 翻唱/31
+         - 完结动画/32
+         - 连载动画/33
+         - 人文·历史/37
+         - 短片·手书·配音/47
+         - 演奏/59
+         - 网络游戏/65
+         - 综艺/71
+         - 动物圈/75
+         - 美食圈/76
+         - 其他国家/83
+         - 短片/85
+         - 特摄/86
+         - 手机平板/95
+         - GMV/121
+         - 野生技术协会/122
+         - 社科人文/124
+         - 人力VOCALOID/126
+         - 教程演示/127
+         - 音乐综合/130
+         - 音游/136
+         - 明星/137
+         - 搞笑/138
+         - 欧美电影/145
+         - 日本电影/146
+         - 华语电影/147
+         - 官方延伸/152
+         - 国产动画/153
+         - 舞蹈综合/154
+         - 舞蹈教程/156
+         - 美妆/157
+         - 服饰/158
+         - T台/159
+         - 手工/161
+         - 绘画/162
+         - 运动/163
+         - 健身/164
+         - 国产原创相关/168
+         - 布袋戏/169
+         - 资讯/170
+         - 电子竞技/171
+         - 手机游戏/172
+         - 桌游棋牌/173
+         - 其他/174
+         - 汽车/176
+         - 科学·探索·自然/178
+         - 军事/179
+         - 社会·美食·旅行/180
+         - 影视杂谈/182
+         - 影视剪辑/183
+         - 预告·资讯/184
+         - 国产剧/185
+         - 海外剧/187
+         - 电脑装机/189
+         - 摄影摄像/190
+         - 影音智能/191
+         - 风尚标/192
+         - MV/193
+         - 电音/194
+         - 动态漫·广播剧/195
+         - 街舞/198
+         - 明星舞蹈/199
+         - 中国舞/200
+         - 科学科普/201
+         - 热点/203
+         - 环球/204
+         - 社会/205
+         - 综合/206
+         - 财经/207
+         - 校园学习/208
+         - 职业职场/209
+         - 手办·模玩/210        
+      opts:
+        description: '其他设置 (如:--original --no-reprint)'
+        required: false
         default: ''
       ydl_opts:
-        description: 'yt-dlp 设置，默认设置使用 aria2 下载；遇到限流可考虑添加 format=best'
+        description: 'yt-dlp 设置 (默认设置使用 aria2 下载,遇到限流可考虑添加 format=best)'
         required: false
         default: 'external_downloader=aria2c'
 
@@ -40,4 +138,4 @@ jobs:
       env:     
         SESSION : ${{ secrets.SESSION }}     
       run: |
-        python -m bilibili_toolman --load "$SESSION" --http --cdn ws --youtube "${{ github.event.inputs.url }}" ${{ github.event.inputs.opts }} --opts "${{ github.event.inputs.ydl_opts }}"
+        python -m bilibili_toolman --load "$SESSION" --http --cdn ws --youtube "${{ github.event.inputs.url }}" --title "${{ github.event.inputs.title }}" --desc "${{ github.event.inputs.desc }}" --tags "${{ github.event.inputs.tags }}"  --thread_id `echo ${{ github.event.inputs.thread }} | cut -d/ -f2` ${{ github.event.inputs.opts}} --opts "${{ github.event.inputs.ydl_opts }}"
