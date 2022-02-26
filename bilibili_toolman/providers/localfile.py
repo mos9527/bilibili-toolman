@@ -17,7 +17,7 @@ def update_config(opt):
 def download_video(res) -> DownloadResult:
     results = DownloadResult()
     if not os.path.isfile(res) and not os.path.isdir(res) or (options['cover'] and os.path.isfile(options['cover'])):
-        raise FileNotFoundError
+        raise FileNotFoundError("%s - file not found" % res)
     def append(res):        
         with DownloadResult() as result:        
             result.video_path = res

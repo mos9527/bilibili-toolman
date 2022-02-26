@@ -27,15 +27,16 @@ class WebUploadChunk(FileIterator):
     def upload_via_session(self,session = None):
         for retries in range(1,BiliSession.RETRIES_UPLOAD_ID+1):
             try:
-                (session or self.session).put(
+                resp = (session or self.session).put(
                     self.url_endpoint,
                     params=self.params,
                     headers=self.headers,
                     data=self
-                )
+                )                
                 return True
             except Exception as e:
                 logger.warning('第 %s 次重试时：%s' % (retries,e))
+        return False
 
 class BiliSession(Session):
     '''哔哩哔哩网页上传 API'''
@@ -46,7 +47,7 @@ class BiliSession(Session):
     
     DEFAULT_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36'
     
-    UPLOAD_PROFILE = 'ugcupos/bup'    
+    UPLOAD_PROFILE = 'ugcupos/bup'
     UPLOAD_CDN     = 'bda2'
 
     RETRIES_UPLOAD_ID = 5
@@ -257,11 +258,15 @@ class BiliSession(Session):
         executor = ThreadPoolExecutor(max_workers=self.WORKERS_UPLOAD)
         class ConsumerThread(Thread):
             daemon = True
+            dirty = False
             def run(self) -> None:
                 while chunk_queue.unfinished_tasks >= 0:
                     chunk : WebUploadChunk = chunk_queue.get()             
-                    future = executor.submit(chunk.upload_via_session)           
-                    future.add_done_callback(lambda future:chunk_queue.task_done())
+                    future = executor.submit(chunk.upload_via_session)   
+                    def cb(future):
+                        if not future._result : self.dirty = True
+                        chunk_queue.task_done()
+                    future.add_done_callback(cb)
         tConsume = ConsumerThread()
         tConsume.start()
         from . import cli        
@@ -273,7 +278,8 @@ class BiliSession(Session):
             cli.report_progress(read_all,size_all)
             if chunk_queue.unfinished_tasks == 0: break
             time.sleep(self.DELAY_REPORT_PROGRESS)
-        del tConsume
+        if tConsume.dirty:
+            logger.error('部分上传分块存在问题，稿件可能永不过审!') # oh no
         return True
 
     def UploadVideo(self, path: str) -> Tuple[str,int]:

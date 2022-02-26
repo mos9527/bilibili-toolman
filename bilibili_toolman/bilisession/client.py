@@ -80,23 +80,25 @@ class ClientUploadChunk(FileIterator):
 
     def upload_via_session(self,session = None):
         chunk_bytes = self.to_bytes()
+        md5 = Crypto.md5(chunk_bytes)
         for retries in range(1,BiliSession.RETRIES_UPLOAD_ID+1):
             try:
-                (session or self.session).post(
+                resp = (session or self.session).post(
                     self.url_endpoint,
                     params=self.params,
                     headers=self.headers,
                     files={
                         **self.files,
-                        'md5':(None,Crypto.md5(chunk_bytes)),
+                        'md5':(None,md5),
                         'file': (self.path, chunk_bytes, 'application/octet-stream')
                     },
                     cookies=self.cookies,            
                 )
+                assert resp.json()['OK'] == 1,resp.text
                 return True
             except Exception as e:
                 logger.warning('第 %s 次重试时：%s' % (retries,e))
-
+        return False
 class BiliSession(WebBiliSession):
     '''哔哩哔哩上传助手 API'''
     # this part reused A LOT of old code, some can still be replaced with thier PC counterparts 
@@ -345,6 +347,8 @@ class BiliSession(WebBiliSession):
         file_manager.open(path)
         logger.debug('上传分块: %s' % chunkcount)
         logger.debug('分块大小: %s B' % chunksize)
+        post_r = self._post_complete_upload(preupload_token['complete'],size,basename,'haha',chunkcount)
+        print(post_r)
         def iter_chunks():
             for chunk_n in range(0,chunkcount):
                 start = chunksize * chunk_n
