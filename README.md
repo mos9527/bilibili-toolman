@@ -21,6 +21,20 @@
 - 在项目 Settings > Secret > New repository secret 创建：
     - Name  : `SESSION`
     - Value : `此处为准备好的凭据`
+- *可选* 替换不同凭据上传、投稿
+   
+    **指定上传凭据**
+    
+    - Name  : `SESSION_UPLOAD`
+    - Value : `此处为准备好的凭据`
+    
+    **指定投稿凭据**
+    
+    - Name  : `SESSION_SUBMIT`
+    - Value : `此处为准备好的凭据`
+
+    一般推荐使用 Web 凭据上传，上传助手凭据投稿（高速 (~400Mbps) 上传，多P投稿）
+
 - 在项目 Actions > 转载 Youtube 视频 > Run Workflow 填入值（[详见参数说明](#参数说明)）
 - 运行即可
 ## API 使用示例
@@ -88,47 +102,54 @@
 
 
 ## 参数说明
-
-    usage: -h [-h] [--cookies COOKIES] [--sms] [--load LOAD] [--save] [--http] [--noenv] [--cdn {ws,qn,bda2,kodo,gcs,bos}] [--opts OPTS] [--thread_id THREAD_ID] [--tags TAGS] [--desc DESC]
-              [--title TITLE] [--seperate_parts] [--no_upload] [--no_submit] [--original] [--no_reprint] [--localfile LOCALFILE-URL] [--youtube YOUTUBE-URL]
+    usage: -h [-h] [--cookies COOKIES] [--sms] [--load LOAD]
+            [--load_upload LOAD_UPLOAD] [--load_submit LOAD_SUBMIT] [--save]
+            [--http] [--noenv] [--cdn {ws,qn,bda2,kodo,gcs,bos}] [--opts OPTS]
+            [--thread_id THREAD_ID] [--tags TAGS] [--desc DESC] [--title TITLE]
+            [--seperate_parts] [--no_upload] [--no_submit] [--original]
+            [--no_reprint] [--localfile LOCALFILE-URL] [--youtube YOUTUBE-URL]
 
     使用帮助
 
     optional arguments:
-      -h, --help            show this help message and exit
+    -h, --help            show this help message and exit
 
     身份设置 （随方式优先级排序）:
-      --cookies COOKIES     登陆： 使用 Cookies 登陆，即使用 Web API （不可多 P 上传） ( 需要 SESSDATA 及 bili_jct ) e.g.SESSDATA=cb0..; bili_jct=6750...
-      --sms                 登陆：使用短信验证码登陆，即使用 上传助手 API （可多 P 上传）（需手动交互）（有日获取限制，请配合 --save 使用）
-      --load LOAD           登陆：使用保存过的凭据登陆，由该参数读入
-      --save                登陆：向stdout输出当前登陆凭据并退出（其他输出转移至stderr）
-      --http                强制使用 HTTP （不推荐）
-      --noenv               上传时，不采用环境变量（如代理）
-      --cdn {ws,qn,bda2,kodo,gcs,bos}
+    --cookies COOKIES     登陆： 使用 Cookies 登陆，即使用 Web API （不可多 P 上传） ( 需要 SESSDATA 及 bili_jct ) e.g.SESSDATA=cb0..; bili_jct=6750...
+    --sms                 登陆：使用短信验证码登陆，即使用 上传助手 API （可多 P 上传）（需手动交互）（有日获取限制，请配合 --save 使用）
+    --load LOAD           登陆：加载凭据，同时用于上传及投稿
+    --load_upload LOAD_UPLOAD
+                            登陆：使用该凭据上传，而不用--load凭据上传
+    --load_submit LOAD_SUBMIT
+                            登陆：使用该凭据投稿，而不用--load凭据投稿
+    --save                登陆：向stdout输出当前登陆凭据并退出（其他输出转移至stderr）
+    --http                强制使用 HTTP （不推荐）
+    --noenv               上传时，不采用环境变量（如代理）
+    --cdn {ws,qn,bda2,kodo,gcs,bos}
                             上传用 CDN （限 Web API) （对应 网宿（适合海外），七牛，百度（默认），七牛，谷歌，百度）
 
     上传设置:
-      --opts OPTS           解析可选参数 ，详见 --opts 格式
-      --thread_id THREAD_ID
+    --opts OPTS           解析可选参数 ，详见 --opts 格式
+    --thread_id THREAD_ID
                             分区 ID
-      --tags TAGS           标签
-      --desc DESC           描述格式 e.g. "原描述：{desc}" (其他变量详见下文)（仅稿件有描述）
-      --title TITLE         标题格式 e.g. "[Youtube] {title} (其他变量详见下文)（使用于稿件及分P）"
-      --seperate_parts      不分P （e.g. --youtube [播放列表],--localfile [文件夹]）独立投稿（不分P）（Web上传默认不分 P）
-      --no_upload           只下载资源
-      --no_submit           不提交稿件，适用于获取filename参数
-      --original            设置稿件为原创
-      --no_reprint          设置稿件不允许转载
+    --tags TAGS           标签
+    --desc DESC           描述格式 e.g. "原描述：{desc}" (其他变量详见下文)（仅稿件有描述）
+    --title TITLE         标题格式 e.g. "[Youtube] {title} (其他变量详见下文)（使用于稿件及分P）"
+    --seperate_parts      不分P （e.g. --youtube [播放列表],--localfile [文件夹]）独立投稿（不分P）（Web上传默认不分 P）
+    --no_upload           只下载资源
+    --no_submit           不提交稿件，适用于获取filename参数
+    --original            设置稿件为原创
+    --no_reprint          设置稿件不允许转载
 
     解析可选参数 "opts" （格式 ： [参数1]=[值1];[参数2]=[值2] (query-string)）:
-      --localfile LOCALFILE-URL
+    --localfile LOCALFILE-URL
                             本地文件
-                               参数:
+                            参数:
                                 cover (str) - 封面图片路径
                             e.g. --localfile "le videos/" --opts cover="le cover.png" --tags ...
-      --youtube YOUTUBE-URL
+    --youtube YOUTUBE-URL
                             Youtube / Twitch / etc 视频下载 (yt-dlp)
-                               参数:yt-dlp 参数：
+                            参数:yt-dlp 参数：
                                 format (str) - 同 yt-dlp -f
                                 quite (True,False) - 是否屏蔽 yt-dlp 日志 (默认 False)
                             特殊参数：
@@ -153,7 +174,7 @@
                                     {avereage_rating}
                                     ...
                                 注：输入播放列表且多 P 时，稿件标题为播放列表标题，稿件描述仅为 `来自Youtube`
-
+                            
                             默认配置：不烧入字幕，下载最高质量音视频，下载字幕但不操作
 
     变量：

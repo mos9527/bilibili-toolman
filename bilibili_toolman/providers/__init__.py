@@ -10,11 +10,10 @@ class DownloadResult:
     title : str = ''
     description : str = ''    
     soruce : str = ''
-
-    original : bool = False # now this really is just a placeholder
+    
     results = None
 
-    extra = dict() # BAD MOVE! though this SHOULD be overwritten and not accessed
+    extra = dict()
 
     @property
     def results(self):

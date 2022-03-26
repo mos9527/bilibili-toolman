@@ -22,8 +22,8 @@ def download_video(res) -> DownloadResult:
         with DownloadResult() as result:        
             result.video_path = res
             result.cover_path = options['cover']            
-            result.original = True    
             result.title = os.path.basename(res)
+            result.soruce = 'bilibili-toolman'
             result.description = '[automated upload of file %s]' % res        
         results.results.append(result)
     if os.path.isfile(res):append(res)
@@ -31,5 +31,6 @@ def download_video(res) -> DownloadResult:
         for f in os.listdir(res):
             append(os.path.join(res,f))
     results.title = os.path.basename(res)   
+    results.soruce = 'bilibili-toolman'
     results.description = '[automated upload of file %s]' % res
     return results

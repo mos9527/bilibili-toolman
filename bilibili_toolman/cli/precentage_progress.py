@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 try:
     from tqdm import tqdm
-    tqdm_ = tqdm(unit='B', unit_scale=True)  
+    tqdm_ = tqdm(unit='B',unit_scale=True,maxinterval=0) 
+    # setting maxinterval=0 to disable tqdm's internal monitor
 except:
     tqdm_ = None
-def report(current,max_val):
-    if tqdm_ is None:return
-    tqdm_.total = max_val
-    tqdm_.n = current    
-    tqdm_.update(0)
-    tqdm_.refresh()
+def report(current,max):    
+    if tqdm is not None:
+        tqdm_.total = max
+        tqdm_.n = current   
+        tqdm_.refresh()
 def close():
-    if tqdm_ is None:return
-    tqdm_.close()
+    # silence tqdm
+    if tqdm is not None:
+        tqdm_.disable = True

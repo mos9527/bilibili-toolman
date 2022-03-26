@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
 '''bilibili - PC API implementation'''
 from time import time
-from typing import Iterable, Optional, Text, Tuple, Union
 from requests.sessions import Session
+from typing import Iterable, Tuple, Union
 from urllib.parse import quote,urlencode
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_v1_5
 from hashlib import md5
 from base64 import b64encode
-import math
+import math,logging
 
-from .web import BiliSession as WebBiliSession,logger
+from .. import BiliWebSession
 from .common import FileIterator, JSONResponse, LoginException , ReprExDict, file_manager, check_file 
 from .common.submission import Submission
+
+logger = logging.getLogger('ClientSession')
 
 def PCOnlyAPI(_classmethod):
     def wrapper(self,*a,**k):
@@ -59,7 +61,7 @@ class Crypto:
             raise TypeError
         return Crypto.md5(_str + Crypto.APPSECRET)
 
-class SingableDict(dict):
+class SignedDict(dict):
     @property
     def sorted(self):
         '''returns a alphabetically sorted version of `self`'''
@@ -99,9 +101,10 @@ class ClientUploadChunk(FileIterator):
             except Exception as e:
                 logger.warning('第 %s 次重试时：%s' % (retries,e))
         return False
-class BiliSession(WebBiliSession):
+class BiliSession(BiliWebSession):
     '''哔哩哔哩上传助手 API'''
-    # this part reused A LOT of old code, some can still be replaced with thier PC counterparts 
+    TYPE = 'client'
+
     UPLOAD_CHUNK_SIZE = 2 * (1 << 20)    
     BUILD_VER = (2, 3, 0,1073)
     BUILD_NO = int(BUILD_VER[0] * 1e8 + BUILD_VER[1] * 1e6 + BUILD_VER[2] * 1e2 + BUILD_VER[3])
@@ -123,6 +126,7 @@ class BiliSession(WebBiliSession):
             'Accept-Encoding': 'gzip,deflate',
         }
         self.login_tokens = dict()
+        self.logger = logger
     # region Properties
     @property
     def mid(self):
@@ -135,7 +139,7 @@ class BiliSession(WebBiliSession):
     @property
     def access_key_param(self):
         '''Singed dictionary containing only `access_key` key-value pair'''
-        return SingableDict({'access_key':self.access_token}).signed
+        return SignedDict({'access_key':self.access_token}).signed
         
     # endregion
 
@@ -168,7 +172,7 @@ class BiliSession(WebBiliSession):
     def _list_archives(self,params):
         return self.get(
             'https://member.bilibili.com/x/client/archives',
-            params=SingableDict({
+            params=SignedDict({
                 "access_key": self.access_token,
                 **params
             }).signed
@@ -178,7 +182,7 @@ class BiliSession(WebBiliSession):
     def _view_archive(self, bvid):
         return self.get(
             'https://member.bilibili.com/x/client/archive/view',
-            params=SingableDict({
+            params=SignedDict({
                 "access_key": self.access_token,
                 "bvid": bvid,
                 'build': self.BUILD_VER[-1]
@@ -189,7 +193,7 @@ class BiliSession(WebBiliSession):
         return self.post(
             "https://member.bilibili.com/x/vu/client/edit",
             params=self.access_key_param,
-            json=SingableDict({
+            json=SignedDict({
                 'build': self.BUILD_VER[-1],
                 'no_reprint':0,
                 'open_elec':0,
@@ -208,7 +212,7 @@ class BiliSession(WebBiliSession):
     # region Client-specific APIs
     @JSONResponse
     def _oauth2_getkey(self):
-        return self.get("https://passport.bilibili.com/x/passport-login/web/key", params=SingableDict({
+        return self.get("https://passport.bilibili.com/x/passport-login/web/key", params=SignedDict({
             'appkey': Crypto.APPKEY,
             'platform':'pc'            
         }).signed)
@@ -279,7 +283,7 @@ class BiliSession(WebBiliSession):
         '''        
         resp = self.post(
             "https://passport.bilibili.com/x/passport-login/sms/send",
-            data=SingableDict({
+            data=SignedDict({
                 'appkey': Crypto.APPKEY,
                 'platform': "pc",                
                 'tel':str(tel),
@@ -312,7 +316,7 @@ class BiliSession(WebBiliSession):
         assert self.login_tokens.get('captcha_key',None),"`RenewSMSCaptcha` not called or failed."
         resp = self.post(
             "https://passport.bilibili.com/x/passport-login/login/sms",
-            data=SingableDict({
+            data=SignedDict({
                 'appkey': Crypto.APPKEY,
                 'platform': "pc",                
                 'captcha_key' : self.login_tokens["captcha_key"],
@@ -347,8 +351,6 @@ class BiliSession(WebBiliSession):
         file_manager.open(path)
         logger.debug('上传分块: %s' % chunkcount)
         logger.debug('分块大小: %s B' % chunksize)
-        post_r = self._post_complete_upload(preupload_token['complete'],size,basename,'haha',chunkcount)
-        print(post_r)
         def iter_chunks():
             for chunk_n in range(0,chunkcount):
                 start = chunksize * chunk_n
@@ -379,7 +381,7 @@ class BiliSession(WebBiliSession):
 
     # region Pickling
     def __dict__(self):
-        return {'cookies':self.cookies,'login_tokens':self.login_tokens,'session':self}
+        return {'cookies':self.cookies,'login_tokens':self.login_tokens,'session':self.TYPE}
     
     def update(self,state_dict : dict):
         self.cookies = state_dict['cookies']        

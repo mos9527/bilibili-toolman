@@ -3,7 +3,7 @@ import os
 import argparse
 import logging
 from pathlib import Path
-from .. import providers
+from .. import providers,__version__,__desc__
 
 class AttribuitedDict(dict):
     def __getattr__(self,name):
@@ -12,7 +12,9 @@ pbar = None
 global_args = {            
     'cookies' : {'help':'登陆： 使用 Cookies 登陆，即使用 Web API （不可多 P 上传） ( 需要 SESSDATA 及 bili_jct ) e.g.SESSDATA=cb0..; bili_jct=6750...'},
     'sms' : {'help':'登陆：使用短信验证码登陆，即使用 上传助手 API （可多 P 上传）（需手动交互）（有日获取限制，请配合 --save 使用）','default':False,'action':'store_true'},
-    'load' : {'help':'登陆：使用保存过的凭据登陆，由该参数读入'},
+    'load' :        {'help':'登陆：加载凭据，同时用于上传及投稿'},
+    'load_upload' : {'help':'登陆：使用该凭据上传，而不用--load凭据上传'},
+    'load_submit' : {'help':'登陆：使用该凭据投稿，而不用--load凭据投稿'},
     'save' : {'help':'登陆：向stdout输出当前登陆凭据并退出（其他输出转移至stderr）','default':False,'action':'store_true'},
     'http' : {'help':'强制使用 HTTP （不推荐）','default':False,'action':'store_true'},
     'noenv' : {'help':'上传时，不采用环境变量（如代理）','default':False,'action':'store_true'},
@@ -45,6 +47,7 @@ def setup_logging():
     coloredlogs.install(0)
     logging.getLogger('urllib3').setLevel(logging.CRITICAL)
     logging.getLogger('PIL.Image').setLevel(logging.CRITICAL)
+    logging.info('%s v%s' % (__desc__,__version__))
 
 def prepare_temp(temp_path : str):    
     if not os.path.isdir(temp_path):os.mkdir(temp_path)

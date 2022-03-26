@@ -5,11 +5,12 @@ import json,pickle,gzip
 from threading import Thread
 from requests import Session
 from typing import List, Tuple
-from . import logger
-import math,time,mimetypes,base64
+import math,time,mimetypes,base64,logging
 
 from .common import JSONResponse , FileIterator, ReprExDict , file_manager , chunk_queue , check_file
 from .common.submission import Submission , create_submission_by_arc
+
+logger = logging.getLogger('WebSession')
 
 def WebOnlyAPI(_classmethod):
     def wrapper(self,*a,**k):
@@ -35,11 +36,13 @@ class WebUploadChunk(FileIterator):
                 )                
                 return True
             except Exception as e:
-                logger.warning('第 %s 次重试时：%s' % (retries,e))
+                self.logger.warning('第 %s 次重试时：%s' % (retries,e))
         return False
 
 class BiliSession(Session):
     '''哔哩哔哩网页上传 API'''
+    TYPE = 'web'
+
     BUILD_VER = (2, 8, 12)
     BUILD_NO = int(BUILD_VER[0] * 1e6 + BUILD_VER[1] * 1e4 + BUILD_VER[2] * 1e2)
     BUILD_STR = '.'.join(map(lambda v: str(v), BUILD_VER))
@@ -69,10 +72,11 @@ class BiliSession(Session):
             url='http' + url[5:]                                   
         return super().request(method, url,*a,**k)
 
-    def __init__(self, cookies: str = '') -> None:      
+    def __init__(self, cookies='') -> None:      
         Session.__init__(self)
         self.LoginViaCookiesQueryString(cookies)
         self.headers['User-Agent'] = self.DEFAULT_UA       
+        self.logger = logger
         
     # region Web-client APIs    
     @WebOnlyAPI
@@ -279,7 +283,7 @@ class BiliSession(Session):
             if chunk_queue.unfinished_tasks == 0: break
             time.sleep(self.DELAY_REPORT_PROGRESS)
         if tConsume.dirty:
-            logger.error('部分上传分块存在问题，稿件可能永不过审!') # oh no
+            self.logger.error('部分上传分块存在问题，稿件可能永不过审!') # oh no
         return True
 
     def UploadVideo(self, path: str) -> Tuple[str,int]:
@@ -301,12 +305,12 @@ class BiliSession(Session):
                         self.headers['X-Upos-Auth'] = config['auth']
                         '''X-Upos-Auth header'''
                         endpoint = 'https:%s/ugcboss/%s' % (config['endpoint'], config['upos_uri'].split('/')[-1])
-                        logger.info('远端结点： %s' % endpoint)
-                        logger.debug('第 %s 次刷新 TOKEN...' % i)
+                        self.logger.info('远端结点： %s' % endpoint)
+                        self.logger.debug('第 %s 次刷新 TOKEN...' % i)
                         upload_id = self._upload_id(endpoint).json()['upload_id']
                         return config,endpoint,upload_id
                     except Exception as e:               
-                        logger.warning('第 %s 上传未成功,重试...' % i)
+                        self.logger.warning('第 %s 上传未成功,重试...' % i)
                         time.sleep(self.DELAY_RETRY_UPLOAD_ID)            
                 return None,None,None
             config,endpoint,upload_id = fetch_upload_id()
@@ -316,8 +320,8 @@ class BiliSession(Session):
             chunksize = config['chunk_size']
             chunkcount = math.ceil(size/chunksize)
             file_manager.open(path)
-            logger.debug('上传分块: %s' % chunkcount)
-            logger.debug('分块大小: %s B' % chunksize)
+            self.logger.debug('上传分块: %s' % chunkcount)
+            self.logger.debug('分块大小: %s B' % chunksize)
             def iter_chunks():
                 for chunk_n in range(0,chunkcount):   
                     start = chunksize * chunk_n
@@ -347,7 +351,7 @@ class BiliSession(Session):
         file_manager.close(path)
         state = self._upload_status(endpoint, basename, config['upload_id'], config['biz_id'])
         if(state['OK']==1):
-            logger.debug('上传完毕: %s' % ReprExDict(state))
+            self.logger.debug('上传完毕: %s' % ReprExDict(state))
         else:
             raise Exception('上传失败: %s' % ReprExDict(state))
         return endpoint, config['biz_id']
@@ -362,9 +366,9 @@ class BiliSession(Session):
     def UploadCover(self, path: str):
         '''上传封面'''
         mime = mimetypes.guess_type(path)[0] or 'image/png' # fall back to png
-        logger.debug('%s -> %s' % (path,mime))
+        self.logger.debug('%s -> %s' % (path,mime))
         content = open(path, 'rb').read()
-        logger.debug('上传封面图 (%s B)' % len(content))
+        self.logger.debug('上传封面图 (%s B)' % len(content))
         return self._upload_cover(content,mime)
 
     def _submit_submission(self,submission : Submission):
@@ -385,22 +389,22 @@ class BiliSession(Session):
             seperate_parts (bool, optional): 是否将多个子视频单独上传. Defaults to False.        
         '''
         if not seperate_parts:
-            logger.debug('准备提交多 P 内容: %s' % submission.title)            
+            self.logger.debug('准备提交多 P 内容: %s' % submission.title)
             result = self._submit_submission(submission).json()
             return {'code:':result['code'],'results':[result]}
         else:
             results = []
             codes = 0
             for submission in submission.videos:
-                logger.debug('准备提交单 P 内容: %s' % submission.title)
+                self.logger.debug('准备提交单 P 内容: %s' % submission.title)
                 while True:
                     result = self._submit_submission(submission).json()
                     if result['code'] == 21070:
-                        logger.warning('请求受限（限流），准备重试')
+                        self.logger.warning('请求受限（限流），准备重试')
                         time.sleep(self.DELAY_VIDEO_SUBMISSION)
                         continue 
                     elif result['code'] != 0:
-                        logger.critical('其他错误 (%s): %s - 跳过上传' % (result['code'],result['message']))                        
+                        self.logger.critical('其他错误 (%s): %s - 跳过上传' % (result['code'],result['message']))                        
                         break       
                     else:
                         break             
@@ -496,7 +500,7 @@ class BiliSession(Session):
 
     # region Pickling
     def __dict__(self):
-        return {'cookies':self.cookies,'session':self}
+        return {'cookies':self.cookies,'session':self.TYPE}
     
     def update(self,state_dict : dict):
         self.cookies = state_dict['cookies']        
@@ -510,7 +514,15 @@ class BiliSession(Session):
     @staticmethod
     def from_bytes(b : bytes):
         unpickled = pickle.loads(gzip.decompress(b))
-        sess = unpickled['session']
+        session = unpickled['session']
+        if session == 'web':
+            from .. import BiliWebSession
+            sess = BiliWebSession()
+        elif session == 'client':
+            from .. import BiliClientSession
+            sess = BiliClientSession()
+        else:
+            raise DeprecationWarning("此凭据不兼容当前版本，请重新获取")
         sess.update(unpickled)
         return sess
 
