@@ -139,11 +139,4 @@ jobs:
         SESSION_SUBMIT : ${{ secrets.SESSION_SUBMIT }}
              
       run: |
-        python -m bilibili_toolman --load "$SESSION" `[[ ! -z "$SESSION_UPLOAD" ]] && echo "--load_upload \"$SESSION_UPLOAD\""` `[[ ! -z "$SESSION_SUBMIT" ]] && echo "--load_submit \"$SESSION_SUBMIT\""` \
-        --http --cdn ws \ 
-        --youtube "${{ github.event.inputs.url }}" \ 
-        --title "${{ github.event.inputs.title }}" \ 
-        --desc "${{ github.event.inputs.desc }}" \ 
-        --tags "${{ github.event.inputs.tags }}" \ 
-        --thread_id `echo ${{ github.event.inputs.thread }} | cut -d/ -f2` ${{ github.event.inputs.opts}} \ 
-        --opts "${{ github.event.inputs.ydl_opts }}"
+        python -m bilibili_toolman --load "$SESSION" `[[ ! -z "$SESSION_UPLOAD" ]] && echo "--load_upload \"$SESSION_UPLOAD\""` `[[ ! -z "$SESSION_SUBMIT" ]] && echo "--load_submit \"$SESSION_SUBMIT\""` --http --cdn ws --youtube "${{ github.event.inputs.url }}" --title "${{ github.event.inputs.title }}" --desc "${{ github.event.inputs.desc }}" --tags "${{ github.event.inputs.tags }}" --thread_id `echo ${{ github.event.inputs.thread }} | cut -d/ -f2` ${{ github.event.inputs.opts}} --opts "${{ github.event.inputs.ydl_opts }}"

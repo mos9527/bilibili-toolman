@@ -52,11 +52,4 @@ jobs:
         SESSION_SUBMIT : ${{ secrets.SESSION_SUBMIT }}
              
       run: |
-        python -m bilibili_toolman --load "$SESSION" `[[ ! -z "$SESSION_UPLOAD" ]] && echo "--load_upload \"$SESSION_UPLOAD\""` `[[ ! -z "$SESSION_SUBMIT" ]] && echo "--load_submit \"$SESSION_SUBMIT\""` \
-        --http --cdn ws \ 
-        --youtube "$CHANNEL_URL" \ 
-        --title "$TITLE_FORMAT" \ 
-        --desc "$DESC_FORMAT" \ 
-        --tags "$TAGS" \ 
-        --thread_id $THREAD_ID \ 
-        --opts "daterange=$DATERANGE;playlistend=$LIMIT"
+        python -m bilibili_toolman --load "$SESSION" `[[ ! -z "$SESSION_UPLOAD" ]] && echo "--load_upload \"$SESSION_UPLOAD\""` `[[ ! -z "$SESSION_SUBMIT" ]] && echo "--load_submit \"$SESSION_SUBMIT\""` --http --cdn ws --youtube "$CHANNEL_URL" --title "$TITLE_FORMAT" --desc "$DESC_FORMAT" --tags "$TAGS" --thread_id $THREAD_ID --opts "daterange=$DATERANGE;playlistend=$LIMIT"
