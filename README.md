@@ -46,7 +46,7 @@
 ### Actions - 定时上传
 该 Actions 适用于需要自动转载Youtube频道的用户
 
-- 依照 [reupload-channel-timed.yml](https://github.com/greats3an/bilibili-toolman/blob/master/.github/workflows/reupload-video.yml) 及其注释配置即可
+- 依照 [reupload-channel-timed.yml](https://github.com/greats3an/bilibili-toolman/blob/master/.github/workflows/reupload-channel-timed.yml) 及其注释配置即可
 
 ## API 使用示例
 ```python
