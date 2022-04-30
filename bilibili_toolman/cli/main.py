@@ -18,7 +18,7 @@ def download_sources(provider,arg) -> DownloadResult:
     resource = arg.resource
     opts = arg.opts
     try:
-        opts = urllib.parse.parse_qs(opts,keep_blank_values=True)
+        opts = urllib.parse.parse_qs(opts,keep_blank_values=False)
         provider.update_config({k:v[-1].replace(';','') for k,v in opts.items()})
     except:opts = '无效选项'
     '''Passing options'''
@@ -207,7 +207,7 @@ def __main__():
         logger.warning('%s配置：' % desc)
         if sess.TYPE == 'web': # using Web APIs
             bup = {'ws','qn','bda2'}
-            bupfetch = {'kodo','gcs','bos'}
+            bupfetch = {'kodo','gcs','bos'} # TODO : Actually implementing bupfetch routes
             if global_args.cdn in bup:
                 sess.UPLOAD_PROFILE = 'ugcupos/bup'                                
             elif global_args.cdn in bupfetch:

@@ -102,20 +102,17 @@
 
 
 ## 参数说明
-    usage: -h [-h] [--cookies COOKIES] [--sms] [--load LOAD]
-            [--load_upload LOAD_UPLOAD] [--load_submit LOAD_SUBMIT] [--save]
-            [--http] [--noenv] [--cdn {ws,qn,bda2,kodo,gcs,bos}] [--opts OPTS]
-            [--thread_id THREAD_ID] [--tags TAGS] [--desc DESC] [--title TITLE]
-            [--seperate_parts] [--no_upload] [--no_submit] [--original]
-            [--no_reprint] [--localfile LOCALFILE-URL] [--youtube YOUTUBE-URL]
+    usage: -h [-h] [--cookies COOKIES] [--sms] [--load LOAD] [--load_upload LOAD_UPLOAD] [--load_submit LOAD_SUBMIT] [--save] [--http] [--noenv]
+            [--cdn {ws,qn,bda2,kodo,gcs,bos}] [--opts OPTS] [--thread_id THREAD_ID] [--tags TAGS] [--desc DESC] [--title TITLE] [--seperate_parts]
+            [--no_upload] [--no_submit] [--original] [--no_reprint] [--localfile LOCALFILE-URL] [--youtube YOUTUBE-URL]
 
     使用帮助
 
-    optional arguments:
+    options:
     -h, --help            show this help message and exit
 
     身份设置 （随方式优先级排序）:
-    --cookies COOKIES     登陆： 使用 Cookies 登陆，即使用 Web API （不可多 P 上传） ( 需要 SESSDATA 及 bili_jct ) e.g.SESSDATA=cb0..; bili_jct=6750...
+    --cookies COOKIES     登陆： 使用 Cookies 登陆，即使用 Web API （不可多 P 上传） ( 需要 SESSDATA 及 bili_jct ) e.g.SESSDATA=cb0..; bili_jct=6750...      
     --sms                 登陆：使用短信验证码登陆，即使用 上传助手 API （可多 P 上传）（需手动交互）（有日获取限制，请配合 --save 使用）
     --load LOAD           登陆：加载凭据，同时用于上传及投稿
     --load_upload LOAD_UPLOAD
@@ -153,15 +150,25 @@
                                 format (str) - 同 yt-dlp -f
                                 quite (True,False) - 是否屏蔽 yt-dlp 日志 (默认 False)
                             特殊参数：
+                                playlistend - 对于播放列表、频道，下载到（时间顺序，新者在前）第 n 个视频为止
+                                playliststart - 对于播放列表、频道，从（时间顺序，新者在前）第 n 个视频开始下载
+
+                                daterange - 只下载在该参数指定时间窗口内的视频 (精确到毫秒)
+                                    格式可以为 YYmmdd,也可以用相对时间. 如：
+
+                                    e.g. daterange=now; (下载今天上传的视频)
+                                    e.g. daterange=now-1day; (下载昨天到今天上传的视频)
+                                    e.g. daterange=220430~220501 (下载 2022年4月30日~2022年5月1日 的视频)
+
                                 hardcode - 烧入硬字幕选项
                                     e.g. 启用    ..;hardcode;...
-                                    e.g. 换用字体 ..;hardcode=style:FontName=Segoe UI       
+                                    e.g. 换用字体 ..;hardcode=style:FontName=Segoe UI
                                     e.g. NV硬解码   ..;hardcode=input:-hwaccel cuda/output:-c:v h264_nvenc -crf 17 -b:v 5M
-                                    多个选项用 / 隔开   
-                            e.g. --youtube "..." --opts "format=best;quiet=True;hardcode" --tags ...
+                                    多个选项用 / 隔开
+                            e.g. --youtube "..." --opts "format=best&quiet=True&hardcode" --tags ...
                                 此外，针对视频对象，还提供其他变量:
                                     {id}
-                                    {title}    
+                                    {title}
                                     {descrption}
                                     {upload_date}
                                     {uploader}
@@ -174,7 +181,7 @@
                                     {avereage_rating}
                                     ...
                                 注：输入播放列表且多 P 时，稿件标题为播放列表标题，稿件描述仅为 `来自Youtube`
-                            
+
                             默认配置：不烧入字幕，下载最高质量音视频，下载字幕但不操作
 
     变量：

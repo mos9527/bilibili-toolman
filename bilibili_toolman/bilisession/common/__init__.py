@@ -91,7 +91,7 @@ def get_timestamp() -> int:
 
 def check_file(path) -> Tuple[str, str, int]:
     '''checks if targeted path is a file then returns its Full Path, Basename, Size (in Bytes)'''
-    assert os.path.isfile(path)
+    assert os.path.isfile(path),"%s 不存在，检查视频源配置！（如：yt-dlp配置了时间窗口）" % path
     size = os.stat(path).st_size
     return path, os.path.basename(path), size
 

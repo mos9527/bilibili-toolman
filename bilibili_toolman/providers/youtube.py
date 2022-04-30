@@ -2,7 +2,7 @@
 '''Youtube video provier - yt-dlp'''
 from yt_dlp.postprocessor.ffmpeg import FFmpegPostProcessor, FFmpegPostProcessorError
 from yt_dlp.postprocessor.embedthumbnail import FFmpegThumbnailsConvertorPP
-from yt_dlp.utils import encodeArgument, encodeFilename, prepend_extension, shell_quote
+from yt_dlp.utils import encodeArgument, encodeFilename, prepend_extension, shell_quote , DateRange
 from . import DownloadResult
 import logging,yt_dlp,os,subprocess,sys
 __desc__ = '''Youtube / Twitch / etc 视频下载 (yt-dlp)'''
@@ -10,12 +10,22 @@ __cfg_help__ = '''yt-dlp 参数：
     format (str) - 同 yt-dlp -f
     quite (True,False) - 是否屏蔽 yt-dlp 日志 (默认 False)
 特殊参数：
+    playlistend - 对于播放列表、频道，下载到（时间顺序，新者在前）第 n 个视频为止
+    playliststart - 对于播放列表、频道，从（时间顺序，新者在前）第 n 个视频开始下载
+
+    daterange - 只下载在该参数指定时间窗口内的视频 (精确到毫秒)
+        格式可以为 YYmmdd,也可以用相对时间. 如：
+        
+        e.g. daterange=now; (下载今天上传的视频)
+        e.g. daterange=now-1day; (下载昨天到今天上传的视频)
+        e.g. daterange=220430~220501 (下载 2022年4月30日~2022年5月1日 的视频)        
+    
     hardcode - 烧入硬字幕选项
         e.g. 启用    ..;hardcode;...
         e.g. 换用字体 ..;hardcode=style:FontName=Segoe UI       
         e.g. NV硬解码   ..;hardcode=input:-hwaccel cuda/output:-c:v h264_nvenc -crf 17 -b:v 5M
         多个选项用 / 隔开   
-e.g. --youtube "..." --opts "format=best;quiet=True;hardcode" --tags ...
+e.g. --youtube "..." --opts "format=best&quiet=True&hardcode" --tags ...
     此外，针对视频对象，还提供其他变量:
         {id}
         {title}    
@@ -42,12 +52,28 @@ params = {
     'outtmpl':'%(id)s.%(ext)s',
     'format':'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',    
     'writethumbnail':True,
-    'writesubtitles':True,     
+    'writesubtitles':True,    
 } # default params,can be overridden
 def __to_yyyy_mm_dd(date):
     return date[:4] + '/' + date[4:6] + '/' + date[6:] 
 def update_config(cfg):    
     global ydl
+    # preprocess some parameters
+    if 'daterange' in cfg:
+        datestr = cfg['daterange']        
+        if '~' in datestr:
+            dateStart,dateEnd = datestr.split('~')
+            daterange = DateRange(dateStart,dateEnd)
+        else:
+            daterange = DateRange(start=datestr)
+        cfg['daterange'] = daterange
+        logger.info('指定要下载的视频上传时间窗口: %s' % daterange)
+    
+    if 'playlistend' in cfg:
+        cfg['playlistend'] = int(cfg['playlistend'])        
+    if 'playlistbegin' in cfg:
+        cfg['playlistbegin'] = int(cfg['playlistbegin'])        
+
     hardcodeSettings = None
     if 'hardcode' in cfg: # private implementation of hardcoding subtitles                    
         hardcodeSettings = HardcodeSettings(from_cmd=cfg['hardcode'])
