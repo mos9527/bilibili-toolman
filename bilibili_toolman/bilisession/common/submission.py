@@ -137,7 +137,7 @@ class Submission:
         self.tags = [] # creates new instance for mutables
         self.videos = SubmissionVideos(self)
         self.title = title
-        self.desc = desc
+        self.description = desc
         self.video_endpoint = video_endpoint
 
     def __enter__(self):

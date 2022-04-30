@@ -1,0 +1,62 @@
+# * 定时转载指定频道视频到 Bilibili
+# 可以复制本配置文件而同时转载多个 Youtube 频道
+# 或分散到多个 Github 账户进行
+
+name: 定时转载
+
+env:
+  CHANNEL_URL :  ''
+  # 频道链接，如 https://www.youtube.com/user/devilleon7
+  TITLE_FORMAT : '${title}'
+  # 标题格式 (如：[转载][{uploader}]{title})
+  DESC_FORMAT : '${desc}'
+  # 描述格式 (如：{desc})
+  TAGS : '转载,测试'
+  # 视频标签 (半角逗号隔开)
+  THREAD_ID : 17
+  # 视频分区 (查阅 README 文末分区表)
+  DATERANGE : 'now'
+  # 视频上传时间时间窗口 - 格式可以为 YYmmdd,也可以用相对时间. 如：
+  
+  # e.g. daterange=now; (下载今天上传的视频)
+  # e.g. daterange=now-1day; (下载昨天到今天上传的视频)
+  # e.g. daterange=220430~220501 (下载 2022年4月30日~2022年5月1日 的视频)            
+  LIMIT : 1
+  # 一次性最多上传的视频数量
+
+on:
+  schedule:
+    # 在这里修改 cron 定时配置；此处为 每天中午 12 点触发检测
+    - cron: '0 12 * * *'
+
+jobs:
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: FedericoCarboni/setup-ffmpeg@v1 
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    - name: Install dependencies
+      run: |
+        python -m pip install -r requirements.txt  
+        sudo apt-get install aria2
+    - name: Begin Reuploading      
+      env:     
+        SESSION : ${{ secrets.SESSION }}
+        SESSION_UPLOAD : ${{ secrets.SESSION_UPLOAD }}
+        SESSION_SUBMIT : ${{ secrets.SESSION_SUBMIT }}
+             
+      run: |
+        python -m bilibili_toolman --load "$SESSION" `[[ ! -z "$SESSION_UPLOAD" ]] && echo "--load_upload \"$SESSION_UPLOAD\""` `[[ ! -z "$SESSION_SUBMIT" ]] && echo "--load_submit \"$SESSION_SUBMIT\""` \
+        --http --cdn ws \ 
+        --youtube "$CHANNEL_URL" \ 
+        --title "$TITLE_FORMAT" \ 
+        --desc "$DESC_FORMAT" \ 
+        --tags "$TAGS" \ 
+        --thread_id $THREAD_ID \ 
+        --opts "daterange=$DATERANGE;playlistend=$LIMIT"

@@ -4,19 +4,21 @@
 
 # 使用
 ## 以 Github Actions 转载视频：
+
 ### 准备凭据
 凭据需要在本地准备
 - [pip 安装 bilibili_toolman](#安装)
 - 使用 Web 端 API
     
         python -m bilibili_toolman --save --cookies "SESSDATA=8aafe8**********;bili_jct=4f39b**********"
-    `SESSDATA`,`bili_jct` 可在XHR请求头中获得，这里不将阐述
+    `SESSDATA`,`bili_jct` 可在XHR请求头中或`document.cookies`获得，这里不将阐述
 - 使用 上传助手 API
         
         python -m bilibili_toolman --save --sms
     跟随输出操作即可
 - 凭据即输出的 Base64 编码内容
-### 准备 Actions
+
+### Actions - 配置凭据
 - Fork 此项目
 - 在项目 Settings > Secret > New repository secret 创建：
     - Name  : `SESSION`
@@ -33,49 +35,61 @@
     - Name  : `SESSION_SUBMIT`
     - Value : `此处为准备好的凭据`
 
-    一般推荐使用 Web 凭据上传，上传助手凭据投稿（高速 (~400Mbps) 上传，多P投稿）
+    一般推荐使用 Web 凭据上传，上传助手凭据投稿（高速 (?) (~400Mbps) 上传，多P投稿）
 
-- 在项目 Actions > 转载 Youtube 视频 > Run Workflow 填入值（[详见参数说明](#参数说明)）
+### Actions - 手动上传
+该 Actions 适用于手动转载的用户
+
+- 在项目 Actions > 手动转载 > Run Workflow 填入值（[详见参数说明](#参数说明)）
 - 运行即可
+
+### Actions - 定时上传
+该 Actions 适用于需要自动转载Youtube频道的用户
+
+- 依照 [reupload-channel-timed.yml](https://github.com/greats3an/bilibili-toolman/blob/master/.github/workflows/reupload-video.yml) 及其注释配置即可
+
 ## API 使用示例
 ```python
 >>> from bilibili_toolman import BiliWebSession,Submission,SubmissionVideos
 # 取决于欲使用的 API，详见 Wiki
 >>> session = BiliWebSession.from_base64_string("H4sIADKW+2EC/5VVWW/bRhB2EF216...") 
 # 从 --save 凭据恢复登录态
->>> endpoint_1,cid_1 = session.UploadVideo("unfathomably_original_content.mp4")
+>>> endpoint_1,cid_1 = session.UploadVideo("本地视频01.mp4")
 ('n220208141kq78....', ...)
->>> endpoint_1,cid_2 = session.UploadVideo("disgracefully_stolen_video.mp4")
+>>> endpoint_1,cid_2 = session.UploadVideo("本地视频02.mp4")
 ('n220209892re88....', ...)
 # 上传视频并拿 key
 >>> submission = Submission(
-    title="【转载】 Boss...",
-    desc="THEY PLAYED US LIKE A DAMN FIDDLE"
+    title="【toolman】 转载测试",
+    desc="...as per request"
 )
-# 新建多 P 稿件 (标题描述内非 CJK/ASCII（如emoji）字符会导致稿件无效)（单 P 过程详见Wiki）
+# 新建稿件 (标题描述内非 CJK/ASCII（如emoji）字符会导致稿件无效)
 >>> submission.videos.append(
     Submission(
-        title="The Ruse",
+        title="多 P （P1)",
         video_endpoint=endpoint_1
     )
 )
 >>> submission.videos.append(
     Submission(
-        title="The Fall",
+        title="多 P （P2)",
         video_endpoint=endpoint_2
     )
 )    
 # 添加视频 (P)，注意仅父节点（稿件）描述会被显示；分 P 视频和父稿件同类型
->>> cover = session.UploadCover('nice_image_bro.png')
+>>> cover = session.UploadCover('封面测试.png')
 >>> submission.cover_url = cover['data']['url']    
 # 上传，设置封面
->>> submission.source = 'uhhhhh internet?'        
+>>> submission.source = 'https://github.com/greats3an/bilibili-toolman'        
 # 设置转载来源
 >>> submission.tags.append('转载')
 # 添加标签
->>> submission.thread = 69
+>>> submission.thread = 17
 # 设置分区（详见Wiki）
->>> session.SubmitSubmission(submission)           
+>>> session.SubmitSubmission(submission,seperate_parts=False)
+# 投稿视频 (尝试以多 P 模式上传)
+>>> session.SubmitSubmission(submission,seperate_parts=True)
+# 投稿视频 (尝试以将多 P 分为单 P 后上传)
 {'code:': 0,
     'results': [{'code': 0, 'message': '0','ttl': 1,
     'data': {'aid': 5939...., 'bvid': 'BV1oq....'}}]}
@@ -92,15 +106,12 @@
 - [web.py](https://github.com/greats3an/bilibili-toolman/blob/master/bilibili_toolman/bilisession/web.py)
 # 截图
 ![le screen shot of le console](https://raw.githubusercontent.com/greats3an/bilibili-toolman/master/readme.png)
-
 # 感谢
 [PC 上传助手逆向 · FortuneDayssss/BilibiliUploader](https://github.com/FortuneDayssss/BilibiliUploader)
 
 [分区数据，API 参考 · Passkou/bilibili_api](https://github.com/Passkou/bilibili_api "Passkou · bilibili_api")
 
 [Youtube 解析 · yt-dlp/yt-dlp](https://github.com/yt-dlp/yt-dlp "yt-dlp · yt-dlp")
-
-
 ## 参数说明
     usage: -h [-h] [--cookies COOKIES] [--sms] [--load LOAD] [--load_upload LOAD_UPLOAD] [--load_submit LOAD_SUBMIT] [--save] [--http] [--noenv]
             [--cdn {ws,qn,bda2,kodo,gcs,bos}] [--opts OPTS] [--thread_id THREAD_ID] [--tags TAGS] [--desc DESC] [--title TITLE] [--seperate_parts]
