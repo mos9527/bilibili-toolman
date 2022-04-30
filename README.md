@@ -51,9 +51,10 @@
 ## API 使用示例
 ```python
 >>> from bilibili_toolman import BiliWebSession,Submission,SubmissionVideos
-# 取决于欲使用的 API，详见 Wiki
+# 取决于欲使用的 API. BiliWebSession 即使用 `--cookies` 的 Web 端 API； BiliClientSession 即使用
+# `--sms` 的 上传助手 API. 二者限制已在上文提及
 >>> session = BiliWebSession.from_base64_string("H4sIADKW+2EC/5VVWW/bRhB2EF216...") 
-# 从 --save 凭据恢复登录态
+# 从凭据恢复登录态，详情见 准备凭据
 >>> endpoint_1,cid_1 = session.UploadVideo("本地视频01.mp4")
 ('n220208141kq78....', ...)
 >>> endpoint_1,cid_2 = session.UploadVideo("本地视频02.mp4")
@@ -85,7 +86,7 @@
 >>> submission.tags.append('转载')
 # 添加标签
 >>> submission.thread = 17
-# 设置分区（详见Wiki）
+# 设置分区（详见 README 文末分区表）
 >>> session.SubmitSubmission(submission,seperate_parts=False)
 # 投稿视频 (尝试以多 P 模式上传)
 >>> session.SubmitSubmission(submission,seperate_parts=True)
