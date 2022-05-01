@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 '''Youtube video provier - yt-dlp'''
+from sqlite3 import Date
 from yt_dlp.postprocessor.ffmpeg import FFmpegPostProcessor, FFmpegPostProcessorError
 from yt_dlp.postprocessor.embedthumbnail import FFmpegThumbnailsConvertorPP
-from yt_dlp.utils import encodeArgument, encodeFilename, prepend_extension, shell_quote , DateRange
+from yt_dlp.utils import encodeArgument, encodeFilename, prepend_extension, shell_quote , DateRange , date_from_str
 from . import DownloadResult
 import logging,yt_dlp,os,subprocess,sys
 __desc__ = '''Youtube / Twitch / etc 视频下载 (yt-dlp)'''
@@ -61,11 +62,13 @@ def update_config(cfg):
     # preprocess some parameters
     if 'daterange' in cfg:
         datestr = cfg['daterange']        
+        daterange = DateRange()
         if '~' in datestr:
             dateStart,dateEnd = datestr.split('~')
-            daterange = DateRange(dateStart,dateEnd)
+            daterange.start = date_from_str(dateStart,strict=False)
+            daterange.end = date_from_str(dateEnd,strict=False)
         else:
-            daterange = DateRange(start=datestr)
+            daterange.start = date_from_str(datestr,strict=False)        
         cfg['daterange'] = daterange
         logger.info('指定要下载的视频上传时间窗口: %s' % daterange)
     
