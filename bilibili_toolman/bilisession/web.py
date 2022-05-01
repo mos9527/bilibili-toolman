@@ -399,7 +399,7 @@ class BiliSession(Session):
                 self.logger.debug('准备提交单 P 内容: %s' % submission.title)
                 while True:
                     result = self._submit_submission(submission).json()
-                    if result['code'] == 21070:
+                    if result['code'] in {21070,21186}:
                         self.logger.warning('请求受限（限流），准备重试')
                         time.sleep(self.DELAY_VIDEO_SUBMISSION)
                         continue 
