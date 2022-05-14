@@ -1,11 +1,7 @@
 # -*- coding: utf-8 -*-
-import setuptools,bilibili_toolman
+import setuptools, bilibili_toolman
 
-requirements = [
-    requirement.strip() for requirement in open('requirements.txt','r').readlines()
-]
-
-with open("README.md", "r",encoding='utf-8') as fh:
+with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
@@ -22,6 +18,10 @@ setuptools.setup(
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
-    ],install_requires=requirements,
-    python_requires='>=3.6',
+    ],
+    install_requires=["requests", "pycryptodome", "coloredlogs", "yt-dlp", "tqdm"],
+    entry_points={
+        "console_scripts": ["bilibili-toolman=bilibili_toolman.cli.main:__main__"]
+    },
+    python_requires=">=3.6",
 )

@@ -1,5 +1,0 @@
-requests
-pycryptodome
-coloredlogs
-yt-dlp
-tqdm
