@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-
+from functools import wraps
 from threading import Lock
 from typing import Tuple
 from requests import Session
@@ -13,7 +13,7 @@ from requests.models import Response
 # region Wrappers
 def JSONResponse(classfunc) -> dict:
     """Decodes `Response`s content to JSON dict"""
-
+    @wraps(classfunc)
     def wrapper(session: Session, *args, **kwargs):
         response: Response = classfunc(session, *args, **kwargs)
         return response.json()

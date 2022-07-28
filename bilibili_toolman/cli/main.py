@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from bilibili_toolman.bilisession.client import RecaptchaRequiredException
 from .. import BiliWebSession as BiliSession
 from ..bilisession.common import LoginException
 from ..bilisession.common.submission import Submission
@@ -200,7 +201,14 @@ def setup_session():
         logger.warning("建议使用 --save 保存验证凭据，再次使用则利用 --load 读取，而不需再次登陆")
         logger.info("准备登陆，输入手机号后，按Enter发送验证码")
         phone = input()
-        sess.RenewSMSCaptcha(phone)
+        try:
+            ret = sess.RenewSMSCaptcha(phone)
+        except RecaptchaRequiredException as r:
+            logger.warning("准备人工校验，若出错请重启运行")
+            recaptcha_url = r.recaptcha_url
+            sess.ManuallySolveGeetestRecaptcha(recaptcha_url)
+            ret = sess.RenewSMSCaptcha(phone)
+        assert ret['code'] == 0,"发送失败 ：%s" % ret
         logger.debug("验证码已发送")
         for i in range(0, 5):
             logger.info("输入验证码:")
@@ -296,5 +304,5 @@ def __main__():
     if not failure:
         logger.info("任务完毕")
         sys.exit(0)
-    logger.warning("上传未完毕：检查标签，标题，描述内有无非法字符或超长字串；如遇其他问题请提交issue")
+    logger.warning("上传未完毕：检查标签，标题，描述内有无非法字符或超长字串，或尝试重新登陆；如遇其他问题请提交issue")
     sys.exit(1)

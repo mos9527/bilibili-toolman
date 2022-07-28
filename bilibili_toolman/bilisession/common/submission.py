@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-"""basic submission tree model impl"""
-from re import sub
-
-
 class SubmissionVideos(list):
     """Container for all videos within a submission (P-arts)"""
 
@@ -181,9 +177,8 @@ class Submission:
             # "up_close_reply": self.close_reply,
             # "up_close_danmu": self.close_danmu
             "no_reprint": self.no_reprint,
+            "cover": self.cover_url
         }
-        if self.cover_url:
-            kv_pair = {**kv_pair, "cover": self.cover_url}
         return kv_pair
 
     def __repr__(self) -> str:

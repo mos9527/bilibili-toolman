@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """bilibili - Web API implmentation"""
+from functools import wraps
 from concurrent.futures.thread import ThreadPoolExecutor
 import json, pickle, gzip
 from threading import Thread
@@ -19,14 +20,13 @@ from .common.submission import Submission, create_submission_by_arc
 
 logger = logging.getLogger("WebSession")
 
-
 def WebOnlyAPI(_classmethod):
+    @wraps(_classmethod)
     def wrapper(self, *a, **k):
         assert type(self) == BiliSession, "限 Web API 使用"
         return _classmethod(self, *a, **k)
 
     return wrapper
-
 
 class WebUploadChunk(FileIterator):
     url_endpoint: str
@@ -47,7 +47,6 @@ class WebUploadChunk(FileIterator):
             except Exception as e:
                 self.logger.warning("第 %s 次重试时：%s" % (retries, e))
         return False
-
 
 class BiliSession(Session):
     """哔哩哔哩网页上传 API"""
@@ -618,4 +617,4 @@ class BiliSession(Session):
         b = base64.b64decode(s)
         return BiliSession.from_bytes(b)
 
-    # endregion
+# endregion

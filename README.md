@@ -15,7 +15,7 @@
 - 使用 上传助手 API
         
         python -m bilibili_toolman --save --sms
-    跟随输出操作即可
+    跟随输出操作即可（注：需要完成 Geetest 校验）
 - 凭据即输出的 Base64 编码内容
 
 ### Actions - 配置凭据
