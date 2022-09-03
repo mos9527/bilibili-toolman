@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from bilibili_toolman.bilisession.client import RecaptchaRequiredException
-from .. import BiliWebSession as BiliSession
+from ..bilisession.web import BiliSession
+from ..bilisession.client import RecaptchaRequiredException
 from ..bilisession.common import LoginException
 from ..bilisession.common.submission import Submission
 from ..providers import DownloadResult
@@ -181,9 +181,9 @@ def setup_session():
             sess.trust_env = False
 
     if global_args.cookies:
-        from .. import BiliWebSession
+        from ..bilisession.web import BiliSession
 
-        sess = BiliWebSession(global_args.cookies)
+        sess = BiliSession(global_args.cookies)
         setup_params(sess)
         user = sess.Self
         if not "uname" in user["data"]:
@@ -193,9 +193,9 @@ def setup_session():
         sess_upload = sess
         sess_submit = sess
     elif global_args.sms:
-        from .. import BiliClientSession
+        from ..bilisession.client import BiliSession
 
-        sess = BiliClientSession()
+        sess = BiliSession()
         setup_params(sess)
         logger.warning("短信验证码有日发送条数限制（5 条），无论验证成败，超限后将无法发送验证码")
         logger.warning("建议使用 --save 保存验证凭据，再次使用则利用 --load 读取，而不需再次登陆")
@@ -224,6 +224,7 @@ def setup_session():
             logger.critical("多次重试后无法登录")
             return False
     elif global_args.load:
+        from ..bilisession.web import BiliSession
         sess = BiliSession.from_base64_string(global_args.load)
         setup_params(sess)
         sess_upload = sess
@@ -258,7 +259,7 @@ def __main__():
         sys.exit(2)
 
     if global_args.save and not (global_args.load_upload or global_args.load_submit):
-        logger.info("保存登陆凭据")
+        logger.info("保存登录凭据")
         print(sess_submit.to_base64_string())
         sys.exit(0)
 

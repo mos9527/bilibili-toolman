@@ -600,15 +600,13 @@ class BiliSession(Session):
         unpickled = pickle.loads(gzip.decompress(b))
         session = unpickled["session"]
         if session == "web":
-            from .. import BiliWebSession
-
-            sess = BiliWebSession()
+            from ..bilisession.web import BiliSession
+            sess = BiliSession()
         elif session == "client":
-            from .. import BiliClientSession
-
-            sess = BiliClientSession()
+            from ..bilisession.client import BiliSession
+            sess = BiliSession()
         else:
-            raise DeprecationWarning("此凭据不兼容当前版本，请重新获取")
+            raise DeprecationWarning("此凭据不兼容当前版本，请重新获取")        
         sess.update(unpickled)
         return sess
 

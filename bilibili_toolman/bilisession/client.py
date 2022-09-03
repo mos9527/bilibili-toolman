@@ -12,7 +12,7 @@ from hashlib import md5
 from base64 import b64encode
 import math, logging
 
-from .. import BiliWebSession
+from .web import BiliSession as BiliWebSession
 from .common import (
     FileIterator,
     JSONResponse,
