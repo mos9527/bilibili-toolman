@@ -229,5 +229,9 @@ def download_video(res) -> DownloadResult:
                 append_result(entry)
             results.description = "转自Youtube"
         else:  # Singular videos
-            append_result(info)
+            append_result(info)        
+        if len(results.results) > 1:
+            results.description = '\n'.join(['P%d : %s' % result for result in enumerate(results.results)])
+        else:
+            results.description = results.results[0].description
         return results

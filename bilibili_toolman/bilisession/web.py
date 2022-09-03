@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """bilibili - Web API implmentation"""
+from functools import wraps
 from concurrent.futures.thread import ThreadPoolExecutor
 import json, pickle, gzip
 from threading import Thread
@@ -19,14 +20,13 @@ from .common.submission import Submission, create_submission_by_arc
 
 logger = logging.getLogger("WebSession")
 
-
 def WebOnlyAPI(_classmethod):
+    @wraps(_classmethod)
     def wrapper(self, *a, **k):
         assert type(self) == BiliSession, "限 Web API 使用"
         return _classmethod(self, *a, **k)
 
     return wrapper
-
 
 class WebUploadChunk(FileIterator):
     url_endpoint: str
@@ -47,7 +47,6 @@ class WebUploadChunk(FileIterator):
             except Exception as e:
                 self.logger.warning("第 %s 次重试时：%s" % (retries, e))
         return False
-
 
 class BiliSession(Session):
     """哔哩哔哩网页上传 API"""
@@ -362,12 +361,18 @@ class BiliSession(Session):
                         config = self._preupload(name=name, size=size).json()
                         self.headers["X-Upos-Auth"] = config["auth"]
                         """X-Upos-Auth header"""
-                        endpoint = "https:%s/ugcboss/%s" % (
+                        endpoint = "https:%s/%s" % (
                             config["endpoint"],
-                            config["upos_uri"].split("/")[-1],
+                            config["upos_uri"].split('upos://')[-1]
                         )
                         self.logger.info("远端结点： %s" % endpoint)
                         self.logger.debug("第 %s 次刷新 TOKEN..." % i)
+                        # https://upos-cs-upcdnbda2.bilivideo.com/ugcfx2lf/
+                        # n220728a288v9obhmjrsgy8g3mf0rpuu.mp4?
+                        # uploads&output=json&profile=ugcfx%2Fbup&filesize=1008319211&
+                        # partsize=10485760&
+                        # meta_upos_uri=upos%3A%2F%2Ffxmeta%2Fn220728a2uy50rqfrx1kz2xenwwshgaq.txt&biz_id=786176430
+                        #
                         upload_id = self._upload_id(endpoint).json()["upload_id"]
                         return config, endpoint, upload_id
                     except Exception as e:
@@ -612,4 +617,4 @@ class BiliSession(Session):
         b = base64.b64decode(s)
         return BiliSession.from_bytes(b)
 
-    # endregion
+# endregion

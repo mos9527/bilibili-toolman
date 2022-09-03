@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """bilibili - PC API implementation"""
+from json import loads
+from functools import wraps
 from time import time
 from requests.sessions import Session
 from typing import Iterable, Tuple, Union
@@ -23,14 +25,17 @@ from .common.submission import Submission
 
 logger = logging.getLogger("ClientSession")
 
+class RecaptchaRequiredException(Exception):
+    def __init__(self, recaptcha_url) -> None:
+        self.recaptcha_url = recaptcha_url
+        super().__init__(recaptcha_url)        
 
 def PCOnlyAPI(_classmethod):
+    @wraps(_classmethod)
     def wrapper(self, *a, **k):
         assert type(self) == BiliSession, "限 PC API 使用"
         return _classmethod(self, *a, **k)
-
     return wrapper
-
 
 class Crypto:
     """THANK YOU! https://github.com/FortuneDayssss/BilibiliUploader"""
@@ -77,7 +82,6 @@ class Crypto:
             raise TypeError
         return Crypto.md5(_str + Crypto.APPSECRET)
 
-
 class SignedDict(dict):
     @property
     def sorted(self):
@@ -89,7 +93,6 @@ class SignedDict(dict):
         """returns our sorted self with calculated `sign` as a new key-value pair at the end"""
         _sorted = self.sorted
         return {**_sorted, "sign": Crypto.sign(_sorted)}
-
 
 class ClientUploadChunk(FileIterator):
     url_endpoint: str
@@ -121,7 +124,6 @@ class ClientUploadChunk(FileIterator):
                 logger.warning("第 %s 次重试时：%s" % (retries, e))
         return False
 
-
 class BiliSession(BiliWebSession):
     """哔哩哔哩上传助手 API"""
 
@@ -129,8 +131,8 @@ class BiliSession(BiliWebSession):
 
     UPLOAD_CHUNK_SIZE = 2 * (1 << 20)
     BUILD_VER = (2, 3, 0, 1073)
-    BUILD_NO = int(
-        BUILD_VER[0] * 1e8 + BUILD_VER[1] * 1e6 + BUILD_VER[2] * 1e2 + BUILD_VER[3]
+    BUILD_NO = int(        
+        BUILD_VER[0] * 1e6 + BUILD_VER[1] * 1e5 + BUILD_VER[2] * 1e4 + BUILD_VER[3]
     )
     BUILD_STR = ".".join(map(lambda v: str(v), BUILD_VER))
 
@@ -149,9 +151,9 @@ class BiliSession(BiliWebSession):
             "User-Agent": BiliSession.DEFAULT_UA,
             "Accept-Encoding": "gzip,deflate",
         }
-        self.login_tokens = dict()
+        self.login_tokens = dict()        
         self.logger = logger
-
+        
     # region Properties
     @property
     def mid(self):
@@ -164,7 +166,7 @@ class BiliSession(BiliWebSession):
     @property
     def access_key_param(self):
         """Singed dictionary containing only `access_key` key-value pair"""
-        return SignedDict({"access_key": self.access_token}).signed
+        return SignedDict({"access_key": self.access_token,"build" : self.BUILD_NO}).signed
 
     # endregion
 
@@ -301,6 +303,26 @@ class BiliSession(BiliWebSession):
             raise LoginException(resp, e)
         return resp
 
+    GEETEST_HOOK = '''eval("Object._assign=Object.assign;Object.assign=(...args)=>{if(args[1]['geetest_challenge']){document.body.innerHTML=JSON.stringify(args[1]);}return Object._assign(...args)}")'''
+    def ManuallySolveGeetestRecaptcha(self,recaptcha_url):
+        from urllib.parse import parse_qsl
+        recaptcha = dict(parse_qsl(recaptcha_url.split('?')[-1]))
+        logger.warning("完成极验步骤须知：")      
+        logger.warning("1. 浏览器中打开所示验证链接")
+        logger.info("%s",recaptcha_url)
+        logger.warning("2. 在浏览器地址栏输入 javascript: 并粘贴以下内容并回车")
+        logger.info("%s",self.GEETEST_HOOK)
+        logger.warning("3. 正确完成验证后，复制出现的 JSON")
+        logger.warning("4. 粘贴于此处并回车：")
+        gee_validation = loads(input())                
+        self.login_tokens["gee_captcha"] = {
+            "recaptcha_token" : recaptcha["recaptcha_token"],
+            "gee_challenge":gee_validation["geetest_challenge"],
+            "gee_validate":gee_validation["geetest_validate"],
+            "gee_seccode":gee_validation["geetest_seccode"]
+        }
+        return self.login_tokens["gee_captcha"]
+
     @PCOnlyAPI
     @JSONResponse
     def RenewSMSCaptcha(self, tel: str, cid=86):
@@ -318,20 +340,28 @@ class BiliSession(BiliWebSession):
             data=SignedDict(
                 {
                     "appkey": Crypto.APPKEY,
+                    "buvid": "",
+                    "cid": str(cid),
+                    "device_id": "",
+                    "device_name": "",
+                    "device_platform" : "",
                     "platform": "pc",
                     "tel": str(tel),
-                    "cid": str(cid),
-                    "ts": int(time() * 1000),
-                    "device_name": "",
-                    "device_id": "",
-                    "buvid": "",
+                    "ts": int(time()),
+                    **(
+                        self.login_tokens["gee_captcha"] if "gee_captcha" in self.login_tokens else  {}
+                    ),
                 }
-            ).signed,
+            ).signed
         )
         try:
+            assert resp.json()["data"]["recaptcha_url"] == ""
             self.login_tokens["captcha_key"] = resp.json()["data"]["captcha_key"]
-            assert self.login_tokens["captcha_key"]
         except Exception as e:
+            data = resp.json()["data"]
+            if data and "recaptcha_url" in data:
+                logger.warning("需要人机交互完成校验")
+                raise RecaptchaRequiredException(data["recaptcha_url"])
             raise LoginException(resp, e)
         return resp
 
@@ -434,4 +464,4 @@ class BiliSession(BiliWebSession):
         self.cookies = state_dict["cookies"]
         self.login_tokens = state_dict["login_tokens"]
 
-    # endregion
+# endregion
