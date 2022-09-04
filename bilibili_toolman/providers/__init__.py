@@ -34,5 +34,5 @@ class DownloadResult:
         return "< title : %s , src : %s>" % (self.title, self.soruce)
 
 
-from . import youtube as provider_youtube
-from . import localfile as provider_localfile
+from bilibili_toolman.providers import youtube as provider_youtube
+from bilibili_toolman.providers import localfile as provider_localfile

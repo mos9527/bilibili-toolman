@@ -12,8 +12,8 @@ from hashlib import md5
 from base64 import b64encode
 import math, logging
 
-from .web import BiliSession as BiliWebSession
-from .common import (
+from bilibili_toolman.bilisession.web import BiliSession as BiliWebSession
+from bilibili_toolman.bilisession.common import (
     FileIterator,
     JSONResponse,
     LoginException,
@@ -21,7 +21,7 @@ from .common import (
     file_manager,
     check_file,
 )
-from .common.submission import Submission
+from bilibili_toolman.bilisession.common.submission import Submission
 
 logger = logging.getLogger("ClientSession")
 

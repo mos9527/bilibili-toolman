@@ -8,7 +8,7 @@ from requests import Session
 from typing import List, Tuple
 import math, time, mimetypes, base64, logging
 
-from .common import (
+from bilibili_toolman.bilisession.common import (
     JSONResponse,
     FileIterator,
     ReprExDict,
@@ -16,7 +16,7 @@ from .common import (
     chunk_queue,
     check_file,
 )
-from .common.submission import Submission, create_submission_by_arc
+from bilibili_toolman.bilisession.common.submission import Submission, create_submission_by_arc
 
 logger = logging.getLogger("WebSession")
 
@@ -327,7 +327,7 @@ class BiliSession(Session):
 
         tConsume = ConsumerThread()
         tConsume.start()
-        from . import cli
+        from bilibili_toolman import cli
 
         while chunk_queue.unfinished_tasks >= 0:
             read_all, size_all = 0, 0
@@ -600,10 +600,10 @@ class BiliSession(Session):
         unpickled = pickle.loads(gzip.decompress(b))
         session = unpickled["session"]
         if session == "web":
-            from ..bilisession.web import BiliSession
+            from bilibili_toolman.bilisession.web import BiliSession
             sess = BiliSession()
         elif session == "client":
-            from ..bilisession.client import BiliSession
+            from bilibili_toolman.bilisession.client import BiliSession
             sess = BiliSession()
         else:
             raise DeprecationWarning("此凭据不兼容当前版本，请重新获取")        

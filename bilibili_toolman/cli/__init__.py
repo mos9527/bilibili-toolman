@@ -2,9 +2,8 @@
 import os
 import argparse
 import logging
-from pathlib import Path
 import sys
-from .. import providers, __version__, __desc__
+from bilibili_toolman import providers, __version__, __desc__
 
 
 class AttribuitedDict(dict):
@@ -102,7 +101,7 @@ def prepare_temp(temp_path: str):
 
 
 def report_progress(current, max_val):
-    from . import precentage_progress
+    from bilibili_toolman.cli import precentage_progress
 
     precentage_progress.report(current, max_val)
 

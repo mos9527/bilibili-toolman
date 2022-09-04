@@ -8,7 +8,7 @@
 ### 准备凭据
 凭据需要在本地准备
 - [pip 安装 bilibili_toolman](#安装)
-    - ~~**Windows 用户**: 在 [Releases](https://github.com/mos9527/bilibili-toolman/releases) 可下载已打包 `.exe` 版本~~
+    - **Windows 用户**: 在 [Releases](https://github.com/mos9527/bilibili-toolman/releases) 可下载已打包 `.exe` 版本
 - 使用 Web 端 API
     
         python -m bilibili_toolman --save --cookies "SESSDATA=8aafe8**********;bili_jct=4f39b**********"

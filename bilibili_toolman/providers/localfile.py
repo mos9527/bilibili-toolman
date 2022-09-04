@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 from sys import path
-from . import DownloadResult
+from bilibili_toolman.providers import DownloadResult
 
 __desc__ = "本地文件"
 __cfg_help__ = """

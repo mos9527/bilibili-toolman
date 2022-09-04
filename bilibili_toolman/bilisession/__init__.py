@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 """Bilibili video submission & other APIs"""
 
-import logging, sys
-from .. import cli
-
+import logging
 logger = logging.getLogger("BiliSession")

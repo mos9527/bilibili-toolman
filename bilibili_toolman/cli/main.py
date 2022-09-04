@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
-from ..bilisession.web import BiliSession
-from ..bilisession.client import RecaptchaRequiredException
-from ..bilisession.common import LoginException
-from ..bilisession.common.submission import Submission
-from ..providers import DownloadResult
-from . import (
-    AttribuitedDict,
+from bilibili_toolman.bilisession.web import BiliSession
+from bilibili_toolman.bilisession.client import RecaptchaRequiredException
+from bilibili_toolman.bilisession.common import LoginException
+from bilibili_toolman.bilisession.common.submission import Submission
+from bilibili_toolman.providers import DownloadResult
+from bilibili_toolman.cli import (
+    local_args as largs,
     setup_logging,
     prepare_temp,
     prase_args,
     sanitize,
     truncate,
-    local_args as largs,
+    AttribuitedDict,
 )
 
 from collections import defaultdict
@@ -181,7 +181,7 @@ def setup_session():
             sess.trust_env = False
 
     if global_args.cookies:
-        from ..bilisession.web import BiliSession
+        from bilibili_toolman.bilisession.web import BiliSession
 
         sess = BiliSession(global_args.cookies)
         setup_params(sess)
@@ -193,7 +193,7 @@ def setup_session():
         sess_upload = sess
         sess_submit = sess
     elif global_args.sms:
-        from ..bilisession.client import BiliSession
+        from bilibili_toolman.bilisession.client import BiliSession
 
         sess = BiliSession()
         setup_params(sess)
@@ -224,7 +224,7 @@ def setup_session():
             logger.critical("多次重试后无法登录")
             return False
     elif global_args.load:
-        from ..bilisession.web import BiliSession
+        from bilibili_toolman.bilisession.web import BiliSession
         sess = BiliSession.from_base64_string(global_args.load)
         setup_params(sess)
         sess_upload = sess

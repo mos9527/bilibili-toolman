@@ -12,7 +12,7 @@ from yt_dlp.utils import (
     date_from_str,
 )
 from yt_dlp.version import __version__ as yt_dlp_version
-from . import DownloadResult
+from bilibili_toolman.providers import DownloadResult
 import logging, yt_dlp, os, subprocess, sys
 
 __desc__ = """Youtube / Twitch / etc 视频下载 (yt-dlp %s)""" % yt_dlp_version
