@@ -50,6 +50,13 @@ jobs:
     - name: Build Windows executables
       run: |          
           pyinstaller -F -i NONE bilibili_toolman/__main__.py --name bilibili_toolman
+    - name: Run UPX
+      uses: crazy-max/ghaction-upx@v2
+      with:
+        version: latest
+        files: |
+          dist/bilibili_toolman.exe
+        args: -fq          
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
       with:
