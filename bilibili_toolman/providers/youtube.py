@@ -11,10 +11,11 @@ from yt_dlp.utils import (
     DateRange,
     date_from_str,
 )
+from yt_dlp.version import __version__ as yt_dlp_version
 from . import DownloadResult
 import logging, yt_dlp, os, subprocess, sys
 
-__desc__ = """Youtube / Twitch / etc 视频下载 (yt-dlp)"""
+__desc__ = """Youtube / Twitch / etc 视频下载 (yt-dlp %s)""" % yt_dlp_version
 __cfg_help__ = """yt-dlp 参数：
     format (str) - 同 yt-dlp -f
     quite (True,False) - 是否屏蔽 yt-dlp 日志 (默认 False)

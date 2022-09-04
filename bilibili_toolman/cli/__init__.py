@@ -91,8 +91,7 @@ def setup_logging():
     )
     coloredlogs.install(level=logging.DEBUG, stream=SemaphoreStdout, isatty=True)
     logging.getLogger("urllib3").setLevel(logging.CRITICAL)
-    logging.getLogger("PIL.Image").setLevel(logging.CRITICAL)
-    logging.info("%s v%s" % (__desc__, __version__))
+    logging.getLogger("PIL.Image").setLevel(logging.CRITICAL)    
 
 
 def prepare_temp(temp_path: str):
@@ -123,7 +122,7 @@ provider_args = _enumerate_providers()
 
 def _create_argparser():
     p = argparse.ArgumentParser(
-        description="使用帮助",
+        description="%s %s 使用帮助" % (__desc__,__version__),
         formatter_class=argparse.RawTextHelpFormatter,
         epilog=arg_epilog,
     )
