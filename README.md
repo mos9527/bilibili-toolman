@@ -51,16 +51,25 @@
 
 ## API 使用示例
 ```python
->>> from bilibili_toolman import BiliWebSession,Submission,SubmissionVideos
-# 取决于欲使用的 API. BiliWebSession 即使用 `--cookies` 的 Web 端 API； BiliClientSession 即使用
-# `--sms` 的 上传助手 API. 二者限制已在上文提及
->>> session = BiliWebSession.from_base64_string("H4sIADKW+2EC/5VVWW/bRhB2EF216...") 
+>>> from bilibili_toolman.bilisession.web import BiliSession
+# bilisession.client 即上传助手 API。较 Web 版相比，可以用低等级帐号投稿多 P 视频
+# 同时，可以免去大部分人机校验操作
+# bilisession.web 即 Web 端创作中心 API。在上传速度上会有优势
+# 注：投稿与上传*不需要*在同一个 Session 中完成
+# 不论 import 的是什么版本，登录态恢复时都会重新实例化登录态对应的 Session
+>>> session = BiliSession.from_base64_string("H4sIADKW+2EC/5VVWW/bRhB2EF216...") 
 # 从凭据恢复登录态，详情见 准备凭据
 >>> endpoint_1,cid_1 = session.UploadVideo("本地视频01.mp4")
 ('n220208141kq78....', ...)
->>> endpoint_1,cid_2 = session.UploadVideo("本地视频02.mp4")
+>>> endpoint_2,cid_2 = session.UploadVideo("本地视频02.mp4")
 ('n220209892re88....', ...)
 # 上传视频并拿 key
+# 上传线路根据恢复的 Session 而定
+# Web / Cookies 使用的是网宿CDN，国内外速度都很可观
+# Client 使用的 CDN 在海外的速度则较慢
+# 推荐分别准备 Web / Client 的 Session. 如此可用 Web 高速上传，Client 多 P 投稿
+>>> from bilibili_toolman.bilisession.common.submission import Submission
+# 准备稿件
 >>> submission = Submission(
     title="【toolman】 转载测试",
     desc="...as per request"
@@ -80,9 +89,9 @@
 )    
 # 添加视频 (P)，注意仅父节点（稿件）描述会被显示；分 P 视频和父稿件同类型
 >>> cover = session.UploadCover('封面测试.png')
->>> submission.cover_url = cover['data']['url']    
+>>> submission.cover_url = cover['data']['url']
 # 上传，设置封面
->>> submission.source = 'https://github.com/greats3an/bilibili-toolman'        
+>>> submission.source = 'https://github.com/mos9527/bilibili-toolman'
 # 设置转载来源
 >>> submission.tags.append('转载')
 # 添加标签
@@ -90,6 +99,7 @@
 # 设置分区（详见 README 文末分区表）
 >>> session.SubmitSubmission(submission,seperate_parts=False)
 # 投稿视频 (尝试以多 P 模式上传)
+# 若使用 Web API，如果条件不足（Lv3+ 及 1000+ 关注量) 则会报错
 >>> session.SubmitSubmission(submission,seperate_parts=True)
 # 投稿视频 (尝试以将多 P 分为单 P 后上传)
 {'code:': 0,
