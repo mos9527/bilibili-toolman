@@ -165,7 +165,7 @@ class BiliSession(Session):
     @JSONResponse
     def _view_archive(self, bvid):
         return self.get(
-            "https://member.bilibili.com/x/web/archive/view", params={"bvid": bvid}
+            "https://member.bilibili.com/x/vupre/web/archive/view", params={"bvid": bvid}
         )
 
     def _edit_archive(self, json: dict):
@@ -227,13 +227,16 @@ class BiliSession(Session):
     def ViewSubmission(self, bvid) -> Submission:
         """以 BVid 获取作品信息
 
+        Notes:
+            仅能获取自己上传的作品信息，否则返回的 BVID 为空。
+            
         Args:
             bvid
 
         Returns:
             Submission: 作品信息
         """
-        arc = self._view_archive(bvid)["data"]
+        arc = self._view_archive(bvid)["data"]        
         return create_submission_by_arc(arc)
 
     def ListSubmissions(

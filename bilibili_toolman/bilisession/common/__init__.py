@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from json import JSONDecodeError
 import os
 from functools import wraps
 from threading import Lock
@@ -15,9 +16,12 @@ def JSONResponse(classfunc) -> dict:
     """Decodes `Response`s content to JSON dict"""
     @wraps(classfunc)
     def wrapper(session: Session, *args, **kwargs):
-        response: Response = classfunc(session, *args, **kwargs)
-        return response.json()
-
+        try:
+            response: Response = classfunc(session, *args, **kwargs)
+            return response.json()
+        except JSONDecodeError:
+            assert response.status_code == 200, 'HTTP %s\n%s\n%s' % (response.status_code,response.request.url,response.text)
+            return response.text
     return wrapper
 
 
