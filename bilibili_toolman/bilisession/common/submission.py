@@ -135,6 +135,9 @@ class Submission:
     """status but human readable"""
     video_duration = 0
     """duration of video"""
+    desc_format_id = 0
+    """description format IDs    
+    TODO : Document the IDs with corrosponding Threads"""
     _parent = None
 
     @property
@@ -172,7 +175,7 @@ class Submission:
             "tid": int(self.thread),
             "title": self.title,
             "tag": ",".join(set(self.tags)),
-            # "desc_format_id": 31,
+            "desc_format_id": self.desc_format_id,
             "desc": self.description,
             # "up_close_reply": self.close_reply,
             # "up_close_danmu": self.close_danmu
@@ -182,8 +185,9 @@ class Submission:
         return kv_pair
 
     def __repr__(self) -> str:
-        return '< bvid : "%s" , title : "%s", desc : "%s" , video_endpoint : "%s" >' % (
+        return '< bvid : "%s" , thread : %s , title : "%s", desc : "%s" , video_endpoint : "%s" >' % (
             self.bvid,
+            self.thread,
             self.title,
             self.description,
             self.video_endpoint
@@ -196,6 +200,8 @@ def create_submission_by_arc(arc: dict):
     with Submission() as submission:
         submission.stat = arc["stat"] if "stat" in arc else arc["archive"]
         submission.aid = submission.stat["aid"]
+        submission.thread = submission.stat["tid"]
+        submission.desc_format_id = submission.stat["desc_format_id"]
         if "parent_tname" in arc:  # Web version only
             submission.parent_tname = arc["parent_tname"]
             submission.thread_name = arc["typename"]
