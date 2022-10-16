@@ -198,15 +198,15 @@ class Submission:
 def create_submission_by_arc(arc: dict):
     """Generates a `Submission` object via a `arc` dict"""
     with Submission() as submission:
-        submission.stat = arc["stat"] if "stat" in arc else arc["archive"]
-        submission.aid = submission.stat["aid"]
-        submission.thread = submission.stat["tid"]
-        submission.desc_format_id = submission.stat["desc_format_id"]
         if "parent_tname" in arc:  # Web version only
             submission.parent_tname = arc["parent_tname"]
             submission.thread_name = arc["typename"]
         if "Archive" in arc:
             arc["archive"] = arc["Archive"]
+        submission.stat = arc.get("archive",arc.get("stat"))
+        submission.aid = submission.stat["aid"]
+        submission.thread = submission.stat["tid"]
+        submission.desc_format_id = submission.stat["desc_format_id"]
         submission.copyright = arc["archive"]["copyright"]
         submission.bvid = arc["archive"]["bvid"]
         submission.title = arc["archive"]["title"]
