@@ -376,10 +376,11 @@ class BiliSession(Session):
                         # partsize=10485760&
                         # meta_upos_uri=upos%3A%2F%2Ffxmeta%2Fn220728a2uy50rqfrx1kz2xenwwshgaq.txt&biz_id=786176430
                         #
-                        upload_id = self._upload_id(endpoint).json()["upload_id"]
+                        resp = self._upload_id(endpoint)
+                        upload_id = resp.json()["upload_id"]
                         return config, endpoint, upload_id
                     except Exception as e:
-                        self.logger.warning("第 %s 上传未成功,重试..." % i)
+                        self.logger.warning("第 %s 上传时：%s (HTTP %s)" % (i,e,resp.status_code))
                         time.sleep(self.DELAY_RETRY_UPLOAD_ID)
                 return None, None, None
 
