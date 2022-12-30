@@ -74,7 +74,7 @@
     title="【toolman】 转载测试",
     desc="...as per request"
 )
-# 新建稿件 (标题描述内非 CJK/ASCII（如emoji）字符会导致稿件无效)
+# 新建稿件 (标题描述出现韩文字符等会导致稿件无效，具体参见 -h 输出)
 >>> submission.videos.append(
     Submission(
         title="多 P （P1)",
@@ -218,6 +218,14 @@
         {title},{desc} 等变量适用于：
             title, desc, tags
 
+    通用变量:
+        {title}     -       原标题
+        {desc}      -       原描述
+        
+                    -       【韩文】替换韩文为特殊字符的标题
+        {roma_korean_title}
+                    -       【韩文】替换韩文为罗马音的标题 (需要安装 korean_romanizer)
+                    
     本工具支持将给定视频源转载至哔哩哔哩
 
     详见项目 README 以获取更多例程 ： github.com/greats3an/bilibili-toolman

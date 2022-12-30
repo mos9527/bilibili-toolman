@@ -5,7 +5,6 @@ import logging
 import sys
 from bilibili_toolman import providers, __version__, __desc__
 
-
 class AttribuitedDict(dict):
     def __getattr__(self, name):
         return self[name]
@@ -63,8 +62,15 @@ local_args = {
 arg_epilog = """
 变量：
     {title},{desc} 等变量适用于：
-        title, desc, tags
+        --title, --desc, --tags
 
+通用变量:
+    {title}     -       原标题
+    {desc}      -       原描述
+    {safe_korean_title}
+                -       【韩文】替换韩文为特殊字符的标题
+    {roma_korean_title}
+                -       【韩文】替换韩文为罗马音的标题 (需要安装 korean_romanizer)
 本工具支持将给定视频源转载至哔哩哔哩
 
 详见项目 README 以获取更多例程 ： github.com/greats3an/bilibili-toolman
@@ -92,6 +98,11 @@ def setup_logging():
     logging.getLogger("urllib3").setLevel(logging.CRITICAL)
     logging.getLogger("PIL.Image").setLevel(logging.CRITICAL)    
 
+def truncate(string, max):
+    """truncate & add ... to string over the length of `max`"""
+    if len(string) > max:
+        string = string[: max - 3] + "..."
+    return string
 
 def prepare_temp(temp_path: str):
     if not os.path.isdir(temp_path):
@@ -144,22 +155,6 @@ def _create_argparser():
             help="%s\n   参数:%s" % (provider.__desc__, provider.__cfg_help__),
         )
     return p
-
-
-def sanitize(string):
-    # limits characters to CJK & ascii chars
-    import re
-
-    return re.sub(
-        "[^\u0000-\u007F\uac00-\ud7a3\u3040-\u30ff\u4e00-\u9FFF]*", "", string
-    )  # remove emojis
-
-
-def truncate(string, max):
-    # truncate & add ... to string over the length of `max`
-    if len(string) > max:
-        string = string[: max - 3] + "..."
-    return string
 
 
 def prase_args(args: list):

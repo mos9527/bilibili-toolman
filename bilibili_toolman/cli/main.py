@@ -8,8 +8,7 @@ from bilibili_toolman.cli import (
     local_args as largs,
     setup_logging,
     prepare_temp,
-    prase_args,
-    sanitize,
+    prase_args,    
     truncate,
     AttribuitedDict,
 )
@@ -43,7 +42,12 @@ def download_sources(provider, arg) -> DownloadResult:
         logger.error("无法下载指定资源 - %s" % e)
         return
 
-
+class lazydict(defaultdict):    
+    def __getitem__(self, __key):
+        item = super().__getitem__(__key)
+        if callable(item):
+            return item()
+        return item
 def upload_sources(sources: DownloadResult, arg):
     """To perform a indivudial task
 
@@ -64,16 +68,23 @@ def upload_sources(sources: DownloadResult, arg):
     logger.info("上传资源数：%s" % len(sources.results))
 
     def format(source):
-        blocks = defaultdict(
+        from bilibili_toolman.cli.sanitizers import sanitize_korean
+        blocks = lazydict(
             lambda: "...",
-            {"title": source.title, "desc": source.description, **source.extra},
+            {
+                "safe_korean_title": lambda: sanitize_korean(source.title),
+                "roma_korean_title": lambda: sanitize_korean(source.title,replace_with_romaji=True),
+                # These are only called upon usage            
+                "title": source.title,
+                "desc": source.description, 
+                **source.extra                
+            },            
         )
         title = truncate(
-            sanitize(arg.title.format_map(blocks)), sess_submit.MISC_MAX_TITLE_LENGTH
+            arg.title.format_map(blocks), sess_submit.MISC_MAX_TITLE_LENGTH
         )
         description = truncate(
-            sanitize(arg.desc.format_map(blocks)),
-            sess_submit.MISC_MAX_DESCRIPTION_LENGTH,
+            arg.desc.format_map(blocks), sess_submit.MISC_MAX_DESCRIPTION_LENGTH,
         )
         return blocks, title, description
 
