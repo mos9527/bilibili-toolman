@@ -221,7 +221,7 @@
     通用变量:
         {title}     -       原标题
         {desc}      -       原描述
-        
+        {safe_korean_title}
                     -       【韩文】替换韩文为特殊字符的标题
         {roma_korean_title}
                     -       【韩文】替换韩文为罗马音的标题 (需要安装 korean_romanizer)
