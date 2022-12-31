@@ -145,7 +145,8 @@ def _create_argparser():
         g.add_argument("--%s" % arg_key, **arg)
     # local args (per source)
     g = p.add_argument_group(
-        '解析可选参数 "opts" （格式 ： [参数1]=[值1];[参数2]=[值2] (query-string)）'
+        '解析可选参数 "opts" （格式 ： [参数1]=[值1];[参数2]=[值2] (query-string)）\n'+
+        '视频源参数'
     )
     for provider_name, provider in provider_args.items():
         g.add_argument(
@@ -170,6 +171,8 @@ def prase_args(args: list):
             global_args_dict[k] = v
             if not "--%s" % k in args:
                 continue
+        elif k in local_args:
+            raise argparse.ArgumentError(None ,'"上传设置" (--%s) 仅应该出现于视频源后 (e.g. --youtube "..." --tags ..) ' % k)
     """pre-parse : fetch global args,then remove them"""
     local_args_group = []
     current_line = []
