@@ -85,7 +85,10 @@ def update_config(cfg):
         else:
             daterange.start = date_from_str(datestr, strict=False)
         cfg["daterange"] = daterange
-        logger.info("指定要下载的视频上传时间窗口: %s" % daterange)
+        logger.info("指定要下载的视频上传时间窗口: %s - %s" % (
+            daterange.start.strftime("%Y/%m/%d %H:%M:%S"),
+            daterange.end.strftime("%Y/%m/%d %H:%M:%S")
+        )
 
     if "playlistend" in cfg:
         cfg["playlistend"] = int(cfg["playlistend"])
