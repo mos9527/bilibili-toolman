@@ -80,10 +80,10 @@ def update_config(cfg):
         daterange = DateRange()
         if "~" in datestr:
             dateStart, dateEnd = datestr.split("~")
-            daterange.start = datetime_from_str(dateStart, precision="second")
-            daterange.end = datetime_from_str(dateEnd, precision="second")
+            daterange.start = datetime_from_str(dateStart, precision="second").date()
+            daterange.end = datetime_from_str(dateEnd, precision="second").date()
         else:
-            daterange.start = datetime_from_str(datestr, precision="second")
+            daterange.start = datetime_from_str(datestr, precision="second").date()
         cfg["daterange"] = daterange
         logger.info("指定要下载的视频上传时间窗口: %s - %s" % (
             daterange.start.strftime("%Y/%m/%d %H:%M:%S"),
