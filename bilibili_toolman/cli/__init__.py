@@ -172,7 +172,8 @@ def prase_args(args: list):
             if not "--%s" % k in args:
                 continue
         elif k in local_args and local_args[k]["default"] != v:
-            raise argparse.ArgumentError(None ,'"上传设置" (--%s) 仅应该出现于视频源后 (e.g. --youtube "..." --tags ..) ' % k)
+            # raise argparse.ArgumentError(None ,'"上传设置" (--%s) 仅应该出现于视频源后 (e.g. --youtube "..." --tags ..) ' % k)
+            pass # TODO : Properly implement this check
     """pre-parse : fetch global args,then remove them"""
     local_args_group = []
     current_line = []
