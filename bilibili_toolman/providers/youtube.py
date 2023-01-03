@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Youtube video provier - yt-dlp"""
+"""Youtube video provider - yt-dlp"""
 from sqlite3 import Date
 from yt_dlp.postprocessor.ffmpeg import FFmpegPostProcessor, FFmpegPostProcessorError
 from yt_dlp.postprocessor.embedthumbnail import FFmpegThumbnailsConvertorPP
@@ -9,7 +9,7 @@ from yt_dlp.utils import (
     prepend_extension,
     shell_quote,
     DateRange,
-    date_from_str,
+    datetime_from_str,
 )
 from yt_dlp.version import __version__ as yt_dlp_version
 from bilibili_toolman.providers import DownloadResult
@@ -80,10 +80,10 @@ def update_config(cfg):
         daterange = DateRange()
         if "~" in datestr:
             dateStart, dateEnd = datestr.split("~")
-            daterange.start = date_from_str(dateStart, strict=False)
-            daterange.end = date_from_str(dateEnd, strict=False)
+            daterange.start = datetime_from_str(dateStart)
+            daterange.end = datetime_from_str(dateEnd)
         else:
-            daterange.start = date_from_str(datestr, strict=False)
+            daterange.start = datetime_from_str(datestr)
         cfg["daterange"] = daterange
         logger.info("指定要下载的视频上传时间窗口: %s - %s" % (
             daterange.start.strftime("%Y/%m/%d %H:%M:%S"),
