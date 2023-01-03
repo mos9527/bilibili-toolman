@@ -88,7 +88,7 @@ def update_config(cfg):
         logger.info("指定要下载的视频上传时间窗口: %s - %s" % (
             daterange.start.strftime("%Y/%m/%d %H:%M:%S"),
             daterange.end.strftime("%Y/%m/%d %H:%M:%S")
-        )
+        ))
 
     if "playlistend" in cfg:
         cfg["playlistend"] = int(cfg["playlistend"])
