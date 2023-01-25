@@ -65,6 +65,7 @@ params = {
     "format": "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
     "writethumbnail": True,
     "writesubtitles": True,
+    "ignoreerrors":True
 }  # default params,can be overridden
 
 
@@ -197,17 +198,16 @@ class HardcodeSubProcesser(FFmpegPostProcessor):
 
 
 def download_video(res) -> DownloadResult:
-    def format_desc(entry):
-        return
-
     with DownloadResult() as results:
-        # downloading the cover
         def append_result(entry):
             with DownloadResult() as result:
+                video_path = "%s.%s" % (entry["display_id"], entry["ext"])
+                if not os.path.exists(video_path):
+                    return
                 result.extra = entry
                 result.title = entry["title"]
                 result.soruce = entry["webpage_url"]
-                result.video_path = "%s.%s" % (entry["display_id"], entry["ext"])
+                result.video_path = video_path
                 """For both total results and local sub-results"""
                 results.cover_path = result.cover_path = "%s.%s" % (
                     entry["display_id"],
