@@ -252,6 +252,9 @@ def setup_session():
         sess = BiliSession.from_base64_string(global_args.load_submit)
         setup_params(sess)
         sess_submit = sess
+    
+    sess_submit.DELAY_VIDEO_SUBMISSION = int(global_args.retry_submit_delay)
+    sess_submit.RETRIES_VIDEO_SUBMISSION = int(global_args.retry_submit_count)
     return True
 
 

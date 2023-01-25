@@ -67,8 +67,10 @@ class BiliSession(Session):
 
     DELAY_FETCH_UPLOAD_ID = 0.1
     DELAY_RETRY_UPLOAD_ID = 1
-    DELAY_VIDEO_SUBMISSION = 30
     DELAY_REPORT_PROGRESS = 1
+
+    RETRIES_VIDEO_SUBMISSION = 5
+    DELAY_VIDEO_SUBMISSION = 30
 
     WORKERS_UPLOAD = 3
 
@@ -472,19 +474,22 @@ class BiliSession(Session):
             codes = 0
             for submission in submission.videos:
                 self.logger.debug("准备提交单 P 内容: %s" % submission.title)
-                while True:
+                success_flag = False
+                for i in range(0,max(self.RETRIES_UPLOAD_ID,1)):
                     result = self._submit_submission(submission).json()
                     if result["code"] in {21070, 21186}:
                         self.logger.warning("请求受限（限流），准备重试")
                         time.sleep(self.DELAY_VIDEO_SUBMISSION)
                         continue
                     elif result["code"] != 0:
-                        self.logger.critical(
+                        self.logger.error(
                             "其他错误 (%s): %s - 跳过上传" % (result["code"], result["message"])
                         )
                         break
                     else:
-                        break
+                        success_flag = True
+                    if not success_flag:
+                        self.logger.error("重试次数达到上限")
                 codes += result["code"]  # we want to see if its 0 or else
                 results.append(result)
             return {"code": codes, "results": results}
