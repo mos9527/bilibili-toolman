@@ -181,6 +181,9 @@ def main_entrance():
     while select_and_execute(routines):
         pass
 
+@register("删除所有稿件", routines)
+def hiroshima():
+    pass
 
 if __name__ == "__main__":
     while select_and_execute(routines):
