@@ -183,7 +183,12 @@ def main_entrance():
 
 @register("删除所有稿件", routines)
 def hiroshima():
-    pass
+    assert type(sess) == BiliSession, "限 PC 客户端"
+    subs = sess.ListSubmissions()    
+    if confirm("该操作不可逆，确定？") and confirm("【所有稿件】将被删除，并扣除相关硬币，确定？"):
+        for sub in subs:
+            print('删除 - %s' % sub.title)
+            sess.DeleteArchive(sub.bvid)  
 
 if __name__ == "__main__":
     while select_and_execute(routines):

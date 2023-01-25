@@ -130,7 +130,7 @@ class BiliSession(BiliWebSession):
     TYPE = "client"
 
     UPLOAD_CHUNK_SIZE = 2 * (1 << 20)
-    BUILD_VER = (2, 3, 0, 1073)
+    BUILD_VER = (2, 3, 0, 1088)
     BUILD_NO = int(        
         BUILD_VER[0] * 1e6 + BUILD_VER[1] * 1e5 + BUILD_VER[2] * 1e4 + BUILD_VER[3]
     )
@@ -197,7 +197,7 @@ class BiliSession(BiliWebSession):
 
     def _list_archives(self, params):
         return self.get(
-            "https://member.bilibili.com/x/client/archives",
+            "https://member.bilibili.com/x/client/archive/search",
             params=SignedDict({"access_key": self.access_token, **params}).signed,
         )
 
