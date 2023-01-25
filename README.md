@@ -154,6 +154,10 @@
     --noenv               上传时，不采用环境变量（如代理）
     --cdn {ws,qn,bda2,kodo,gcs,bos}
                             上传用 CDN （限 Web API) （对应 网宿（适合海外），七牛，百度（默认），七牛，谷歌，百度）
+    --retry_submit_delay RETRY_SUBMIT_DELAY
+                            投稿限流时，重新投稿周期
+    --retry_submit_count RETRY_SUBMIT_COUNT
+                            投稿限流时，尝试重新投稿次数
 
     上传设置:
     --opts OPTS           解析可选参数 ，详见 --opts 格式

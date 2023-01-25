@@ -6,6 +6,7 @@ from bilibili_toolman.bilisession.common.submission import Submission
 from bilibili_toolman.providers import DownloadResult
 from bilibili_toolman.cli import (
     local_args as largs,
+    global_args as gargs,
     setup_logging,
     prepare_temp,
     prase_args,    
@@ -301,6 +302,10 @@ def __main__():
     logger.info("任务总数: %s" % len(local_args))
     success, failure = [], []
     fmt = lambda s: ("×", "√")[s] if type(s) is bool else s
+    logger.info("配置信息：")
+    for k, v in gargs.items():
+        if not k in {'cookies','sms','load','load_upload','load_submit','save'}:
+            logger.info("  - %s : %s" % (list(v.values())[0], fmt(global_args[k])))    
     for provider, arg_ in local_args:
         arg = AttribuitedDict(arg_)
         logger.info("任务信息：")
