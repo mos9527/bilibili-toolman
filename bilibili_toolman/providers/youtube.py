@@ -200,6 +200,7 @@ class HardcodeSubProcesser(FFmpegPostProcessor):
 def download_video(res) -> DownloadResult:
     with DownloadResult() as results:
         def append_result(entry):
+            if not entry: return
             with DownloadResult() as result:
                 video_path = "%s.%s" % (entry["display_id"], entry["ext"])
                 if not os.path.exists(video_path):
@@ -225,6 +226,8 @@ def download_video(res) -> DownloadResult:
             results.results.append(result)
 
         info = ydl.extract_info(res, download=True)
+        if not info:
+            return results
         results.soruce = info["webpage_url"]
         results.title = info["title"]
         """Appending our results"""

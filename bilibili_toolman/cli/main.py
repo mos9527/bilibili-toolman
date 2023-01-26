@@ -64,7 +64,8 @@ def upload_sources(sources: DownloadResult, arg):
             - See `utils.local_args` for more arguments,along with thier details
     """
     submission = Submission()
-    if not sources:
+    if not sources or len(sources.results) == 0:
+        logger.error('无可上传的资源')
         return None, True
     logger.info("上传资源数：%s" % len(sources.results))
 
