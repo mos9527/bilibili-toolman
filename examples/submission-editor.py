@@ -105,6 +105,15 @@ def main_entrance():
         new_tags = text("输入新标签（逗号隔开）")
         sub.tags = new_tags.split(",")
 
+    @register("编辑话题", routines)
+    def edit_topics():
+        topic_id = text("话题 ID (见 search-topics.py)")
+        topic_name = text("话题名 (见 search-topics.py)")
+        sub.topic_id = topic_id
+        sub.topic_name = topic_name
+        if not topic_name in sub.tags:
+            sub.tags.add(topic_name)
+
     @register("编辑子视频", routines)
     def edit_sub_archive():
         routines = {}
