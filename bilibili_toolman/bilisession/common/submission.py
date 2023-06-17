@@ -136,8 +136,11 @@ class Submission:
     video_duration = 0
     """duration of video"""
     desc_format_id = 0
-    """description format IDs    
-    TODO : Document the IDs with corrosponding Threads"""
+    """description format IDs"""
+    topic_id = 0
+    """topic(?) ID"""
+    topic_name = ""
+    """topic(?) Name"""    
     _parent = None
 
     @property
@@ -180,7 +183,14 @@ class Submission:
             # "up_close_reply": self.close_reply,
             # "up_close_danmu": self.close_danmu
             "no_reprint": self.no_reprint,
-            "cover": self.cover_url
+            "cover": self.cover_url,
+            **({
+                "topic_detail":{
+                    "from_source":"arc.web.recommend", # let's leave it be for now
+                    "from_topic_id" : int(self.topic_id)
+                },
+                "topic_id": int(self.topic_id)
+            } if self.topic_id and self.topic_name else {})            
         }
         return kv_pair
 
@@ -221,4 +231,6 @@ def create_submission_by_arc(arc: dict):
         if "Videos" in arc:
             arc["videos"] = arc["Videos"]
         submission.videos.extend(arc["videos"])
+        submission.topic_id = arc["archive"].get("topic_id",0)
+        submission.topic_name = arc["archive"].get("topic_name","")
     return submission

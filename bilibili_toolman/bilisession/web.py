@@ -213,16 +213,9 @@ class BiliSession(Session):
         """
         return self._edit_archive(
             {
+                **submission.archive,
                 "aid": submission.aid,
-                "copyright": submission.copyright,
-                "videos": submission.videos.archive,
-                "source": submission.source,
-                "tid": int(submission.thread),
-                "cover": submission.cover_url,
-                "title": submission.title,
-                "tag": ",".join(set(submission.tags)),
                 "desc_format_id": 31,
-                "desc": submission.description,
             }
         )
 

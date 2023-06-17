@@ -86,6 +86,7 @@ def main_entrance():
         - 状态     :  {sub.state_desc}
         - 上传时间  :  {to_yymmdd(sub.stat['ptime'])}
         - 标签     :  {','.join(sub.tags)}
+        - 活动     :  {sub.topic_name} ({sub.topic_id})
         - 描述     :  
         {add_indent(sub.description,'      ')[3:]}"""
     )
