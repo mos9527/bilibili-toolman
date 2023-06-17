@@ -36,7 +36,7 @@ global_args = {
         "default": "bda2",
     },
     "retry_submit_delay" : {"help": "投稿限流时，重新投稿周期", "default": 30},
-    "retry_submit_count" : {"help": "投稿限流时，尝试重新投稿次数", "default": 5},\
+    "retry_submit_count" : {"help": "投稿限流时，尝试重新投稿次数", "default": 5},
 }
 local_args = {
     "opts": {"help": "解析可选参数 ，详见 --opts 格式", "default": ""},
