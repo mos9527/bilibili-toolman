@@ -82,7 +82,7 @@ class BiliSession(Session):
     def request(self, method: str, url, *a, **k):
         if self.FORCE_HTTP and url[:5] == "https":
             url = "http" + url[5:]
-        return super().request(method, url, *a, **k)
+        return super().request(method, url, *a, **k,verify=not self.FORCE_HTTP)
 
     def __init__(self, cookies="") -> None:
         Session.__init__(self)

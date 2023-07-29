@@ -77,9 +77,9 @@ class Crypto:
     def sign(data: Union[str, dict]) -> str:
         """salted sign funtion for `dict`(converts to qs then parse) & `str`"""
         if isinstance(data, dict):
-            _str = urlencode(data)
+            _str = urlencode(data,quote_via=quote)
         elif type(data) != str:
-            raise TypeError
+            raise TypeError        
         return Crypto.md5(_str + Crypto.APPSECRET)
 
 class SignedDict(dict):
@@ -130,7 +130,7 @@ class BiliSession(BiliWebSession):
     TYPE = "client"
 
     UPLOAD_CHUNK_SIZE = 2 * (1 << 20)
-    BUILD_VER = (2, 3, 0, 1088)
+    BUILD_VER = (2, 3, 0, 1092)
     BUILD_NO = int(        
         BUILD_VER[0] * 1e6 + BUILD_VER[1] * 1e5 + BUILD_VER[2] * 1e4 + BUILD_VER[3]
     )
@@ -138,7 +138,7 @@ class BiliSession(BiliWebSession):
 
     UPLOAD_PROFILE = "ugcfr/pc3"
 
-    DEFAULT_UA = ""
+    DEFAULT_UA = "PcUploader/2.3.0.1092 os/Windows pc_app/pcUploader build/1092 osVer/10.0_x86_64"
 
     RETRIES_UPLOAD_ID = 5
 
@@ -340,15 +340,16 @@ class BiliSession(BiliWebSession):
             data=SignedDict(
                 {
                     "appkey": Crypto.APPKEY,
-                    "buvid": "",
+                    "buvid": "00000000-000000000000",
                     "cid": str(cid),
-                    "device_id": "",
-                    "device_name": "",
-                    "device_platform" : "",
+                    "device_id": "000000000000",
+                    "device_name": "ughhh",
+                    "device_platform" : "Windows 10",
                     "platform": "pc",
-                    "tel": str(tel),
-                    "ts": int(time()),
+                    "tel": tel,
+                    "ts": str(int(time())),
                     **(
+            
                         self.login_tokens["gee_captcha"] if "gee_captcha" in self.login_tokens else  {}
                     ),
                 }
