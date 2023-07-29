@@ -88,9 +88,6 @@ class FileIterator:
     def __init__(self, path, start, end) -> None:
         self.path, self.start, self.end = path, start, end
 
-    def __getattr__(self, name):  # defining fallback
-        return {}
-
     def __iter__(self):
         start = self.start
         for start in range(self.start, self.end, FileManager.CHUNK_SIZE):

@@ -20,7 +20,7 @@ def download_video(res) -> DownloadResult:
     if (
         not os.path.isfile(res)
         and not os.path.isdir(res)
-        or (options["cover"] and os.path.isfile(options["cover"]))
+        or not (options["cover"] and os.path.isfile(options["cover"]))
     ):
         raise FileNotFoundError("%s - file not found" % res)
 

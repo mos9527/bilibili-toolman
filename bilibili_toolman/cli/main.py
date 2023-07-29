@@ -100,7 +100,7 @@ def upload_sources(sources: DownloadResult, arg):
             try:
                 endpoint, bid = sess_upload.UploadVideo(source.video_path)
                 cover_url = (
-                    sess_upload.UploadCover(source.cover_path)["data"]["url"]
+                    sess_upload.UploadCover(source.cover_path)
                     if source.cover_path
                     else ""
                 )
@@ -112,7 +112,7 @@ def upload_sources(sources: DownloadResult, arg):
             continue
         logger.info("资源已上传")
         from bilibili_toolman.cli import precentage_progress
-
+        cover_url = ''
         precentage_progress.close()
         with Submission() as video:
             """Creatating a video per submission"""
@@ -154,7 +154,7 @@ def upload_sources(sources: DownloadResult, arg):
     submission.source = sources.soruce
     """Upload cover images for all our submissions as well"""
     cover_url = (
-        sess_upload.UploadCover(sources.cover_path)["data"]["url"]
+        sess_upload.UploadCover(sources.cover_path)
         if sources.cover_path
         else ""
     )
